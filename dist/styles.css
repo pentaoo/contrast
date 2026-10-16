@@ -23,3 +23,51 @@ html.ending-blank{scrollbar-width:none}html.ending-blank::-webkit-scrollbar{disp
 /* Quiet editorial layout: only content and meaningful interaction labels remain. */
 .hero{padding-top:35px}.hero h1{margin-top:0}.hero-description{gap:0}.illusion-button{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0}.illusion-result{font-size:12px;color:var(--muted);line-height:1.7;min-height:34px;padding-top:10px}.sound-lab{padding-top:25px}.science-note{display:block;border-left:1px solid #515747;padding-left:20px}.science-note p{max-width:800px;font-size:12px}.type-principles>div{display:block}.type-principles p{margin-bottom:10px}.type-principles>div>span:last-child{display:block;font-size:12px}.rhythm-demo>.text-button{font-family:var(--sans);font-size:12px;letter-spacing:0}.conclusion-label{display:block;font-size:13px;color:var(--muted);margin-bottom:14px;letter-spacing:0}.sources summary{font-size:13px}.spectrum-legend{padding-top:0}.spectrum-explainer{display:block}.spectrum-explainer p{font-size:12px}.lab-bottom{font-size:12px}
 @media(max-width:680px){.hero{padding-top:21px}.hero h1{margin-bottom:18px}.illusion-button{font-size:11px;padding:11px 15px}.illusion-result{font-size:10px;min-height:30px}.sound-lab{padding-top:20px}.spectrum-explainer p{font-size:10px}.lab-bottom{font-size:10px}.science-note p{font-size:11px}.type-principles>div>span:last-child{font-size:10px}.rhythm-demo>.text-button{font-size:11px}.conclusion-label{font-size:10px;margin-bottom:10px}.sources summary{font-size:12px}}
+
+/* The opening experiment occupies one complete viewport, outside the text grid. */
+.illusion {
+  --circle-size: min(35vw, 56vh);
+  --bridge-size: clamp(20px, calc(var(--circle-size) * .22), 80px);
+  height: 100vh;
+  height: 100svh;
+  min-height: 360px;
+  scroll-margin-top: -90px;
+}
+@supports (height: 100svh) {
+  .illusion {
+    --circle-size: min(35vw, 56svh);
+  }
+}
+.illusion-circle {
+  width: var(--circle-size);
+  height: var(--circle-size);
+  transform: none;
+}
+.illusion-bridge {
+  height: var(--bridge-size);
+  top: calc(50% - var(--bridge-size) / 2);
+}
+.illusion-bridge span { font-size: 12px; }
+.illusion-button {
+  bottom: max(76px, calc(env(safe-area-inset-bottom, 0px) + 56px));
+  min-height: 46px;
+}
+.illusion-result {
+  position: absolute;
+  bottom: max(24px, env(safe-area-inset-bottom, 0px));
+  left: 20px;
+  right: 20px;
+  padding: 0;
+  min-height: 21px;
+  text-align: center;
+  color: #fff;
+  mix-blend-mode: difference;
+  z-index: 4;
+}
+.illusion-result:empty { visibility: hidden; }
+.spectrum-stage { height: 340px; }
+@media (max-width: 680px) {
+  .illusion { scroll-margin-top: -30px; }
+  .illusion-bridge span { font-size: 10px; }
+  .spectrum-stage { height: 290px; }
+}

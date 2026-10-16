@@ -62,13 +62,14 @@
     rhythm.classList.add('has-surprise');
   }
 
-  // Frequency centers match playback. Peak width/height are schematic,
+  // Only the two fundamentals are shown. Their centers match playback.
+  // Peak width/height are schematic,
   // not an FFT measurement or a quantitative model of dissonance.
   const canvas = $('#spectrum-canvas');
   const ctx = canvas.getContext('2d');
   const intervals = {
-    third: { frequency: 329.6276, label: 'Ми · E₄', description: 'Большая терция: некоторые обертоны почти совпадают. Сравните со звучанием малой секунды.' },
-    second: { frequency: 277.1826, label: 'Ре♭ · D♭₄', description: 'Малая секунда: пики основных тонов стоят тесно, как и многие пары обертонов.' }
+    third: { frequency: 329.6276, label: 'Ми · E₄', description: 'Большая терция: между основными тонами — 68 Гц. Сравните с малой секундой.' },
+    second: { frequency: 277.1826, label: 'Ре♭ · D♭₄', description: 'Малая секунда: между основными тонами — 15,56 Гц. Пики заметно ближе.' }
   };
   let selectedInterval = 'third';
   let canvasWidth = 0;
@@ -82,21 +83,19 @@
   let audioBusy = false;
   let animationStart = 0;
 
-  const harmonicAmplitudes = [1, 0.3, 0.17, 0.1, 0.06, 0.04, 0.025, 0.015];
   function drawSpectrum(phase = 0) {
     if (!ctx || !canvasWidth || !canvasHeight) return;
     const width = canvasWidth;
     const height = canvasHeight;
     ctx.clearRect(0, 0, width, height);
-    const low = 125;
-    const high = 4000;
-    const logRange = Math.log(high / low);
+    const low = 200;
+    const high = 400;
     const baseline = height - 8;
-    const xForFrequency = (frequency) => Math.log(frequency / low) / logRange * width;
+    const xForFrequency = (frequency) => (frequency - low) / (high - low) * width;
 
     ctx.strokeStyle = '#d1d6be12';
     ctx.lineWidth = 1;
-    [125, 250, 500, 1000, 2000, 4000].forEach((frequency) => {
+    [200, 240, 280, 320, 360, 400].forEach((frequency) => {
       const x = xForFrequency(frequency);
       ctx.beginPath();
       ctx.moveTo(x, 10);
@@ -113,14 +112,9 @@
     const frequencies = [261.6256, intervals[selectedInterval].frequency];
     const levels = frequencies.map((fundamental, noteIndex) => {
       return Array.from({ length: bands }, (_, index) => {
-        const frequency = low * Math.exp((index + 0.5) / bands * logRange);
-        let energy = 0;
-        harmonicAmplitudes.forEach((amplitude, harmonicIndex) => {
-          const center = fundamental * (harmonicIndex + 1);
-          const spread = 14 + center * 0.021;
-          const distance = (frequency - center) / spread;
-          energy += Math.exp(-0.5 * distance * distance) * Math.pow(amplitude, 0.48);
-        });
+        const frequency = low + (index + 0.5) / bands * (high - low);
+        const distance = (frequency - fundamental) / 11;
+        const energy = Math.exp(-0.5 * distance * distance);
         const motion = playing ? 0.96 + Math.sin(phase * 2 + index * 0.24 + noteIndex) * 0.04 : 1;
         return clamp(energy) * motion * height * 0.84;
       });

@@ -30,14 +30,15 @@
       <h1 id="hero-title">КОНТРАСТ<span class="title-dot">.</span></h1>
       <div class="hero-subline">
         <p class="hero-statement">Чтобы что-то заметить,<br>нужно заметить <em>разницу.</em></p>
-        <div class="hero-description"><a href="#principle" class="circle-link" aria-label="Начать читать"><span>↓</span></a></div>
+        <div class="hero-description"><a href="#illusion" class="circle-link" aria-label="Начать читать"><span>↓</span></a></div>
       </div>
-      <div class="illusion" id="illusion">
+    </section>
+
+    <section class="illusion" id="illusion" aria-label="Один цвет на разном фоне">
         <div class="illusion-side light-side"><div class="illusion-circle circle-left"></div></div>
         <div class="illusion-side dark-side"><div class="illusion-circle circle-right"></div></div>
         <div class="illusion-bridge" aria-hidden="true"><span>#858580</span></div>
         <button class="illusion-button" id="illusion-toggle" aria-pressed="false">Они одного цвета? <span>↗</span></button>
-      </div>
       <p class="illusion-result" id="illusion-caption" aria-live="polite"></p>
     </section>
 
@@ -54,14 +55,14 @@
 
     <section class="sound-section section-pad" id="sound" aria-labelledby="sound-title">
       <div class="chapter-heading reveal"><h2 id="sound-title">Между нотами —<br><span class="serif">ощущение.</span></h2></div>
-      <div class="sound-intro reveal"><p class="large-copy">Две ноты. Много частот.<br>Одно общее ощущение.</p><p class="body-copy">В каждой ноте есть основной тон и обертоны. На общей частотной шкале видно, как эти семейства частот располагаются рядом, совпадают и взаимодействуют.</p></div>
+      <div class="sound-intro reveal"><p class="large-copy">Две ноты. Два основных тона.<br>Услышьте разницу.</p><p class="body-copy">Приблизим основные частоты двух нот. Переключите интервал, чтобы увидеть, как меняется расстояние между пиками, и сравните звучание.</p></div>
       <div class="sound-lab reveal">
         <div class="spectrum-legend"><span class="spectrum-note mono"><i class="note-dot note-dot-a" aria-hidden="true"></i>До · C₄ <span class="spectrum-frequency">261,63 Гц</span></span><span class="spectrum-note mono"><i class="note-dot note-dot-b" aria-hidden="true"></i><span id="second-note">Ми · E₄ <span class="spectrum-frequency">329,63 Гц</span></span></span><span class="spectrum-overlap mono"><i aria-hidden="true"></i>Наложение</span></div>
-        <div class="spectrum-stage"><canvas id="spectrum-canvas" aria-label="Схематичный спектральный эквалайзер: оранжевые и светлые полосы показывают основные частоты и обертоны двух нот на общей частотной шкале"></canvas></div>
-        <div class="spectrum-axis mono"><span>125</span><span>250</span><span>500</span><span>1 000</span><span>2 000</span><span>4 000 Гц</span></div>
-        <div class="spectrum-explainer"><p>Светлые участки показывают наложение полос. Высота и ширина полос условные.</p></div>
+        <div class="spectrum-stage"><canvas id="spectrum-canvas" aria-label="Схематичный спектральный эквалайзер: два крупных пика основных тонов на шкале от 200 до 400 герц. Обертоны не показаны."></canvas></div>
+        <div class="spectrum-axis mono"><span>200</span><span>240</span><span>280</span><span>320</span><span>360</span><span>400 Гц</span></div>
+        <div class="spectrum-explainer"><p>Два основных тона. Светлые участки — наложение полос; их ширина условная.</p></div>
         <div class="sound-controls"><div class="segmented" role="group" aria-label="Музыкальный интервал"><button data-interval="third" aria-pressed="true">Большая терция <span>До + Ми</span></button><button data-interval="second" aria-pressed="false">Малая секунда <span>До + Ре♭</span></button></div><button class="play-button" id="play-sound" aria-pressed="false"><span class="play-icon" aria-hidden="true">▶</span><span class="play-label">Послушать</span></button></div>
-        <div class="lab-bottom"><p id="interval-description" aria-live="polite">Большая терция: некоторые обертоны почти совпадают. Сравните со звучанием малой секунды.</p></div>
+        <div class="lab-bottom"><p id="interval-description" aria-live="polite">Большая терция: между основными тонами — 68 Гц. Сравните с малой секундой.</p></div>
       </div>
       <aside class="science-note reveal"><p>Совпадение частот само по себе не означает диссонанс. Близкие частотные компоненты могут создавать биения и шероховатость, а совпадающие обертоны — поддерживать ощущение созвучности. На приятность звучания влияет и культурный опыт. <a href="#sources" aria-label="К источникам о восприятии музыки">[1, 2]</a></p></aside>
       <p class="chapter-takeaway reveal">Музыка живёт между<br><span>напряжением</span> и разрешением.</p>
