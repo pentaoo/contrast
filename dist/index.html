@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f1f0eb">
-  <meta name="description" content="Почему мы замечаем разницу. Интерактивное эссе о контрасте в музыке, дизайне и наших чувствах.">
+  <meta name="description" content="Заметить, понять, почувствовать. Интерактивное эссе о контрасте в восприятии, дизайне, музыке и историях.">
   <title>КОНТРАСТ — разница имеет значение</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="./assets/oswald-600.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/manrope-400.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="./assets/fonts.css">
   <link rel="stylesheet" href="./styles.css">
-  <script src="./app.js" defer></script>
+  <script type="module" src="./app.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#principle">К содержанию</a>
@@ -21,76 +21,78 @@
       <h1 id="hero-title">КОНТРАСТ<span class="title-dot">.</span></h1>
       <div class="hero-subline">
         <p class="hero-statement">Чтобы что-то заметить,<br>нужно заметить <em>разницу.</em></p>
-        <div class="hero-description"><a href="#illusion" class="circle-link" aria-label="Начать читать"><span>↓</span></a></div>
+        <a href="#principle" class="circle-link" aria-label="Начать читать"><span aria-hidden="true">↓</span></a>
       </div>
     </section>
 
-    <section class="illusion" id="illusion" aria-label="Один цвет на разном фоне">
-        <div class="illusion-side light-side"><div class="illusion-circle circle-left"></div></div>
-        <div class="illusion-side dark-side"><div class="illusion-circle circle-right"></div></div>
-        <div class="illusion-bridge" aria-hidden="true"><span>#858580</span></div>
-        <button class="illusion-button" id="illusion-toggle" aria-pressed="false">Они одного цвета? <span>↗</span></button>
-      <p class="illusion-result" id="illusion-caption" aria-live="polite"></p>
-    </section>
-
-    <section class="principle section-pad" id="principle" aria-labelledby="principle-title">
-      <div class="principle-layout">
-        <h2 class="reveal" id="principle-title">Всё начинается<br>с <span class="serif">различия.</span></h2>
-        <div class="body-copy reveal"><p>Мы замечаем фигуру на фоне. Голос — среди шума. Движение — в неподвижности. Восприятие помогает нам отделять одно от другого.</p><p>Контраст даёт этому различию форму. Иногда — чтобы стало понятнее. Иногда — чтобы стало <em>интереснее.</em></p></div>
-      </div>
-      <div class="attention-demo reveal">
+    <section class="attention-scene scroll-scene" id="principle" aria-labelledby="principle-title">
+      <div class="scene-sticky attention-stage">
         <div class="dot-field" id="dot-field" aria-hidden="true"></div>
-        <div class="attention-caption"><span class="orange-line"></span><p>На что вы посмотрели<br><strong>в первую очередь?</strong></p></div>
+        <div class="attention-insight"><h2 id="principle-title">Разницу мы замечаем<br><span class="serif">первой.</span></h2></div>
+        <p class="attention-next">Но мы видим не только сам объект.</p>
       </div>
     </section>
 
-    <section class="sound-section section-pad" id="sound" aria-labelledby="sound-title">
-      <div class="chapter-heading reveal"><h2 id="sound-title">Между нотами —<br><span class="serif">ощущение.</span></h2></div>
-      <div class="sound-intro reveal"><p class="large-copy">Две ноты. Два основных тона.<br>Услышьте разницу.</p><p class="body-copy">Приблизим основные частоты двух нот. Переключите интервал, чтобы увидеть, как меняется расстояние между пиками, и сравните звучание.</p></div>
-      <div class="sound-lab reveal">
-        <div class="spectrum-legend"><span class="spectrum-note mono"><i class="note-dot note-dot-a" aria-hidden="true"></i>До · C₄ <span class="spectrum-frequency">261,63 Гц</span></span><span class="spectrum-note mono"><i class="note-dot note-dot-b" aria-hidden="true"></i><span id="second-note">Ми · E₄ <span class="spectrum-frequency">329,63 Гц</span></span></span><span class="spectrum-overlap mono"><i aria-hidden="true"></i>Наложение</span></div>
-        <div class="spectrum-stage"><canvas id="spectrum-canvas" aria-label="Схематичный спектральный эквалайзер: два крупных пика основных тонов на шкале от 200 до 400 герц. Обертоны не показаны."></canvas></div>
-        <div class="spectrum-axis mono"><span>200</span><span>240</span><span>280</span><span>320</span><span>360</span><span>400 Гц</span></div>
-        <div class="spectrum-explainer"><p>Два основных тона. Светлые участки — наложение полос; их ширина условная.</p></div>
-        <div class="sound-controls"><div class="segmented" role="group" aria-label="Музыкальный интервал"><button data-interval="third" aria-pressed="true">Большая терция <span>До + Ми</span></button><button data-interval="second" aria-pressed="false">Малая секунда <span>До + Ре♭</span></button></div><button class="play-button" id="play-sound" aria-pressed="false"><span class="play-icon" aria-hidden="true">▶</span><span class="play-label">Послушать</span></button></div>
-        <div class="lab-bottom"><p id="interval-description" aria-live="polite">Большая терция: между основными тонами — 68 Гц. Сравните с малой секундой.</p></div>
+    <section class="illusion-scene scroll-scene" id="illusion" aria-label="Один цвет на разном фоне">
+      <div class="scene-sticky illusion">
+        <div class="illusion-side light-side"><div class="illusion-circle"></div></div>
+        <div class="illusion-side dark-side"><div class="illusion-circle"></div></div>
+        <div class="illusion-bridge" aria-hidden="true"></div>
+        <div class="illusion-controls"><button id="illusion-toggle" class="illusion-button" aria-pressed="false">Они одного цвета? <span aria-hidden="true">↗</span></button><p id="illusion-caption" class="illusion-result" aria-live="polite"></p></div>
       </div>
-      <aside class="science-note reveal"><p>Совпадение частот само по себе не означает диссонанс. Близкие частотные компоненты могут создавать биения и шероховатость, а совпадающие обертоны — поддерживать ощущение созвучности. На приятность звучания влияет и культурный опыт. <a href="#sources" aria-label="К источникам о восприятии музыки">[1, 2]</a></p></aside>
-      <p class="chapter-takeaway reveal">Музыка живёт между<br><span>напряжением</span> и разрешением.</p>
     </section>
+    <div class="scene-bridge"><p>То, что рядом,<br><span class="serif">меняет восприятие.</span></p><span>Этой разницей можно управлять вниманием.</span></div>
 
-    <section class="form-section section-pad" id="form" aria-labelledby="form-title">
-      <div class="chapter-heading reveal"><h2 id="form-title">Если всё главное,<br><span class="serif">главного нет.</span></h2></div>
-      <div class="form-intro reveal"><p class="body-copy">Заголовок отличается от текста. Кнопка — от подписи. Главное — от второстепенного. Так появляется иерархия: понятный маршрут для внимания.</p><p class="annotation">Один текст.<br>Два способа его увидеть. <span>↘</span></p></div>
-      <div class="hierarchy-lab reveal">
-        <div class="poster" id="poster"><span class="poster-kicker">ВСТРЕЧА / 24 ОКТЯБРЯ</span><div class="poster-title">Искусство<br>замечать.</div><p class="poster-description">Вечер о том, как видеть привычное<br>по-новому. Просто посмотрите внимательнее.</p><span class="poster-cta">Быть внимательнее <span>↗</span></span><div class="poster-mark" aria-hidden="true"><span></span><span></span></div></div>
-        <div class="hierarchy-bottom"><label class="switch-label" for="hierarchy-toggle"><input type="checkbox" id="hierarchy-toggle" checked><span class="switch-track" aria-hidden="true"><span></span></span><span>Включить иерархию</span></label><p id="hierarchy-description" aria-live="polite">Разница в масштабе, весе и цвете подсказывает, что читать первым.</p></div>
+    <section class="form-section scene section-pad" id="form" aria-labelledby="form-title">
+      <div class="scene-heading"><h2 id="form-title">Что читать<br><span class="serif">первым?</span></h2></div>
+      <div class="hierarchy-lab">
+        <div class="poster" id="poster"><span class="poster-kicker">ВСТРЕЧА / 24 ОКТЯБРЯ</span><div class="poster-title">Искусство<br>замечать.</div><p class="poster-description">Вечер о том, как видеть привычное<br>по-новому. Просто посмотрите внимательнее.</p><span class="poster-cta">Быть внимательнее <span aria-hidden="true">↗</span></span><div class="poster-mark" aria-hidden="true"><span></span><span></span></div></div>
+        <button id="hierarchy-toggle" class="outline-button" aria-pressed="false">Добавить иерархию <span aria-hidden="true">↗</span></button>
+        <p id="hierarchy-description" class="hierarchy-insight" aria-live="polite"></p>
       </div>
-      <div class="type-principles reveal"><div><p>Масштаб</p><span>Большое задаёт начало.</span></div><div><p>Насыщенность</p><span>Плотное получает вес.</span></div><div><p>Пространство</p><span>Пауза разделяет смыслы.</span></div></div>
+      <p class="chapter-bridge">Разницу можно не только увидеть.</p>
     </section>
 
-    <section class="feeling-section section-pad" id="feeling" aria-labelledby="feeling-title">
-      <div class="chapter-heading reveal"><h2 id="feeling-title">Мы ждём одно.<br><span class="serif">Нас трогает другое.</span></h2></div>
-      <div class="feeling-intro reveal"><p class="large-copy">Суровая внешность.<br>Неожиданная нежность.</p><div class="body-copy"><p>Человек в чёрном, с тяжёлыми ботинками и колючим взглядом, бережно несёт домой замёрзшего котёнка.</p><p>Иногда нас трогает именно этот зазор между первым впечатлением и тем, что открывается потом. Контраст делает образ объёмнее.</p></div></div>
-      <div class="feeling-art reveal" id="feeling-art"><div class="hard-shape" aria-hidden="true"><svg viewBox="0 0 400 400"><path d="M200 5 231 106 300 42 286 137 388 120 315 200 395 249 286 267 308 363 223 308 173 399 145 289 47 341 99 242 4 211 104 168 49 81 152 111Z"/></svg></div><div class="soft-shape" aria-hidden="true"></div><span class="art-divider" aria-hidden="true">×</span><p class="art-caption">Сложнее, чем кажется.</p></div>
-      <div class="story-layout reveal"><h3>Истории работают<br>с тем же <span class="serif">зазором.</span></h3><div class="body-copy"><p>Тишина перед припевом. Шутка посреди драмы. Герой, который поступает вопреки нашим ожиданиям.</p><p>Перемена ощущается сильнее, когда ей есть с чем сравниваться. Исследования музыкального удовольствия тоже показывают связь между ожиданием, неожиданностью и удовольствием. <a href="#sources" aria-label="К исследованию музыкальных ожиданий">[3]</a></p></div></div>
-      <div class="rhythm-demo reveal"><div class="rhythm-track" id="rhythm-track" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><p>Повторение создаёт правило.<br><strong>Отклонение становится событием.</strong></p><button id="rhythm-replay" class="text-button mono">Повторить <span>↻</span></button></div>
+    <section class="sound-section scene section-pad" id="sound" aria-labelledby="sound-title">
+      <div class="scene-heading"><h2 id="sound-title">А теперь —<br><span class="serif">на слух.</span></h2></div>
+      <div class="sound-lab" id="sound-lab">
+        <div class="listening-intro"><h3 id="listening-prompt">Послушайте первую пару.</h3><p id="listening-instruction">Две ноты одновременно. Как они звучат для вас?</p></div>
+        <div class="spectrum-stage"><canvas id="spectrum-canvas" aria-label="Схематичный эквалайзер с двумя пиками основных частот. Ширина пиков условная."></canvas></div>
+        <div class="listening-actions">
+          <button class="play-button" id="play-sound" aria-pressed="false"><span class="play-icon" aria-hidden="true">▶</span><span class="play-label">Послушать первую пару</span></button>
+          <div id="response-panel" class="response-panel" hidden><p>Какое ощущение осталось?</p><div class="response-options" role="group" aria-label="Ваше ощущение"><button data-impression="calm">Спокойно</button><button data-impression="tense">Напряжённо</button><button data-impression="other">Иначе / не знаю</button></div></div>
+          <button class="text-button skip-audio" id="skip-audio">Перейти к объяснению <span aria-hidden="true">↘</span></button>
+        </div>
+        <p id="audio-error" class="audio-error" role="status"></p>
+      </div>
+      <div id="sound-explanation" class="sound-explanation" hidden>
+        <h3 id="explanation-title" tabindex="-1">Что изменилось?</h3>
+        <p id="listening-result" class="listening-result"></p>
+        <div class="explanation-copy"><p>В первой паре — <strong>до и ми</strong>, большая терция. Такое сочетание многим кажется созвучным и устойчивым.</p><p>Во второй — <strong>до и ре-бемоль</strong>, малая секунда. В ней основные тоны ближе друг к другу. Близкие частотные компоненты могут создавать биения и шероховатость — ощущение напряжения.</p><p>Дело не в том, что частоты просто «пересеклись». Важны взаимодействие обертонов, тембр и музыкальный опыт. Ваше впечатление может отличаться. <a href="#sources" aria-label="Источники о восприятии созвучий">[1, 2]</a></p></div>
+        <div class="replay-controls" role="group" aria-label="Повторить сравнение"><span>Послушать ещё раз:</span><button data-replay="third" aria-pressed="false">Первую пару</button><button data-replay="second" aria-pressed="false">Вторую пару</button></div>
+      </div>
+      <noscript><p class="body-copy">Первая пара — до и ми, большая терция; вторая — до и ре-бемоль, малая секунда. Для прослушивания включите JavaScript. Близкие частотные компоненты могут создавать биения и шероховатость, но приятность звучания также зависит от тембра и музыкального опыта.</p></noscript>
+      <p class="chapter-bridge">Контраст меняет и наши ожидания.</p>
     </section>
 
-    <section class="conclusion section-pad" aria-labelledby="conclusion-title">
-      <h2 class="reveal" id="conclusion-title">Разница помогает<br><span class="serif">почувствовать целое.</span></h2>
-      <div class="conclusion-grid reveal"><p><span class="conclusion-label">В музыке</span>От напряжения<br>к разрешению.</p><p><span class="conclusion-label">В дизайне</span>От главного<br>к деталям.</p><p><span class="conclusion-label">В историях</span>От ожидания<br>к открытию.</p></div>
-      <p class="conclusion-copy reveal">Сила контраста — в отношениях.<br>Свет ощущается светлее рядом с тенью.<br>Тишина становится слышна после шума.</p>
+    <section class="feeling-section scroll-scene" id="feeling" aria-labelledby="feeling-title">
+      <div class="scene-sticky feeling-stage">
+        <div class="feeling-art" aria-hidden="true"><div class="hard-shape"><svg viewBox="0 0 400 400"><path d="M200 5 231 106 300 42 286 137 388 120 315 200 395 249 286 267 308 363 223 308 173 399 145 289 47 341 99 242 4 211 104 168 49 81 152 111Z"/></svg></div><div class="soft-shape"></div></div>
+        <div class="feeling-copy"><h2 id="feeling-title"><span class="feeling-first">Кажется<br><span class="serif">резким.</span></span><span class="feeling-second">Оказывается<br><span class="serif">нежным.</span></span></h2><div class="feeling-story"><p>Человек с колючим взглядом и тяжёлыми ботинками бережно несёт домой замёрзшего котёнка.</p><p>Нас трогает зазор между первым впечатлением и тем, что открывается потом.</p><p class="story-connection">Как шутка посреди драмы.<br>Как поступок вопреки ожиданиям.</p></div></div>
+      </div>
+    </section>
+
+    <section class="conclusion scene section-pad" id="conclusion" aria-labelledby="conclusion-title">
+      <h2 id="conclusion-title">Контраст помогает<br>заметить, понять<br><span class="serif">и почувствовать.</span></h2>
       <details class="sources" id="sources"><summary><span>Исследования и источники</span><span class="sources-plus" aria-hidden="true">+</span></summary><div class="source-list"><p>Это визуальное эссе, а не единая научная теория контраста. Связи между звуком, дизайном и историями здесь — авторская рамка. Научные опоры музыкальных примеров:</p><a href="https://mcdermottlab.mit.edu/papers/McDermott_etal_2016_consonance.pdf" target="_blank" rel="noopener noreferrer"><span>01</span><div>McDermott et al., 2016<small>Indifference to dissonance in native Amazonians reveals cultural variation in music perception. Nature.</small></div><span>↗</span></a><a href="https://www.nature.com/articles/s41467-020-16448-6" target="_blank" rel="noopener noreferrer"><span>02</span><div>McPherson et al., 2020<small>Perceptual fusion of musical notes by native Amazonians suggests universal representations of musical intervals. Nature Communications.</small></div><span>↗</span></a><a href="https://doi.org/10.1016/j.cub.2019.09.067" target="_blank" rel="noopener noreferrer"><span>03</span><div>Cheung et al., 2019<small>Uncertainty and Surprise Jointly Predict Musical Pleasure and Amygdala, Hippocampus, and Auditory Cortex Activity. Current Biology.</small></div><span>↗</span></a></div></details>
-      <a href="#disappearance" class="ending-link reveal">А если убрать все различия? <span>↓</span></a>
+      <a href="#disappearance" class="ending-link">А если убрать все различия? <span aria-hidden="true">↓</span></a>
     </section>
 
     <section class="disappearance" id="disappearance" aria-label="Финал: исчезновение контраста">
-      <div class="ending-sticky"><div class="ending-pattern" aria-hidden="true"><div></div><div></div><div></div><div></div></div><div class="ending-content"><h2>Без разницы.</h2><p class="ending-subtitle">Нет фигуры. Нет фона.<br>Нечего различать.</p></div><div class="ending-last"><p>И всё начинается заново.</p><button id="restart" class="text-button">Вернуться к началу <span>↗</span></button></div><span class="ending-coordinate mono" aria-hidden="true">КОНТРАСТ <span id="contrast-value">100</span>%</span></div>
+      <div class="ending-sticky"><div class="ending-pattern" aria-hidden="true"><div></div><div></div></div><div class="ending-content"><h2>Без разницы.</h2></div><div class="ending-last"><p>И всё начинается заново.</p><button id="restart" class="text-button">Вернуться к началу <span aria-hidden="true">↗</span></button></div></div>
     </section>
   </main>
   <div class="restart-veil" aria-hidden="true"></div>
-  <div class="sound-status sr-only" id="sound-status" role="status"></div>
-  <noscript><div class="noscript-note">Текст доступен целиком. Включите JavaScript, чтобы попробовать интерактивные примеры.</div></noscript>
+  <div class="sr-only" id="sound-status" role="status"></div>
 </body>
 </html>

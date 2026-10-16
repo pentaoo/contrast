@@ -2,9 +2,11 @@
   "name": "contrast-visual-essay",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "An interactive Russian visual essay on contrast",
   "scripts": {
     "dev": "python3 -m http.server 4173 --directory dist",
-    "check": "node --check dist/app.js"
+    "check": "node --check dist/app.js && node --check dist/listening.js",
+    "test": "node --test tests/listening.test.js"
   }
 }

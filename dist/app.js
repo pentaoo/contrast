@@ -1,342 +1,360 @@
-(() => {
-  'use strict';
+import { createListeningState, finishSample, respondToSample, skipListening, impressions } from './listening.js';
 
-  const $ = (selector) => document.querySelector(selector);
-  const $$ = (selector) => [...document.querySelectorAll(selector)];
-  const clamp = (number, min = 0, max = 1) => Math.min(max, Math.max(min, number));
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  document.documentElement.classList.add('js-enabled');
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => [...document.querySelectorAll(selector)];
+const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+const root = document.documentElement;
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+root.classList.add('js-enabled');
+requestAnimationFrame(() => requestAnimationFrame(() => root.classList.add('intro-ready')));
 
-  // Reveals follow the reading order and never hide the document without JS.
-  const reveals = $$('.reveal');
-  if ('IntersectionObserver' in window) {
-    const revealObserver = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        entry.target.classList.add('is-visible');
-        revealObserver.unobserve(entry.target);
-      }
-    }, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
-    reveals.forEach((element) => revealObserver.observe(element));
-  } else {
-    reveals.forEach((element) => element.classList.add('is-visible'));
-  }
-
-  const field = $('#dot-field');
-  for (let index = 0; index < 72; index++) field.append(document.createElement('i'));
-
-  $('#illusion-toggle').addEventListener('click', () => {
-    const revealed = $('#illusion').classList.toggle('is-revealed');
-    $('#illusion-toggle').setAttribute('aria-pressed', String(revealed));
-    $('#illusion-toggle').innerHTML = revealed ? 'Да, одинаковые <span>↙</span>' : 'Они одного цвета? <span>↗</span>';
-    $('#illusion-caption').textContent = revealed ? 'Оба круга — #858580. Отличается только фон.' : '';
-  });
-
-  $('#hierarchy-toggle').addEventListener('change', (event) => {
-    const enabled = event.target.checked;
-    $('#poster').classList.toggle('no-hierarchy', !enabled);
-    $('#hierarchy-description').textContent = enabled ? 'Разница в масштабе, весе и цвете подсказывает, что читать первым.' : 'Теперь всё одного веса. Глазу приходится самому искать, за что зацепиться.';
-  });
-
-  let rhythmTimer;
-  const rhythm = $('#rhythm-track');
-  function playRhythm() {
-    clearTimeout(rhythmTimer);
-    rhythm.classList.remove('has-surprise');
-    rhythmTimer = setTimeout(() => rhythm.classList.add('has-surprise'), reducedMotion.matches ? 0 : 650);
-  }
-  $('#rhythm-replay').addEventListener('click', playRhythm);
-  if ('IntersectionObserver' in window) {
-    const artObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        entry.target.classList.toggle('in-view', entry.isIntersecting);
-        if (entry.isIntersecting && entry.target === rhythm && !rhythm.dataset.played) {
-          rhythm.dataset.played = 'true';
-          playRhythm();
-        }
-      });
-    }, { threshold: 0.3 });
-    artObserver.observe($('#feeling-art'));
-    artObserver.observe(rhythm);
-  } else {
-    rhythm.classList.add('has-surprise');
-  }
-
-  // Only the two fundamentals are shown. Their centers match playback.
-  // Peak width/height are schematic,
-  // not an FFT measurement or a quantitative model of dissonance.
-  const canvas = $('#spectrum-canvas');
-  const ctx = canvas.getContext('2d');
-  const intervals = {
-    third: { frequency: 329.6276, label: 'Ми · E₄', description: 'Большая терция: между основными тонами — 68 Гц. Сравните с малой секундой.' },
-    second: { frequency: 277.1826, label: 'Ре♭ · D♭₄', description: 'Малая секунда: между основными тонами — 15,56 Гц. Пики заметно ближе.' }
-  };
-  let selectedInterval = 'third';
-  let canvasWidth = 0;
-  let canvasHeight = 0;
-  let spectrumPhase = 0;
-  let spectrumFrame = 0;
-  let playing = false;
-  let audioContext;
-  let voices = [];
-  let stopTimer;
-  let audioBusy = false;
-  let animationStart = 0;
-
-  function drawSpectrum(phase = 0) {
-    if (!ctx || !canvasWidth || !canvasHeight) return;
-    const width = canvasWidth;
-    const height = canvasHeight;
-    ctx.clearRect(0, 0, width, height);
-    const low = 200;
-    const high = 400;
-    const baseline = height - 8;
-    const xForFrequency = (frequency) => (frequency - low) / (high - low) * width;
-
-    ctx.strokeStyle = '#d1d6be12';
-    ctx.lineWidth = 1;
-    [200, 240, 280, 320, 360, 400].forEach((frequency) => {
-      const x = xForFrequency(frequency);
-      ctx.beginPath();
-      ctx.moveTo(x, 10);
-      ctx.lineTo(x, baseline);
-      ctx.stroke();
+// Each scene enters as a unit; changes inside it follow its own sequence.
+if ('IntersectionObserver' in window) {
+  const sceneObserver = new IntersectionObserver((entries) => {
+    entries.forEach(({ isIntersecting, target }) => {
+      if (!isIntersecting) return;
+      target.classList.add('is-entered');
+      sceneObserver.unobserve(target);
     });
-    for (let row = 1; row < 5; row++) {
-      const y = baseline - row * height * 0.2;
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
-    }
+  }, { threshold: .02, rootMargin: '0px 0px -12% 0px' });
+  $$('.scene').forEach((scene) => sceneObserver.observe(scene));
+} else {
+  $$('.scene').forEach((scene) => scene.classList.add('is-entered'));
+}
 
-    const bands = Math.max(72, Math.round(width / 6));
-    const bandWidth = width / bands;
-    const frequencies = [261.6256, intervals[selectedInterval].frequency];
-    const levels = frequencies.map((fundamental, noteIndex) => {
-      return Array.from({ length: bands }, (_, index) => {
-        const frequency = low + (index + 0.5) / bands * (high - low);
-        const distance = (frequency - fundamental) / 11;
-        const energy = Math.exp(-0.5 * distance * distance);
-        const motion = playing ? 0.96 + Math.sin(phase * 2 + index * 0.24 + noteIndex) * 0.04 : 1;
-        return clamp(energy) * motion * height * 0.84;
-      });
-    });
+for (let index = 0; index < 72; index++) $('#dot-field').append(document.createElement('i'));
+let illusionTimer;
+$('#illusion-toggle').addEventListener('click', () => {
+  clearTimeout(illusionTimer);
+  const revealed = $('#illusion').classList.toggle('is-revealed');
+  $('#illusion-toggle').setAttribute('aria-pressed', String(revealed));
+  $('#illusion-toggle').innerHTML = revealed ? 'Сравнить ещё раз <span aria-hidden="true">↙</span>' : 'Они одного цвета? <span aria-hidden="true">↗</span>';
+  $('#illusion-caption').textContent = '';
+  if (revealed) illusionTimer = setTimeout(() => {
+    $('#illusion-caption').textContent = 'Да, одинаковые. Отличается только фон.';
+  }, reducedMotion.matches ? 0 : 750);
+});
 
-    // Overlay two bar spectra; their shared areas become a third, lighter color.
-    levels.forEach((spectrum, noteIndex) => {
-      ctx.fillStyle = noteIndex === 0 ? '#ee492c' : '#d1d6be';
-      ctx.globalAlpha = noteIndex === 0 ? 0.88 : 0.70;
-      for (let index = 0; index < bands; index++) {
-        const barHeight = Math.max(1, spectrum[index]);
-        ctx.fillRect(index * bandWidth + 1, baseline - barHeight, Math.max(1, bandWidth - 2), barHeight);
-      }
-    });
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = '#f4e0b1';
-    for (let index = 0; index < bands; index++) {
-      const overlap = Math.min(levels[0][index], levels[1][index]);
-      if (overlap > 3) ctx.fillRect(index * bandWidth + 1, baseline - overlap, Math.max(1, bandWidth - 2), overlap);
-    }
-    ctx.strokeStyle = '#d1d6be40';
-    ctx.beginPath();ctx.moveTo(0,baseline + 1);ctx.lineTo(width,baseline + 1);ctx.stroke();
+$('#hierarchy-toggle').addEventListener('click', () => {
+  const ordered = $('#poster').classList.toggle('is-ordered');
+  $('#hierarchy-toggle').setAttribute('aria-pressed', String(ordered));
+  $('#hierarchy-toggle').innerHTML = ordered ? 'Убрать иерархию <span aria-hidden="true">↙</span>' : 'Добавить иерархию <span aria-hidden="true">↗</span>';
+  $('#hierarchy-description').textContent = ordered ? 'Контраст подсказывает, что читать первым. Через масштаб, вес и пространство.' : 'Теперь всё одного веса. Глазу снова приходится искать начало.';
+});
+
+// Listening is sequential, without grading the visitor's subjective impression.
+let listening = createListeningState();
+let selectedInterval = 'third';
+let playing = false;
+let audioBusy = false;
+let audioContext;
+let voices = [];
+let stopTimer;
+let audioGeneration = 0;
+let spectrumFrame = 0;
+let spectrumPhase = 0;
+let animationStart = 0;
+const intervals = { third: 329.6276, second: 277.1826 };
+const canvas = $('#spectrum-canvas');
+const ctx = canvas.getContext('2d');
+let canvasWidth = 0;
+let canvasHeight = 0;
+
+function updateListeningUI() {
+  const done = listening.revealed;
+  const second = listening.step === 1;
+  const compared = listening.responses.every(Boolean);
+  $('#listening-prompt').textContent = done ? compared ? 'Две пары. Два ощущения.' : 'Сравните две пары.' : second ? 'Теперь послушайте вторую.' : 'Послушайте первую пару.';
+  $('#listening-instruction').textContent = done ? compared ? 'Важна разница, которую услышали вы.' : 'Или прочитайте, чем отличаются эти созвучия.' : second ? 'Сравните её с первой. Что изменилось?' : 'Две ноты одновременно. Как они звучат для вас?';
+  $('#play-sound').hidden = done;
+  $('#play-sound').disabled = audioBusy;
+  $('#play-sound').setAttribute('aria-pressed', String(playing && !done));
+  $('.play-icon').textContent = playing ? '■' : '▶';
+  $('.play-label').textContent = playing ? 'Остановить' : listening.heard[listening.step] ? 'Послушать ещё раз' : second ? 'Послушать вторую пару' : 'Послушать первую пару';
+  $('#response-panel').hidden = done || !listening.heard[listening.step] || playing || audioBusy;
+  $('#skip-audio').hidden = done;
+  $('#sound-explanation').hidden = !done;
+  if (done) {
+    $('#listening-result').textContent = listening.responses.every(Boolean)
+      ? `Вы отметили: первая пара — ${impressions[listening.responses[0]]}, вторая — ${impressions[listening.responses[1]]}.`
+      : 'Можно сравнить пары ниже — в любом порядке.';
   }
+  $$('[data-replay]').forEach((button) => button.setAttribute('aria-pressed', String(playing && selectedInterval === button.dataset.replay)));
+  $('#sound-lab').dataset.step = done ? 'complete' : second ? 'second' : 'first';
+}
 
-  function resizeCanvas() {
-    if (!ctx) return;
-    const rect = canvas.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvasWidth = rect.width;
-    canvasHeight = rect.height;
-    canvas.width = Math.round(rect.width * dpr);
-    canvas.height = Math.round(rect.height * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    drawSpectrum(spectrumPhase);
-  }
-
-  function animateSpectrum(timestamp) {
-    if (!playing || reducedMotion.matches || document.hidden) return;
-    if (!animationStart) animationStart = timestamp;
-    spectrumPhase = (timestamp - animationStart) * 0.0012;
-    drawSpectrum(spectrumPhase);
-    spectrumFrame = requestAnimationFrame(animateSpectrum);
-  }
-
-  function stopVoices() {
-    if (!audioContext) return;
-    const now = audioContext.currentTime;
-    voices.forEach(({ oscillator, gain }) => {
-      gain.gain.cancelScheduledValues(now);
-      gain.gain.setTargetAtTime(0, now, 0.025);
-      oscillator.stop(now + 0.15);
-      oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
-    });
-    voices = [];
-  }
-
-  function startVoices() {
-    stopVoices();
-    const now = audioContext.currentTime;
-    // Gentle harmonic tones make the comparison audible without a loud attack.
-    const real = new Float32Array(9);
-    const imaginary = new Float32Array([0, 1, 0.3, 0.17, 0.1, 0.06, 0.04, 0.025, 0.015]);
-    const wave = audioContext.createPeriodicWave(real, imaginary);
-    [261.6256, intervals[selectedInterval].frequency].forEach((frequency) => {
-      const oscillator = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-      oscillator.setPeriodicWave(wave);
-      oscillator.frequency.value = frequency;
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.065, now + 0.12);
-      oscillator.connect(gain);
-      gain.connect(audioContext.destination);
-      oscillator.start();
-      voices.push({ oscillator, gain });
-    });
-  }
-
-  function stopAudio() {
-    clearTimeout(stopTimer);
-    stopVoices();
-    playing = false;
-    cancelAnimationFrame(spectrumFrame);
-    $('.sound-lab').classList.remove('is-playing');
-    $('#play-sound').setAttribute('aria-pressed', 'false');
-    $('.play-label').textContent = 'Послушать';
-    $('.play-icon').textContent = '▶';
-    $('#sound-status').textContent = 'Воспроизведение остановлено.';
-  }
-
-  $('#play-sound').addEventListener('click', async () => {
-    if (audioBusy) return;
-    if (playing) { stopAudio(); return; }
-    audioBusy = true;
-    try {
-      const Audio = window.AudioContext || window.webkitAudioContext;
-      if (!Audio) throw new Error('Web Audio unavailable');
-      audioContext ||= new Audio();
-      await audioContext.resume();
-      playing = true;
-      animationStart = 0;
-      startVoices();
-      $('.sound-lab').classList.add('is-playing');
-      $('#play-sound').setAttribute('aria-pressed', 'true');
-      $('.play-label').textContent = 'Остановить';
-      $('.play-icon').textContent = '■';
-      $('#sound-status').textContent = `Звучит ${selectedInterval === 'third' ? 'большая терция' : 'малая секунда'}. Воспроизведение остановится через 4 секунды.`;
-      if (!reducedMotion.matches) spectrumFrame = requestAnimationFrame(animateSpectrum);
-      stopTimer = setTimeout(stopAudio, 4000);
-    } catch (error) {
-      stopAudio();
-      $('.play-label').textContent = 'Повторить';
-      $('#sound-status').textContent = 'Не удалось включить звук. Попробуйте ещё раз в браузере с поддержкой Web Audio.';
-    } finally {
-      audioBusy = false;
-    }
-  });
-
-  $$('[data-interval]').forEach((button) => {
-    button.addEventListener('click', () => {
-      selectedInterval = button.dataset.interval;
-      $$('[data-interval]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
-      const interval = intervals[selectedInterval];
-      $('#second-note').innerHTML = `${interval.label} <span class="spectrum-frequency">${interval.frequency.toFixed(2).replace('.', ',')} Гц</span>`;
-      $('#interval-description').textContent = interval.description;
-      drawSpectrum(spectrumPhase);
-      if (playing) {
-        startVoices();
-        clearTimeout(stopTimer);
-        stopTimer = setTimeout(stopAudio, 4000);
-      }
+// Two enlarged fundamental peaks; widths are illustrative, not measured spectra.
+function drawSpectrum(phase = 0) {
+  if (!ctx || !canvasWidth || !canvasHeight) return;
+  const width = canvasWidth;
+  const height = canvasHeight;
+  const baseline = height - 4;
+  ctx.clearRect(0, 0, width, height);
+  const bands = Math.max(65, Math.round(width / 6));
+  const bandWidth = width / bands;
+  const levels = [261.6256, intervals[selectedInterval]].map((center, noteIndex) => {
+    return Array.from({ length: bands }, (_, index) => {
+      const frequency = 200 + (index + .5) / bands * 200;
+      const distance = (frequency - center) / 11;
+      const motion = playing ? .97 + Math.sin(phase * 2 + index * .15 + noteIndex) * .03 : 1;
+      return Math.exp(-.5 * distance * distance) * motion * height * .87;
     });
   });
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      stopAudio();
-      cancelRestart();
-    } else {
-      updateScroll();
-    }
+  levels.forEach((spectrum, noteIndex) => {
+    ctx.fillStyle = noteIndex ? '#d1d6be' : '#ee492c';
+    ctx.globalAlpha = noteIndex ? .7 : .9;
+    spectrum.forEach((barHeight, index) => {
+      if (barHeight < .6) return;
+      ctx.fillRect(index * bandWidth + 1, baseline - barHeight, Math.max(1, bandWidth - 2), barHeight);
+    });
   });
-  window.addEventListener('pagehide', stopAudio);
-  if ('ResizeObserver' in window) new ResizeObserver(resizeCanvas).observe(canvas);
-  else window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#f4e0b1';
+  levels[0].forEach((first, index) => {
+    const overlap = Math.min(first, levels[1][index]);
+    if (overlap > 2) ctx.fillRect(index * bandWidth + 1, baseline - overlap, Math.max(1, bandWidth - 2), overlap);
+  });
+}
 
-  // Scroll erases shape differences, then luminance differences, then the page.
-  const ending = $('#disappearance');
-  const veil = $('.restart-veil');
-  const progress = $('.reading-progress span');
-  let restartTimer;
-  let restarting = false;
-  let scrollTicking = false;
-  let lastEndingProgress = 0;
+function resizeCanvas() {
+  if (!ctx) return;
+  const rect = canvas.getBoundingClientRect();
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  canvasWidth = rect.width;
+  canvasHeight = rect.height;
+  canvas.width = Math.round(rect.width * dpr);
+  canvas.height = Math.round(rect.height * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawSpectrum(spectrumPhase);
+}
 
-  function cancelRestart() {
-    clearTimeout(restartTimer);
-    restartTimer = undefined;
-  }
+function animateSpectrum(timestamp) {
+  if (!playing || reducedMotion.matches || document.hidden) return;
+  if (!animationStart) animationStart = timestamp;
+  spectrumPhase = (timestamp - animationStart) * .0012;
+  drawSpectrum(spectrumPhase);
+  spectrumFrame = requestAnimationFrame(animateSpectrum);
+}
 
-  function restartEssay() {
-    if (restarting) return;
-    restarting = true;
-    cancelRestart();
+function stopVoices() {
+  if (!audioContext) return;
+  const now = audioContext.currentTime;
+  voices.forEach(({ oscillator, gain }) => {
+    gain.gain.cancelScheduledValues(now);
+    gain.gain.setTargetAtTime(0, now, .025);
+    oscillator.stop(now + .15);
+    oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
+  });
+  voices = [];
+}
+
+function startVoices() {
+  stopVoices();
+  const now = audioContext.currentTime;
+  const real = new Float32Array(9);
+  const imaginary = new Float32Array([0, 1, .3, .17, .1, .06, .04, .025, .015]);
+  const wave = audioContext.createPeriodicWave(real, imaginary);
+  [261.6256, intervals[selectedInterval]].forEach((frequency) => {
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.setPeriodicWave(wave);
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(.065, now + .12);
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start();
+    voices.push({ oscillator, gain });
+  });
+}
+
+function stopAudio(completed = false) {
+  audioGeneration++;
+  clearTimeout(stopTimer);
+  stopVoices();
+  cancelAnimationFrame(spectrumFrame);
+  const wasPlaying = playing;
+  playing = false;
+  audioBusy = false;
+  if (completed && wasPlaying && !listening.revealed) listening = finishSample(listening);
+  updateListeningUI();
+  drawSpectrum();
+  if (completed && !listening.revealed) $('#sound-status').textContent = 'Какое ощущение осталось? Можно выбрать ответ.';
+}
+
+async function playSample(interval) {
+  if (audioBusy) return;
+  if (playing && selectedInterval === interval) { stopAudio(); return; }
+  stopAudio();
+  const generation = ++audioGeneration;
+  selectedInterval = interval;
+  audioBusy = true;
+  $('#audio-error').textContent = '';
+  updateListeningUI();
+  drawSpectrum();
+  try {
+    const Audio = window.AudioContext || window.webkitAudioContext;
+    if (!Audio) throw new Error('Web Audio unavailable');
+    audioContext ||= new Audio();
+    await audioContext.resume();
+    // A skip, hidden tab or reset may have cancelled the pending resume.
+    if (generation !== audioGeneration) return;
+    playing = true;
+    audioBusy = false;
+    animationStart = 0;
+    startVoices();
+    updateListeningUI();
+    $('#sound-status').textContent = `Звучит ${interval === 'third' ? 'первая' : 'вторая'} пара. Четыре секунды.`;
+    if (!reducedMotion.matches) spectrumFrame = requestAnimationFrame(animateSpectrum);
+    stopTimer = setTimeout(() => stopAudio(true), 4000);
+  } catch {
+    if (generation !== audioGeneration) return;
     stopAudio();
-    veil.classList.add('active');
-    setTimeout(() => {
-      const previousBehavior = document.documentElement.style.scrollBehavior;
-      document.documentElement.style.scrollBehavior = 'auto';
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      if (location.hash) history.replaceState(null, '', location.pathname + location.search);
-      document.documentElement.style.scrollBehavior = previousBehavior;
-      $('#hero-title').setAttribute('tabindex', '-1');
-      $('#hero-title').focus({ preventScroll: true });
-      $('#sound-status').textContent = 'Всё начинается заново. Начало эссе.';
-      requestAnimationFrame(() => {
-        updateScroll();
-        setTimeout(() => {
-          veil.classList.remove('active');
-          restarting = false;
-        }, reducedMotion.matches ? 0 : 250);
-      });
-    }, reducedMotion.matches ? 0 : 350);
+    $('#audio-error').textContent = 'Не удалось включить звук. Попробуйте ещё раз или перейдите к объяснению.';
   }
+}
 
-  function updateScroll() {
-    scrollTicking = false;
-    const y = window.scrollY;
-    const total = document.documentElement.scrollHeight - window.innerHeight;
-    progress.style.transform = `scaleX(${clamp(y / Math.max(1, total))})`;
-    const local = clamp((y - ending.offsetTop) / Math.max(1, ending.offsetHeight - window.innerHeight));
-    lastEndingProgress = local;
-    const dissolve = clamp(local / 0.48);
-    const whiten = clamp((local - 0.57) / 0.36);
-    const contentOpacity = 1 - clamp((local - 0.17) / 0.30);
-    ending.style.setProperty('--end-p', dissolve.toFixed(4));
-    ending.style.setProperty('--end-w', whiten.toFixed(4));
-    ending.style.setProperty('--end-opacity', contentOpacity.toFixed(4));
-    // Even the progress line disappears from the final white frame.
-    $('.reading-progress').style.opacity = String(1 - clamp((local - 0.35) / 0.15));
-    document.documentElement.classList.toggle('ending-blank', local > 0.48 && !reducedMotion.matches);
-    if (local > 0.97 && !reducedMotion.matches && !document.hidden && !restarting) {
-      if (!restartTimer) restartTimer = setTimeout(() => {
-        if (lastEndingProgress > 0.97 && !document.hidden) restartEssay();
-      }, 1400);
-    } else if (local <= 0.97 || reducedMotion.matches) {
-      cancelRestart();
-    }
+function showExplanation() {
+  updateListeningUI();
+  $('#explanation-title').focus({ preventScroll: true });
+  $('#sound-explanation').scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'start' });
+  queueScrollUpdate();
+}
+
+$('#play-sound').addEventListener('click', () => playSample(listening.step === 1 ? 'second' : 'third'));
+$$('[data-impression]').forEach((button) => button.addEventListener('click', () => {
+  const next = respondToSample(listening, button.dataset.impression);
+  if (next === listening) return;
+  stopAudio();
+  listening = next;
+  if (listening.revealed) {
+    showExplanation();
+  } else {
+    // Keep the second example unknown until its play action.
+    updateListeningUI();
+    $('#play-sound').focus({ preventScroll: true });
+    $('#sound-status').textContent = 'Теперь послушайте вторую пару и сравните ощущения.';
   }
+}));
+$('#skip-audio').addEventListener('click', () => {
+  stopAudio();
+  $('#audio-error').textContent = '';
+  listening = skipListening(listening);
+  showExplanation();
+});
+$$('[data-replay]').forEach((button) => button.addEventListener('click', () => playSample(button.dataset.replay)));
 
-  $('#restart').addEventListener('click', restartEssay);
-  window.addEventListener('scroll', () => {
-    if (scrollTicking) return;
-    scrollTicking = true;
-    requestAnimationFrame(updateScroll);
-  }, { passive: true });
-  window.addEventListener('resize', updateScroll, { passive: true });
-  reducedMotion.addEventListener('change', () => {
-    cancelAnimationFrame(spectrumFrame);
-    if (playing && !reducedMotion.matches) spectrumFrame = requestAnimationFrame(animateSpectrum);
+const attention = $('#principle');
+const illusion = $('#illusion');
+const feeling = $('#feeling');
+const ending = $('#disappearance');
+const veil = $('.restart-veil');
+let scrollTicking = false;
+let restartTimer;
+let restarting = false;
+let lastEndingProgress = 0;
+
+function localProgress(element) {
+  return clamp(-element.getBoundingClientRect().top / Math.max(1, element.offsetHeight - innerHeight));
+}
+function cancelRestart() {
+  clearTimeout(restartTimer);
+  restartTimer = undefined;
+}
+function updateScroll() {
+  scrollTicking = false;
+  const reduced = reducedMotion.matches;
+  const staticScenes = reduced || matchMedia('(max-height: 600px)').matches;
+  const attentionProgress = localProgress(attention);
+  attention.classList.toggle('has-difference', staticScenes || attentionProgress > .10);
+  attention.classList.toggle('has-insight', staticScenes || attentionProgress > .32);
+  attention.classList.toggle('has-next', staticScenes || attentionProgress > .70);
+  illusion.classList.toggle('has-prompt', reduced || illusion.getBoundingClientRect().top < innerHeight * .15);
+  const feelingProgress = localProgress(feeling);
+  const soft = staticScenes || feelingProgress > .23;
+  feeling.classList.toggle('has-softness', soft);
+  feeling.classList.toggle('has-story', staticScenes || feelingProgress > .45);
+  $('.feeling-first').setAttribute('aria-hidden', String(soft));
+  $('.feeling-second').setAttribute('aria-hidden', String(!soft));
+  const total = root.scrollHeight - innerHeight;
+  $('.reading-progress span').style.transform = `scaleX(${clamp(scrollY / Math.max(1, total))})`;
+  const progress = localProgress(ending);
+  lastEndingProgress = progress;
+  ending.style.setProperty('--end-p', clamp(progress / .48).toFixed(4));
+  ending.style.setProperty('--end-w', clamp((progress - .57) / .36).toFixed(4));
+  ending.style.setProperty('--end-opacity', (1 - clamp((progress - .17) / .3)).toFixed(4));
+  $('.reading-progress').style.opacity = String(1 - clamp((progress - .35) / .15));
+  root.classList.toggle('ending-blank', progress > .48 && !reduced);
+  if (progress > .97 && !reduced && !document.hidden && !restarting) {
+    if (!restartTimer) restartTimer = setTimeout(() => {
+      if (lastEndingProgress > .97 && !document.hidden) restartEssay();
+    }, 1400);
+  } else if (progress <= .97 || reduced) cancelRestart();
+}
+function queueScrollUpdate() {
+  if (scrollTicking) return;
+  scrollTicking = true;
+  requestAnimationFrame(updateScroll);
+}
+function resetExperiments() {
+  clearTimeout(illusionTimer);
+  illusion.classList.remove('is-revealed');
+  $('#illusion-toggle').setAttribute('aria-pressed', 'false');
+  $('#illusion-toggle').innerHTML = 'Они одного цвета? <span aria-hidden="true">↗</span>';
+  $('#illusion-caption').textContent = '';
+  $('#poster').classList.remove('is-ordered');
+  $('#hierarchy-toggle').setAttribute('aria-pressed', 'false');
+  $('#hierarchy-toggle').innerHTML = 'Добавить иерархию <span aria-hidden="true">↗</span>';
+  $('#hierarchy-description').textContent = '';
+  listening = createListeningState();
+  selectedInterval = 'third';
+  $('#audio-error').textContent = '';
+  $('#sources').open = false;
+  updateListeningUI();
+  drawSpectrum();
+}
+function restartEssay() {
+  if (restarting) return;
+  restarting = true;
+  cancelRestart();
+  stopAudio();
+  veil.classList.add('active');
+  root.classList.remove('intro-ready');
+  setTimeout(() => {
+    resetExperiments();
+    const previous = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
+    scrollTo({ top: 0, behavior: 'instant' });
+    if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+    root.style.scrollBehavior = previous;
+    $('#hero-title').setAttribute('tabindex', '-1');
+    $('#hero-title').focus({ preventScroll: true });
     updateScroll();
-  });
-  window.addEventListener('load', updateScroll);
-  updateScroll();
-})();
+    setTimeout(() => {
+      veil.classList.remove('active');
+      requestAnimationFrame(() => root.classList.add('intro-ready'));
+      restarting = false;
+    }, reducedMotion.matches ? 0 : 150);
+  }, reducedMotion.matches ? 0 : 300);
+}
+$('#restart').addEventListener('click', restartEssay);
+addEventListener('scroll', queueScrollUpdate, { passive: true });
+addEventListener('resize', () => { resizeCanvas(); queueScrollUpdate(); }, { passive: true });
+addEventListener('load', queueScrollUpdate);
+addEventListener('pagehide', () => stopAudio());
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { stopAudio(); cancelRestart(); }
+  else queueScrollUpdate();
+});
+reducedMotion.addEventListener('change', () => {
+  cancelAnimationFrame(spectrumFrame);
+  if (playing && !reducedMotion.matches) spectrumFrame = requestAnimationFrame(animateSpectrum);
+  queueScrollUpdate();
+});
+if ('ResizeObserver' in window) {
+  new ResizeObserver(resizeCanvas).observe(canvas);
+  new ResizeObserver(queueScrollUpdate).observe($('main'));
+}
+updateListeningUI();
+resizeCanvas();
+updateScroll();
