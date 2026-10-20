@@ -60,25 +60,6 @@ h3 { font-size: clamp(22px, 2.2vw, 30px); line-height: 1.3; letter-spacing: -.04
 .attention-next { position: absolute; bottom: 5vh; font-size: 14px; color: var(--muted); text-align: center; padding: 0 20px; }
 .js-enabled .attention-insight, .js-enabled .attention-next { opacity: 0; transform: translateY(12px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
 .has-insight .attention-insight, .has-next .attention-next { opacity: 1; transform: none; }
-.js-enabled .illusion-scene { height: 150vh; height: 150svh; }
-.illusion { --circle-size: min(35vw, 56vh); display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; }
-@supports (height: 100svh) { .illusion { --circle-size: min(35vw, 56svh); } }
-.illusion-side { display: grid; place-items: center; }
-.light-side { background: #e0dfd6; }
-.dark-side { background: #20211e; }
-.illusion-circle { width: var(--circle-size); height: var(--circle-size); border-radius: 50%; background: #858580; z-index: 2; }
-.illusion-bridge { position: absolute; height: clamp(20px, calc(var(--circle-size) * .22), 80px); width: 50%; left: 25%; top: 50%; background: #858580; transform: translateY(-50%) scaleX(0); transition: transform .75s var(--ease); z-index: 3; }
-.is-revealed .illusion-bridge { transform: translateY(-50%) scaleX(1); }
-.illusion-controls { position: absolute; left: 20px; right: 20px; bottom: max(25px, env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; align-items: center; gap: 20px; z-index: 4; }
-.illusion-button { padding: 15px 22px; min-height: 48px; background: var(--paper); color: var(--ink); font-size: 13px; font-weight: 600; }
-.illusion-button span { margin-left: 20px; }
-.illusion-button:hover { background: var(--accent); color: white; }
-.illusion-result { min-height: 24px; color: white; mix-blend-mode: difference; font-size: 12px; line-height: 1.7; text-align: center; }
-.js-enabled .illusion-controls { visibility: hidden; opacity: 0; transition: opacity .4s; }
-.illusion-scene.has-prompt .illusion-controls { visibility: visible; opacity: 1; }
-.scene-bridge { padding: 80px 8.5%; text-align: center; }
-.scene-bridge>p { font-size: clamp(27px, 3.4vw, 48px); line-height: 1.3; letter-spacing: -.05em; }
-.scene-bridge>span { display: block; font-size: 14px; line-height: 1.8; color: var(--muted); margin-top: 22px; }
 .js-enabled .scene>.scene-heading, .js-enabled .scene>.hierarchy-lab, .js-enabled .scene>.sound-lab, .js-enabled .conclusion>h2 { opacity: 0; transform: translateY(22px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
 .js-enabled .scene.is-entered>.scene-heading, .js-enabled .scene.is-entered>.hierarchy-lab, .js-enabled .scene.is-entered>.sound-lab, .js-enabled .conclusion.is-entered>h2 { opacity: 1; transform: none; }
 .scene.is-entered>.hierarchy-lab, .scene.is-entered>.sound-lab { transition-delay: .12s; }
@@ -207,11 +188,6 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .dot-field { width: 100%; gap: 23px 10px; }
   .attention-insight h2 { font-size: 8vw; }
   .attention-next { font-size: 12px; max-width: 270px; bottom: 7vh; }
-  .illusion-controls { gap: 16px; bottom: max(25px, env(safe-area-inset-bottom, 0px)); }
-  .illusion-button { font-size: 12px; }
-  .illusion-result { font-size: 11px; max-width: 270px; min-height: 38px; }
-  .scene-bridge { padding: 65px 7%; }
-  .scene-bridge>span { font-size: 12px; max-width: 270px; margin: 20px auto 0; }
   .form-section { padding-top: 15px; }
   .poster { padding: 28px 23px; height: 400px; margin: 0 -2%; }
   .poster-kicker, .poster-title, .poster-description, .poster-cta { font-size: 12px; }
@@ -266,7 +242,7 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   *, *:before, *:after { transition: none !important; animation: none !important; }
   .js-enabled .scroll-scene { height: auto; }
   .scene-sticky { position: relative; }
-  .js-enabled .attention-insight, .js-enabled .attention-next, .js-enabled .illusion-controls,
+  .js-enabled .attention-insight, .js-enabled .attention-next,
   .js-enabled .scene>.scene-heading, .js-enabled .scene>.hierarchy-lab, .js-enabled .scene>.sound-lab,
   .js-enabled .conclusion>h2, .js-enabled .hero h1, .js-enabled .hero-statement, .js-enabled .hero .circle-link,
   .js-enabled .feeling-second, .js-enabled .feeling-story, .js-enabled .soft-shape { opacity: 1; transform: none; visibility: visible; }

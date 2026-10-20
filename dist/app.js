@@ -23,18 +23,6 @@ if ('IntersectionObserver' in window) {
 }
 
 for (let index = 0; index < 72; index++) $('#dot-field').append(document.createElement('i'));
-let illusionTimer;
-$('#illusion-toggle').addEventListener('click', () => {
-  clearTimeout(illusionTimer);
-  const revealed = $('#illusion').classList.toggle('is-revealed');
-  $('#illusion-toggle').setAttribute('aria-pressed', String(revealed));
-  $('#illusion-toggle').innerHTML = revealed ? 'Сравнить ещё раз <span aria-hidden="true">↙</span>' : 'Они одного цвета? <span aria-hidden="true">↗</span>';
-  $('#illusion-caption').textContent = '';
-  if (revealed) illusionTimer = setTimeout(() => {
-    $('#illusion-caption').textContent = 'Да, одинаковые. Отличается только фон.';
-  }, reducedMotion.matches ? 0 : 750);
-});
-
 $('#hierarchy-toggle').addEventListener('click', () => {
   const ordered = $('#poster').classList.toggle('is-ordered');
   $('#hierarchy-toggle').setAttribute('aria-pressed', String(ordered));
@@ -245,7 +233,6 @@ $('#skip-audio').addEventListener('click', () => {
 $$('[data-replay]').forEach((button) => button.addEventListener('click', () => playSample(button.dataset.replay)));
 
 const attention = $('#principle');
-const illusion = $('#illusion');
 const feeling = $('#feeling');
 const ending = $('#disappearance');
 const veil = $('.restart-veil');
@@ -269,7 +256,6 @@ function updateScroll() {
   attention.classList.toggle('has-difference', staticScenes || attentionProgress > .10);
   attention.classList.toggle('has-insight', staticScenes || attentionProgress > .32);
   attention.classList.toggle('has-next', staticScenes || attentionProgress > .70);
-  illusion.classList.toggle('has-prompt', reduced || illusion.getBoundingClientRect().top < innerHeight * .15);
   const feelingProgress = localProgress(feeling);
   const soft = staticScenes || feelingProgress > .23;
   feeling.classList.toggle('has-softness', soft);
@@ -297,11 +283,6 @@ function queueScrollUpdate() {
   requestAnimationFrame(updateScroll);
 }
 function resetExperiments() {
-  clearTimeout(illusionTimer);
-  illusion.classList.remove('is-revealed');
-  $('#illusion-toggle').setAttribute('aria-pressed', 'false');
-  $('#illusion-toggle').innerHTML = 'Они одного цвета? <span aria-hidden="true">↗</span>';
-  $('#illusion-caption').textContent = '';
   $('#poster').classList.remove('is-ordered');
   $('#hierarchy-toggle').setAttribute('aria-pressed', 'false');
   $('#hierarchy-toggle').innerHTML = 'Добавить иерархию <span aria-hidden="true">↗</span>';
