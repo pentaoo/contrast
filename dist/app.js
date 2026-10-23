@@ -1,4 +1,4 @@
-import { mountPianoExperience } from './piano.js';
+import { mountPianoExperience } from './piano.js?v=piano-scroll-6';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];

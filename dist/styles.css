@@ -83,7 +83,7 @@ h3 { font-size: clamp(22px, 2.2vw, 30px); line-height: 1.3; letter-spacing: -.04
 .hierarchy-insight { min-height: 50px; max-width: 580px; margin: 20px auto 0; font-size: 14px; line-height: 1.8; color: var(--muted); }
 .chapter-bridge { margin-top: 65px; font-family: Georgia, serif; font-size: clamp(21px, 2.5vw, 32px); font-style: italic; letter-spacing: -.025em; text-align: center; }
 .sound-section { background: var(--ink); color: var(--paper); padding-bottom: 48px; }
-.sound-lab { --sound-deck-height: clamp(280px, 43svh, 430px); position: relative; display: grid; overflow-anchor: none; }
+.sound-lab { --sound-deck-height: clamp(360px, 43svh, 430px); position: relative; display: grid; overflow-anchor: none; }
 .sound-story, .sound-instrument { grid-area: 1 / 1; }
 .sound-step { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; padding: clamp(20px, 4svh, 48px) 8.5% calc(var(--sound-deck-height) + clamp(20px, 4svh, 48px)); }
 .sound-copy { width: 100%; max-width: 1050px; margin: 0 auto; font-size: clamp(30px, min(4.3vw, 6svh), 64px); font-weight: 600; line-height: 1.24; letter-spacing: -.04em; text-wrap: pretty; }

@@ -1,6 +1,6 @@
-import { createListeningState, finishMelody, skipListening } from './listening.js';
-import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js';
-import { mountSpectrum } from './spectrum.js';
+import { createListeningState, finishMelody, skipListening } from './listening.js?v=piano-scroll-6';
+import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=piano-scroll-6';
+import { mountSpectrum } from './spectrum.js?v=piano-scroll-6';
 
 export function mountPianoExperience({ reducedMotion }) {
   const piano = document.querySelector('#piano');
@@ -55,10 +55,21 @@ export function mountPianoExperience({ reducedMotion }) {
   }
 
   function updateUI() {
+    const openingExplanation = explanation.hidden && state.phase !== 'intro';
+    const readingPosition = openingExplanation ? { top: window.scrollY, left: window.scrollX } : null;
+    const focusExplanation = openingExplanation && [button, skip].includes(document.activeElement);
+    if (focusExplanation) document.activeElement.blur();
     lab.dataset.phase = state.phase;
     lab.dataset.playing = active ? active.version : busy ? 'loading' : 'none';
     opening.hidden = state.phase !== 'intro';
     explanation.hidden = state.phase === 'intro';
+    if (readingPosition) {
+      // Expanding the sticky grid can move the browser's scroll anchor to its
+      // end. Flush that layout, then keep the reader at the first paragraph.
+      explanation.getBoundingClientRect();
+      window.scrollTo({ ...readingPosition, behavior: 'instant' });
+      if (focusExplanation) document.querySelector('#listening-lead').focus({ preventScroll: true });
+    }
     finalStepVisible = state.phase !== 'intro' && finalStep.getBoundingClientRect().top <= innerHeight * .15;
     lab.dataset.step = state.phase === 'intro' ? 'intro' : finalStepVisible ? 'final' : 'reading';
     skip.hidden = state.phase !== 'intro';
@@ -84,7 +95,7 @@ export function mountPianoExperience({ reducedMotion }) {
     const rect = tonesCopy.getBoundingClientRect();
     const readingArea = Math.max(1, Math.min(innerHeight, instrument.getBoundingClientRect().top));
     const showAnnotations = rect.top <= readingArea * .8;
-    const progress = (readingArea * .42 - rect.top) / Math.max(rect.height, readingArea * .5);
+    const progress = (readingArea * .64 - rect.top) / Math.max(rect.height, readingArea * .5);
     spectrum.setFocus(showAnnotations, Math.max(0, Math.min(1, progress)));
   }
 
