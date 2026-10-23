@@ -1,4 +1,4 @@
-import { finalNotes, noteFrequency } from './melody.js?v=piano-scroll-6';
+import { finalNotes, noteFrequency } from './melody.js?v=ui-kit-1';
 
 // The display uses measured FFT data. Peak proximity/overlap is not a model of
 // roughness, and no noise or artificial broadening is added to either version.
@@ -16,6 +16,7 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
   let focus = 0;
   let annotations = false;
   let version = null;
+  let lastLive = 0;
   const colors = ['#ee492c', '#a8af99'];
 
   function connect(context, normalOutput) {
@@ -143,6 +144,21 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
       annotations = showAnnotations;
       focus = next;
       label(version);
+      draw();
+    },
+    // Free play: the whole measured output, named by the keys being held.
+    live(description) {
+      if (!master) return;
+      caption.textContent = description || 'Частоты звучащих нот';
+      canvas.dataset.version = 'free';
+      canvas.setAttribute('aria-label', description ? `Измеренный спектр сыгранных нот: ${description.toLowerCase()}.` : 'Измеренный спектр сыгранных нот.');
+      if (reducedMotion.matches) return;
+      const now = performance.now();
+      if (now - lastLive < 1000 / 30) return;
+      lastLive = now;
+      master.getFloatFrequencyData(buffers[0]);
+      shown = [buffers[0]];
+      version = null;
       draw();
     },
     begin() { shown = null; lastFrame = -Infinity; label(null); draw(); },

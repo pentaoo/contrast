@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>КОНТРАСТ — UI-kit</title>
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/fonts.css">
+  <link rel="stylesheet" href="./styles.css?v=ui-kit-1">
+  <style>
+    /* Только раскладка витрины. Сами элементы — из styles.css. */
+    .kit-section { padding-block: var(--space-5); border-top: 1px solid var(--line); }
+    .kit-section.on-ink { background: var(--ink); color: var(--paper); border-top: 0; }
+    .kit-section>.label:first-child { margin-bottom: var(--space-3); }
+    .kit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--space-3); }
+    .kit-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+    .kit-row + .kit-row { margin-top: var(--space-3); }
+    .kit-stack>*+* { margin-top: var(--space-4); }
+    .swatch { display: grid; gap: 4px; }
+    .swatch i { display: block; height: 88px; border: 1px solid var(--line); }
+    .swatch b { font-size: var(--text-ui); font-weight: 600; }
+    .type-row { display: grid; grid-template-columns: 160px 1fr; gap: var(--space-3); align-items: baseline; padding-block: var(--space-3); border-bottom: 1px solid var(--line); }
+    .space-row { display: grid; grid-template-columns: 110px 1fr; gap: var(--space-2); align-items: center; }
+    .space-row i { display: block; height: 12px; background: var(--accent); }
+    .space-row + .space-row { margin-top: var(--space-1); }
+    .kit-piano { max-width: 520px; }
+    .kit-piano .piano { cursor: default; }
+    @media (max-width: 600px) { .type-row { grid-template-columns: 1fr; gap: var(--space-1); } }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="container section-pad">
+      <p class="label chapter"><b>UI-kit</b> Контраст</p>
+      <h2>Один акцент<br><span class="serif">на фоне тишины.</span></h2>
+      <p class="body-copy" style="margin-top: var(--space-3)">Набор элементов лонгрида. Все значения живут в токенах <code>styles.css</code>: цвет, пять ролей текста, шкала отступов и общая сетка. Новое на странице собирается из этих частей; если чего-то не хватает, сначала добавляется токен или компонент сюда.</p>
+    </header>
+
+    <section class="kit-section container" aria-labelledby="kit-color">
+      <p class="label chapter"><b>01</b> Цвет</p>
+      <h3 class="h2" id="kit-color" style="margin-bottom: var(--space-4)">Бумага, тушь<br><span class="serif">и один акцент.</span></h3>
+      <div class="kit-grid">
+        <div class="swatch"><i style="background: var(--paper)"></i><b>--paper</b><span class="label">#f1f0eb · фон</span></div>
+        <div class="swatch"><i style="background: var(--paper-deep)"></i><b>--paper-deep</b><span class="label">#e5e6db · вторая плоскость</span></div>
+        <div class="swatch"><i style="background: var(--ink)"></i><b>--ink</b><span class="label">#191a17 · текст, тёмная сцена</span></div>
+        <div class="swatch"><i style="background: var(--ink-deep)"></i><b>--ink-deep</b><span class="label">#0e0f0c · корпус пианино</span></div>
+        <div class="swatch"><i style="background: var(--muted)"></i><b>--muted</b><span class="label">#5d6055 · вторичный текст, 5,6:1</span></div>
+        <div class="swatch"><i style="background: var(--muted-on-ink)"></i><b>--muted-on-ink</b><span class="label">#c8cdbf · вторичный на тёмном, 10,8:1</span></div>
+        <div class="swatch"><i style="background: var(--line)"></i><b>--line</b><span class="label">#d1d1c8 · линии</span></div>
+        <div class="swatch"><i style="background: var(--accent)"></i><b>--accent</b><span class="label">#ee492c · единственный акцент, первая нота</span></div>
+        <div class="swatch"><i style="background: var(--sage)"></i><b>--sage</b><span class="label">#a8af99 · вторая нота</span></div>
+        <div class="swatch"><i style="background: var(--moss)"></i><b>--moss</b><span class="label">#293022 · колючая форма</span></div>
+      </div>
+      <p class="body-copy" style="margin-top: var(--space-4)">Акцент на экране один. Текст на акцентной кнопке — тушью (4,7:1), а не белым (3,7:1).</p>
+    </section>
+
+    <section class="kit-section container" aria-labelledby="kit-type">
+      <p class="label chapter"><b>02</b> Текст</p>
+      <h3 class="h2" id="kit-type" style="margin-bottom: var(--space-4)">Пять ролей<br><span class="serif">вместо двадцати размеров.</span></h3>
+      <div class="type-row"><span class="label">Обложка<br>Oswald 600</span><span style="font: 600 clamp(64px, 12vw, 160px)/1 var(--display); letter-spacing: -.052em">КОНТРАСТ<span class="title-dot">.</span></span></div>
+      <div class="type-row"><span class="label">h2 · --text-h1<br>38–84 px</span><h2>Контраст помогает <span class="serif">заметить.</span></h2></div>
+      <div class="type-row"><span class="label">.h2 · --text-h2<br>32–60 px</span><p class="h2">Разницу мы замечаем <span class="serif">первой.</span></p></div>
+      <div class="type-row"><span class="label">.voice<br>21–32 px, Georgia</span><p class="voice">Разницу можно не только увидеть.</p></div>
+      <div class="type-row"><span class="label">.body-copy<br>16–18 px</span><p class="body-copy">Нас трогает зазор между первым впечатлением и тем, что открывается потом.</p></div>
+      <div class="type-row"><span class="label">.label<br>14 px</span><p class="label">Частоты звучащих нот · подписи, кнопки, служебный текст</p></div>
+      <p class="body-copy" style="margin-top: var(--space-4)">Курсив Georgia — только для слова-акцента внутри заголовка (<code>.serif</code>) и для авторского голоса (<code>.voice</code>): мостов между главами, финальных фраз. Мельче 14 px текста нет, кроме демонстрационного плаката.</p>
+    </section>
+
+    <section class="kit-section container" aria-labelledby="kit-space">
+      <p class="label chapter"><b>03</b> Сетка</p>
+      <h3 class="h2" id="kit-space" style="margin-bottom: var(--space-4)">Одни поля<br><span class="serif">для всех сцен.</span></h3>
+      <div class="kit-stack">
+        <div>
+          <div class="space-row"><span class="label">--space-1 · 8</span><i style="width: 8px"></i></div>
+          <div class="space-row"><span class="label">--space-2 · 16</span><i style="width: 16px"></i></div>
+          <div class="space-row"><span class="label">--space-3 · 24</span><i style="width: 24px"></i></div>
+          <div class="space-row"><span class="label">--space-4 · 40</span><i style="width: 40px"></i></div>
+          <div class="space-row"><span class="label">--space-5 · 64</span><i style="width: 64px"></i></div>
+          <div class="space-row"><span class="label">--space-6 · 104</span><i style="width: 104px"></i></div>
+          <div class="space-row"><span class="label">--space-7 · 160</span><i style="width: 160px"></i></div>
+        </div>
+        <p class="body-copy"><code>.container</code> даёт каждой сцене одинаковые поля: <code>--gutter</code> (20–96 px) и ширину <code>--measure</code> 1240 px. Текст абзацев — не шире <code>--measure-text</code> 640 px. Всё выровнено по левому краю, кроме сцены с точками: она собрана вокруг центра.</p>
+      </div>
+    </section>
+
+    <section class="kit-section container" aria-labelledby="kit-buttons">
+      <p class="label chapter"><b>04</b> Кнопки</p>
+      <h3 class="h2" id="kit-buttons" style="margin-bottom: var(--space-4)">Четыре кнопки,<br><span class="serif">одна главная.</span></h3>
+      <div class="kit-row">
+        <button class="button button--primary"><span class="button-icon" aria-hidden="true">▶</span>Послушать</button>
+        <button class="button button--outline">Добавить иерархию <span aria-hidden="true">↗</span></button>
+        <button class="link-button">Вернуться к началу <span aria-hidden="true">↗</span></button>
+        <a href="#kit-buttons" class="circle-link" aria-label="Вниз"><span aria-hidden="true">↓</span></a>
+      </div>
+      <p class="body-copy" style="margin-top: var(--space-3)"><code>.button--primary</code> — одно главное действие сцены. <code>.button--outline</code> — второстепенное. <code>.link-button</code> — тихий выход или пропуск. <code>.circle-link</code> — переход вниз. Высота от 44 px.</p>
+    </section>
+
+    <section class="kit-section on-ink container" aria-labelledby="kit-ink">
+      <p class="label chapter"><b>05</b> На тёмном</p>
+      <h3 class="h2" id="kit-ink" style="margin-bottom: var(--space-4)">Тёмная сцена —<br><span class="serif">тот же набор.</span></h3>
+      <div class="kit-row">
+        <button class="button button--primary"><span class="button-icon" aria-hidden="true">▶</span>Послушать</button>
+        <button class="button button--outline">Второстепенное</button>
+        <button class="link-button skip-audio">Без звука <span aria-hidden="true">↘</span></button>
+      </div>
+      <div class="kit-piano" style="margin-top: var(--space-4)">
+        <div class="piano-stage"><div class="piano" id="kit-piano" aria-hidden="true"></div></div>
+        <p class="label piano-hint" style="margin-top: var(--space-1)">Обычная клавиша · нажатая (акцент) · вторая нота (шалфей) · подпись «до»</p>
+      </div>
+      <p class="voice chapter-bridge">Контраст меняет и наши ожидания.</p>
+      <p class="body-copy" style="color: var(--muted-on-ink); margin-top: var(--space-3)">Класс <code>.on-ink</code> на секции переключает подписи, мосты и контурные кнопки на светлые цвета.</p>
+    </section>
+
+    <section class="kit-section container" aria-labelledby="kit-misc">
+      <p class="label chapter"><b>06</b> Прочее</p>
+      <h3 class="h2" id="kit-misc" style="margin-bottom: var(--space-4)">Метка главы,<br><span class="serif">источники, переход.</span></h3>
+      <p class="label chapter"><b>03</b> Звук</p>
+      <details class="sources"><summary><span>Исследования и источники</span><span class="sources-plus" aria-hidden="true">+</span></summary><div class="source-list"><p class="body-copy">Пояснение к списку.</p><a href="#kit-misc"><span>01</span><div>Автор, год<small>Название работы. Журнал.</small></div><span>↗</span></a></div></details>
+      <a href="#kit-misc" class="voice ending-link">А если убрать все различия? <span aria-hidden="true">↓</span></a>
+    </section>
+  </main>
+  <script type="module">
+    // Static keyboard in its three states; the real one lives in piano.js.
+    const piano = document.querySelector('#kit-piano');
+    const isBlack = (n) => [1, 3, 6, 8, 10].includes(n % 12);
+    const notes = Array.from({ length: 25 }, (_, i) => 48 + i);
+    const whites = notes.filter((n) => !isBlack(n)).length;
+    let index = 0;
+    for (const note of notes) {
+      const key = document.createElement('span');
+      const black = isBlack(note);
+      key.className = `piano-key ${black ? 'is-black' : 'is-white'}`;
+      if (note % 12 === 0) key.dataset.label = 'до';
+      if (note === 60 || note === 64) key.classList.add('is-active');
+      if (note === 64) key.classList.add('is-second');
+      key.style.left = `${(index - (black ? .3 : 0)) / whites * 100}%`;
+      key.style.width = `${(black ? .6 : 1) / whites * 100}%`;
+      piano.append(key);
+      if (!black) index++;
+    }
+  </script>
+</body>
+</html>
