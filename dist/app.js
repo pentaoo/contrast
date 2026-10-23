@@ -1,4 +1,4 @@
-import { createListeningState, finishSample, respondToSample, skipListening, impressions } from './listening.js';
+import { mountPianoExperience } from './piano.js';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -30,207 +30,7 @@ $('#hierarchy-toggle').addEventListener('click', () => {
   $('#hierarchy-description').textContent = ordered ? 'Контраст подсказывает, что читать первым. Через масштаб, вес и пространство.' : 'Теперь всё одного веса. Глазу снова приходится искать начало.';
 });
 
-// Listening is sequential, without grading the visitor's subjective impression.
-let listening = createListeningState();
-let selectedInterval = 'third';
-let playing = false;
-let audioBusy = false;
-let audioContext;
-let voices = [];
-let stopTimer;
-let audioGeneration = 0;
-let spectrumFrame = 0;
-let spectrumPhase = 0;
-let animationStart = 0;
-const intervals = { third: 329.6276, second: 277.1826 };
-const canvas = $('#spectrum-canvas');
-const ctx = canvas.getContext('2d');
-let canvasWidth = 0;
-let canvasHeight = 0;
-
-function updateListeningUI() {
-  const done = listening.revealed;
-  const second = listening.step === 1;
-  const compared = listening.responses.every(Boolean);
-  $('#listening-prompt').textContent = done ? compared ? 'Две пары. Два ощущения.' : 'Сравните две пары.' : second ? 'Теперь послушайте вторую.' : 'Послушайте первую пару.';
-  $('#listening-instruction').textContent = done ? compared ? 'Важна разница, которую услышали вы.' : 'Или прочитайте, чем отличаются эти созвучия.' : second ? 'Сравните её с первой. Что изменилось?' : 'Две ноты одновременно. Как они звучат для вас?';
-  $('#play-sound').hidden = done;
-  $('#play-sound').disabled = audioBusy;
-  $('#play-sound').setAttribute('aria-pressed', String(playing && !done));
-  $('.play-icon').textContent = playing ? '■' : '▶';
-  $('.play-label').textContent = playing ? 'Остановить' : listening.heard[listening.step] ? 'Послушать ещё раз' : second ? 'Послушать вторую пару' : 'Послушать первую пару';
-  $('#response-panel').hidden = done || !listening.heard[listening.step] || playing || audioBusy;
-  $('#skip-audio').hidden = done;
-  $('#sound-explanation').hidden = !done;
-  if (done) {
-    $('#listening-result').textContent = listening.responses.every(Boolean)
-      ? `Вы отметили: первая пара — ${impressions[listening.responses[0]]}, вторая — ${impressions[listening.responses[1]]}.`
-      : 'Можно сравнить пары ниже — в любом порядке.';
-  }
-  $$('[data-replay]').forEach((button) => button.setAttribute('aria-pressed', String(playing && selectedInterval === button.dataset.replay)));
-  $('#sound-lab').dataset.step = done ? 'complete' : second ? 'second' : 'first';
-}
-
-// Two enlarged fundamental peaks; widths are illustrative, not measured spectra.
-function drawSpectrum(phase = 0) {
-  if (!ctx || !canvasWidth || !canvasHeight) return;
-  const width = canvasWidth;
-  const height = canvasHeight;
-  const baseline = height - 4;
-  ctx.clearRect(0, 0, width, height);
-  const bands = Math.max(65, Math.round(width / 6));
-  const bandWidth = width / bands;
-  const levels = [261.6256, intervals[selectedInterval]].map((center, noteIndex) => {
-    return Array.from({ length: bands }, (_, index) => {
-      const frequency = 200 + (index + .5) / bands * 200;
-      const distance = (frequency - center) / 11;
-      const motion = playing ? .97 + Math.sin(phase * 2 + index * .15 + noteIndex) * .03 : 1;
-      return Math.exp(-.5 * distance * distance) * motion * height * .87;
-    });
-  });
-  levels.forEach((spectrum, noteIndex) => {
-    ctx.fillStyle = noteIndex ? '#d1d6be' : '#ee492c';
-    ctx.globalAlpha = noteIndex ? .7 : .9;
-    spectrum.forEach((barHeight, index) => {
-      if (barHeight < .6) return;
-      ctx.fillRect(index * bandWidth + 1, baseline - barHeight, Math.max(1, bandWidth - 2), barHeight);
-    });
-  });
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = '#f4e0b1';
-  levels[0].forEach((first, index) => {
-    const overlap = Math.min(first, levels[1][index]);
-    if (overlap > 2) ctx.fillRect(index * bandWidth + 1, baseline - overlap, Math.max(1, bandWidth - 2), overlap);
-  });
-}
-
-function resizeCanvas() {
-  if (!ctx) return;
-  const rect = canvas.getBoundingClientRect();
-  const dpr = Math.min(devicePixelRatio || 1, 2);
-  canvasWidth = rect.width;
-  canvasHeight = rect.height;
-  canvas.width = Math.round(rect.width * dpr);
-  canvas.height = Math.round(rect.height * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  drawSpectrum(spectrumPhase);
-}
-
-function animateSpectrum(timestamp) {
-  if (!playing || reducedMotion.matches || document.hidden) return;
-  if (!animationStart) animationStart = timestamp;
-  spectrumPhase = (timestamp - animationStart) * .0012;
-  drawSpectrum(spectrumPhase);
-  spectrumFrame = requestAnimationFrame(animateSpectrum);
-}
-
-function stopVoices() {
-  if (!audioContext) return;
-  const now = audioContext.currentTime;
-  voices.forEach(({ oscillator, gain }) => {
-    gain.gain.cancelScheduledValues(now);
-    gain.gain.setTargetAtTime(0, now, .025);
-    oscillator.stop(now + .15);
-    oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
-  });
-  voices = [];
-}
-
-function startVoices() {
-  stopVoices();
-  const now = audioContext.currentTime;
-  const real = new Float32Array(9);
-  const imaginary = new Float32Array([0, 1, .3, .17, .1, .06, .04, .025, .015]);
-  const wave = audioContext.createPeriodicWave(real, imaginary);
-  [261.6256, intervals[selectedInterval]].forEach((frequency) => {
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-    oscillator.setPeriodicWave(wave);
-    oscillator.frequency.value = frequency;
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(.065, now + .12);
-    oscillator.connect(gain);
-    gain.connect(audioContext.destination);
-    oscillator.start();
-    voices.push({ oscillator, gain });
-  });
-}
-
-function stopAudio(completed = false) {
-  audioGeneration++;
-  clearTimeout(stopTimer);
-  stopVoices();
-  cancelAnimationFrame(spectrumFrame);
-  const wasPlaying = playing;
-  playing = false;
-  audioBusy = false;
-  if (completed && wasPlaying && !listening.revealed) listening = finishSample(listening);
-  updateListeningUI();
-  drawSpectrum();
-  if (completed && !listening.revealed) $('#sound-status').textContent = 'Какое ощущение осталось? Можно выбрать ответ.';
-}
-
-async function playSample(interval) {
-  if (audioBusy) return;
-  if (playing && selectedInterval === interval) { stopAudio(); return; }
-  stopAudio();
-  const generation = ++audioGeneration;
-  selectedInterval = interval;
-  audioBusy = true;
-  $('#audio-error').textContent = '';
-  updateListeningUI();
-  drawSpectrum();
-  try {
-    const Audio = window.AudioContext || window.webkitAudioContext;
-    if (!Audio) throw new Error('Web Audio unavailable');
-    audioContext ||= new Audio();
-    await audioContext.resume();
-    // A skip, hidden tab or reset may have cancelled the pending resume.
-    if (generation !== audioGeneration) return;
-    playing = true;
-    audioBusy = false;
-    animationStart = 0;
-    startVoices();
-    updateListeningUI();
-    $('#sound-status').textContent = `Звучит ${interval === 'third' ? 'первая' : 'вторая'} пара. Четыре секунды.`;
-    if (!reducedMotion.matches) spectrumFrame = requestAnimationFrame(animateSpectrum);
-    stopTimer = setTimeout(() => stopAudio(true), 4000);
-  } catch {
-    if (generation !== audioGeneration) return;
-    stopAudio();
-    $('#audio-error').textContent = 'Не удалось включить звук. Попробуйте ещё раз или перейдите к объяснению.';
-  }
-}
-
-function showExplanation() {
-  updateListeningUI();
-  $('#explanation-title').focus({ preventScroll: true });
-  $('#sound-explanation').scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'start' });
-  queueScrollUpdate();
-}
-
-$('#play-sound').addEventListener('click', () => playSample(listening.step === 1 ? 'second' : 'third'));
-$$('[data-impression]').forEach((button) => button.addEventListener('click', () => {
-  const next = respondToSample(listening, button.dataset.impression);
-  if (next === listening) return;
-  stopAudio();
-  listening = next;
-  if (listening.revealed) {
-    showExplanation();
-  } else {
-    // Keep the second example unknown until its play action.
-    updateListeningUI();
-    $('#play-sound').focus({ preventScroll: true });
-    $('#sound-status').textContent = 'Теперь послушайте вторую пару и сравните ощущения.';
-  }
-}));
-$('#skip-audio').addEventListener('click', () => {
-  stopAudio();
-  $('#audio-error').textContent = '';
-  listening = skipListening(listening);
-  showExplanation();
-});
-$$('[data-replay]').forEach((button) => button.addEventListener('click', () => playSample(button.dataset.replay)));
+const soundExperience = mountPianoExperience({ reducedMotion });
 
 const attention = $('#principle');
 const feeling = $('#feeling');
@@ -250,6 +50,7 @@ function cancelRestart() {
 }
 function updateScroll() {
   scrollTicking = false;
+  soundExperience.updateScroll();
   const reduced = reducedMotion.matches;
   const staticScenes = reduced || matchMedia('(max-height: 600px)').matches;
   const attentionProgress = localProgress(attention);
@@ -287,18 +88,14 @@ function resetExperiments() {
   $('#hierarchy-toggle').setAttribute('aria-pressed', 'false');
   $('#hierarchy-toggle').innerHTML = 'Добавить иерархию <span aria-hidden="true">↗</span>';
   $('#hierarchy-description').textContent = '';
-  listening = createListeningState();
-  selectedInterval = 'third';
-  $('#audio-error').textContent = '';
+  soundExperience.reset();
   $('#sources').open = false;
-  updateListeningUI();
-  drawSpectrum();
 }
 function restartEssay() {
   if (restarting) return;
   restarting = true;
   cancelRestart();
-  stopAudio();
+  soundExperience.stop();
   veil.classList.add('active');
   root.classList.remove('intro-ready');
   setTimeout(() => {
@@ -320,22 +117,18 @@ function restartEssay() {
 }
 $('#restart').addEventListener('click', restartEssay);
 addEventListener('scroll', queueScrollUpdate, { passive: true });
-addEventListener('resize', () => { resizeCanvas(); queueScrollUpdate(); }, { passive: true });
+addEventListener('resize', queueScrollUpdate, { passive: true });
 addEventListener('load', queueScrollUpdate);
-addEventListener('pagehide', () => stopAudio());
+addEventListener('pagehide', () => soundExperience.stop());
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { stopAudio(); cancelRestart(); }
+  if (document.hidden) { soundExperience.stop(); cancelRestart(); }
   else queueScrollUpdate();
 });
 reducedMotion.addEventListener('change', () => {
-  cancelAnimationFrame(spectrumFrame);
-  if (playing && !reducedMotion.matches) spectrumFrame = requestAnimationFrame(animateSpectrum);
+  soundExperience.motionChanged();
   queueScrollUpdate();
 });
 if ('ResizeObserver' in window) {
-  new ResizeObserver(resizeCanvas).observe(canvas);
   new ResizeObserver(queueScrollUpdate).observe($('main'));
 }
-updateListeningUI();
-resizeCanvas();
 updateScroll();

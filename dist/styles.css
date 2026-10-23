@@ -19,7 +19,7 @@ p, h1, h2, h3 { margin: 0; }
 [hidden] { display: none !important; }
 ::selection { background: var(--accent); color: white; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
-#hero-title:focus, #explanation-title:focus { outline: none; }
+#hero-title:focus, #sound-explanation:focus { outline: none; }
 h2 { font-size: clamp(38px, 5.3vw, 82px); line-height: 1.12; letter-spacing: -.06em; font-weight: 600; text-wrap: balance; }
 h3 { font-size: clamp(22px, 2.2vw, 30px); line-height: 1.3; letter-spacing: -.04em; font-weight: 600; }
 .serif { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 400; letter-spacing: -.05em; }
@@ -78,40 +78,56 @@ h3 { font-size: clamp(22px, 2.2vw, 30px); line-height: 1.3; letter-spacing: -.04
 .poster.is-ordered .poster-description { font-size: 13px; }
 .poster.is-ordered .poster-cta { font-size: 12px; background: var(--ink); padding: 11px 16px; color: white; }
 .poster.is-ordered .poster-mark { opacity: 1; }
-.hierarchy-lab>.outline-button { margin-top: 25px; }
+#hierarchy-toggle { margin-top: 25px; border-color: var(--accent); background: var(--accent); color: var(--ink); }
+#hierarchy-toggle:hover { border-color: #ff6040; background: #ff6040; }
 .hierarchy-insight { min-height: 50px; max-width: 580px; margin: 20px auto 0; font-size: 14px; line-height: 1.8; color: var(--muted); }
 .chapter-bridge { margin-top: 65px; font-family: Georgia, serif; font-size: clamp(21px, 2.5vw, 32px); font-style: italic; letter-spacing: -.025em; text-align: center; }
-.sound-section { background: var(--ink); color: var(--paper); }
-.sound-section .body-copy { color: #bec4b0; }
-.sound-section .scene-heading { margin-bottom: 32px; }
-.sound-lab { max-width: 1000px; margin: auto; background: #20211d; padding: 28px 32px 18px; }
-.listening-intro { text-align: center; }
-.listening-intro p { margin-top: 12px; font-size: 14px; color: #b7bca9; line-height: 1.7; min-height: 24px; }
-.spectrum-stage { height: 180px; margin: 22px 0 20px; }
-canvas { display: block; width: 100%; height: 100%; }
-.listening-actions { display: flex; flex-direction: column; align-items: center; gap: 17px; }
-.play-button { min-height: 50px; padding: 15px 25px; background: var(--accent); color: white; display: inline-flex; align-items: center; justify-content: center; gap: 14px; font-size: 14px; font-weight: 600; min-width: 255px; transition: background .2s; }
+.sound-section { background: var(--ink); color: var(--paper); padding-bottom: 48px; }
+.sound-lab { --sound-deck-height: clamp(280px, 43svh, 430px); position: relative; display: grid; overflow-anchor: none; }
+.sound-story, .sound-instrument { grid-area: 1 / 1; }
+.sound-step { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; padding: clamp(20px, 4svh, 48px) 8.5% calc(var(--sound-deck-height) + clamp(20px, 4svh, 48px)); }
+.sound-copy { width: 100%; max-width: 1050px; margin: 0 auto; font-size: clamp(30px, min(4.3vw, 6svh), 64px); font-weight: 600; line-height: 1.24; letter-spacing: -.04em; text-wrap: pretty; }
+.sound-copy h2 { font: inherit; letter-spacing: inherit; }
+.sound-copy:focus { outline: none; }
+#listening-prompt, .sound-instrument p, .sound-section .body-copy { font-size: 15px; font-weight: 400; line-height: 1.7; letter-spacing: 0; color: #c8cdbf; }
+#listening-prompt { margin-top: 24px; }
+.sound-instrument { position: sticky; top: calc(100svh - var(--sound-deck-height)); height: var(--sound-deck-height); align-self: start; z-index: 2; background: var(--ink); padding: 16px 8.5%; display: flex; flex-direction: column; gap: 14px; }
+.spectrum-stage { flex: 1; min-height: 60px; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 6px; }
+#spectrum-canvas { display: block; width: 100%; height: 100%; min-height: 0; }
+#spectrum-caption { text-align: center; }
+.piano-stage { flex: none; padding: 8px 8px 10px; background: #0e0f0c; }
+.piano { position: relative; height: clamp(56px, 11svh, 120px); isolation: isolate; }
+.piano-key { position: absolute; top: 0; border-radius: 0 0 3px 3px; transition: background 80ms, transform 80ms; }
+.piano-key.is-white { height: 100%; background: var(--paper); border-right: 1px solid #62655a; border-bottom: 6px solid #b9bbaf; }
+.piano-key.is-black { z-index: 1; height: 62%; background: #242620; border: 1px solid #0e0f0c; border-bottom: 6px solid #090a07; box-shadow: 0 3px 3px #0005; }
+.piano-key.is-active { background: var(--accent); border-bottom-color: #a92e1a; transform: translateY(3px); }
+.piano-key.is-active.is-second { background: #a8af99; border-bottom-color: #68705c; }
+.listening-actions { flex: none; height: 52px; display: flex; align-items: center; justify-content: center; gap: 24px; }
+.sound-lab[data-step="reading"][data-playing="none"] .listening-actions { display: none; }
+.play-button { min-height: 48px; padding: 12px 24px; background: var(--accent); color: white; display: inline-flex; align-items: center; justify-content: center; gap: 14px; font-size: 15px; transition: background .2s; }
 .play-button:hover { background: #ff6040; }
 .play-button:disabled { opacity: .7; cursor: wait; }
 .play-icon { font-size: 12px; width: 12px; }
-.response-panel { text-align: center; }
-.response-panel>p { font-size: 14px; margin-bottom: 12px; }
-.response-options { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-.response-options button { background: transparent; color: #d5d9ca; border: 1px solid #626a52; min-height: 44px; padding: 10px 16px; font-size: 13px; transition: background .2s, color .2s; }
-.response-options button:hover { background: var(--paper); color: var(--ink); }
-.skip-audio { color: #a8af99; font-size: 12px; }
-.audio-error { text-align: center; font-size: 13px; line-height: 1.7; color: #f4bd9e; }
-.audio-error:not(:empty) { margin-top: 20px; }
-.sound-explanation { max-width: 760px; margin: 50px auto 0; padding-top: 35px; border-top: 1px solid #4a503f; scroll-margin-top: 28px; }
-.sound-explanation h3 { font-size: clamp(30px, 3.5vw, 46px); }
-.listening-result { color: #bcc3ac; font-size: 13px; line-height: 1.8; margin-top: 18px; }
-.explanation-copy { font-size: 15px; line-height: 1.9; color: #bec4b0; margin-top: 24px; }
-.explanation-copy p+p { margin-top: 18px; }
-.explanation-copy strong { font-weight: 600; color: var(--paper); }
-.replay-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 12px; margin-top: 28px; color: #b2bba0; }
-.replay-controls button { min-height: 44px; padding: 10px 12px; background: transparent; border: 1px solid #5b654a; color: var(--paper); }
-.replay-controls button[aria-pressed=true] { background: var(--accent); border-color: var(--accent); }
-.sound-section .chapter-bridge { color: #d1d6c3; }
+.skip-audio { color: #c8cdbf; font-size: 15px; white-space: nowrap; }
+.audio-error:empty { display: none; }
+.audio-error:not(:empty) { position: absolute; bottom: 82px; left: 8.5%; right: 8.5%; padding: 12px; background: var(--ink); text-align: center; }
+.sound-section .chapter-bridge { margin: 0; padding: 40px 8.5% 0; color: #c8cdbf; font: 400 15px/1.7 var(--sans); letter-spacing: 0; }
+@media (min-width: 1600px) {
+  .sound-step, .sound-instrument { padding-left: max(8.5%, calc((100vw - 1100px)/2)); padding-right: max(8.5%, calc((100vw - 1100px)/2)); }
+}
+@media (max-height: 500px) {
+  .sound-lab { --sound-deck-height: 210px; }
+  .sound-step { padding-top: 12px; padding-bottom: calc(var(--sound-deck-height) + 12px); }
+  .sound-copy { font-size: clamp(22px, 4.6svh, 30px); }
+  .sound-instrument { padding-top: 8px; padding-bottom: 8px; gap: 8px; }
+  .piano { height: 48px; }
+  .piano-stage { padding: 4px 4px 6px; }
+  .listening-actions { height: 44px; }
+  .play-button { min-height: 44px; padding-top: 10px; padding-bottom: 10px; }
+  .spectrum-stage { gap: 2px; }
+}
+.confetti-layer { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 70; }
+.confetti-layer i { position: absolute; display: block; width: 5px; height: 9px; }
 .feeling-section { background: #e5e6db; }
 .js-enabled .feeling-section { height: 200vh; height: 200svh; }
 .feeling-stage { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 8%; padding: 60px 8.5%; }
@@ -200,21 +216,11 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .outline-button { font-size: 12px; }
   .hierarchy-insight { font-size: 12px; min-height: 65px; }
   .chapter-bridge { margin-top: 42px; font-size: 23px; }
-  .sound-lab { padding: 25px 16px 15px; margin: 0 -3%; }
-  .listening-intro h3 { font-size: 23px; }
-  .listening-intro p { font-size: 12px; max-width: 255px; margin: 12px auto 0; }
-  .spectrum-stage { height: 150px; margin: 20px 0; }
-  .play-button { min-width: 0; width: 100%; font-size: 12px; padding: 15px; }
-  .response-panel>p { font-size: 12px; }
-  .response-options { gap: 7px; }
-  .response-options button { font-size: 11px; padding: 10px 12px; }
-  .skip-audio { font-size: 11px; }
-  .sound-explanation { margin-top: 35px; padding-top: 28px; }
-  .sound-explanation h3 { font-size: 32px; }
-  .listening-result { font-size: 11px; }
-  .explanation-copy { font-size: 13px; }
-  .replay-controls { font-size: 11px; gap: 8px; }
-  .replay-controls>span { width: 100%; margin-bottom: 4px; }
+  .sound-step { padding-left: 7%; padding-right: 7%; }
+  .sound-instrument { padding-left: 7%; padding-right: 7%; }
+  .piano-stage { padding: 6px 6px 9px; }
+  .listening-actions { gap: 14px; }
+  .play-button { min-width: 0; padding-left: 15px; padding-right: 15px; }
   .feeling-stage { display: flex; flex-direction: column; justify-content: center; gap: 20px; padding: 40px 8%; }
   .feeling-art { width: min(56vw, 240px); flex-shrink: 0; }
   .feeling-copy { width: 100%; max-width: 380px; }

@@ -10,8 +10,8 @@
   <link rel="preload" href="./assets/oswald-600.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/manrope-400.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="./assets/fonts.css">
-  <link rel="stylesheet" href="./styles.css?v=f74662b">
-  <script type="module" src="./app.js?v=f74662b"></script>
+  <link rel="stylesheet" href="./styles.css?v=piano-focus-4">
+  <script type="module" src="./app.js?v=piano-focus-4"></script>
 </head>
 <body>
   <a class="skip-link" href="#principle">К содержанию</a>
@@ -43,25 +43,30 @@
       <p class="chapter-bridge">Разницу можно не только увидеть.</p>
     </section>
 
-    <section class="sound-section scene section-pad" id="sound" aria-labelledby="sound-title">
-      <div class="scene-heading"><h2 id="sound-title">А теперь —<br><span class="serif">на слух.</span></h2></div>
+    <section class="sound-section" id="sound" aria-labelledby="sound-title">
       <div class="sound-lab" id="sound-lab">
-        <div class="listening-intro"><h3 id="listening-prompt">Послушайте первую пару.</h3><p id="listening-instruction">Две ноты одновременно. Как они звучат для вас?</p></div>
-        <div class="spectrum-stage"><canvas id="spectrum-canvas" aria-label="Схематичный эквалайзер с двумя пиками основных частот. Ширина пиков условная."></canvas></div>
-        <div class="listening-actions">
-          <button class="play-button" id="play-sound" aria-pressed="false"><span class="play-icon" aria-hidden="true">▶</span><span class="play-label">Послушать первую пару</span></button>
-          <div id="response-panel" class="response-panel" hidden><p>Какое ощущение осталось?</p><div class="response-options" role="group" aria-label="Ваше ощущение"><button data-impression="calm">Спокойно</button><button data-impression="tense">Напряжённо</button><button data-impression="other">Иначе / не знаю</button></div></div>
-          <button class="text-button skip-audio" id="skip-audio">Перейти к объяснению <span aria-hidden="true">↘</span></button>
+        <div class="sound-story">
+          <div class="sound-step" id="sound-opening">
+            <div class="sound-copy"><h2 id="sound-title">А теперь —<br>на слух.</h2><p id="listening-prompt">Небольшая мелодия. Просто послушайте.</p></div>
+          </div>
+          <div id="sound-explanation" hidden>
+            <div class="sound-step"><p class="sound-copy" id="listening-lead" tabindex="-1">Кажется, музыкант сбился. В финале остались две соседние ноты — до и ре-бемоль.</p></div>
+            <div class="sound-step"><p class="sound-copy" id="sound-tones-copy">У каждой ноты есть основной тон и обертоны. Для сравнения рассмотрим только основные тона.</p></div>
+            <div class="sound-step"><p class="sound-copy">Близкие частотные составляющие могут создавать биения. Так появляется шероховатость звучания.</p></div>
+            <div class="sound-step" id="sound-final-step"><p class="sound-copy">У двух до в октаву часть гармоник совпадает точно. Теперь завершим мелодию этой парой.</p></div>
+          </div>
         </div>
-        <p id="audio-error" class="audio-error" role="status"></p>
+        <div class="sound-instrument">
+          <div class="spectrum-stage"><canvas id="spectrum-canvas" role="img" aria-label="Измеренный спектр звучащей мелодии, от 200 до 4000 герц."></canvas><p id="spectrum-caption">Частоты звучащих нот</p></div>
+          <div class="piano-stage" id="piano-stage"><div class="piano" id="piano" role="img" aria-label="Клавиатура пианино. Во время мелодии подсвечиваются звучащие клавиши."></div></div>
+          <div class="listening-actions">
+            <button class="play-button" id="play-sound" aria-pressed="false"><span class="play-icon" aria-hidden="true">▶</span><span class="play-label">Послушать</span></button>
+            <button class="text-button skip-audio" id="skip-audio">Без звука <span aria-hidden="true">↘</span></button>
+          </div>
+          <p id="audio-error" class="audio-error" role="status"></p>
+        </div>
       </div>
-      <div id="sound-explanation" class="sound-explanation" hidden>
-        <h3 id="explanation-title" tabindex="-1">Что изменилось?</h3>
-        <p id="listening-result" class="listening-result"></p>
-        <div class="explanation-copy"><p>В первой паре — <strong>до и ми</strong>, большая терция. Такое сочетание многим кажется созвучным и устойчивым.</p><p>Во второй — <strong>до и ре-бемоль</strong>, малая секунда. В ней основные тоны ближе друг к другу. Близкие частотные компоненты могут создавать биения и шероховатость — ощущение напряжения.</p><p>Дело не в том, что частоты просто «пересеклись». Важны взаимодействие обертонов, тембр и музыкальный опыт. Ваше впечатление может отличаться. <a href="#sources" aria-label="Источники о восприятии созвучий">[1, 2]</a></p></div>
-        <div class="replay-controls" role="group" aria-label="Повторить сравнение"><span>Послушать ещё раз:</span><button data-replay="third" aria-pressed="false">Первую пару</button><button data-replay="second" aria-pressed="false">Вторую пару</button></div>
-      </div>
-      <noscript><p class="body-copy">Первая пара — до и ми, большая терция; вторая — до и ре-бемоль, малая секунда. Для прослушивания включите JavaScript. Близкие частотные компоненты могут создавать биения и шероховатость, но приятность звучания также зависит от тембра и музыкального опыта.</p></noscript>
+      <noscript><style>.sound-lab { display: none; }</style><p class="body-copy">Для прослушивания включите JavaScript. Первое исполнение заканчивается двумя нотами: до и ре-бемоль, малой секундой. Близкие частотные составляющие могут создавать биения и шероховатость. Исправленный финал — два до в октаву, тоника.</p></noscript>
       <p class="chapter-bridge">Контраст меняет и наши ожидания.</p>
     </section>
 

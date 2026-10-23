@@ -1,47 +1,85 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createListeningState, finishSample, respondToSample, skipListening } from '../dist/listening.js';
+import { createListeningState, finishMelody, skipListening } from '../dist/listening.js';
+import { createMelody, expectedNote, mistakenNote, tonicNote, keyboardRange, noteFrequency } from '../dist/melody.js';
 
-test('a response cannot advance an unheard sample', () => {
+test('the corrected performance cannot precede the explanation', () => {
   const state = createListeningState();
-  assert.equal(respondToSample(state, 'calm'), state);
-  assert.equal(state.step, 0);
-  assert.equal(state.revealed, false);
+  assert.equal(finishMelody(state, 'correct'), state);
+  const explained = finishMelody(state, 'mistake');
+  assert.equal(explained.phase, 'explanation');
+  assert.equal(explained.heardCorrect, false);
+  const completed = finishMelody(explained, 'correct');
+  assert.equal(completed.phase, 'complete');
+  assert.equal(completed.heardCorrect, true);
 });
 
-test('both samples require their own listening and response', () => {
-  let state = finishSample(createListeningState());
-  state = respondToSample(state, 'tense');
-  assert.equal(state.step, 1);
-  assert.equal(state.revealed, false);
-  assert.deepEqual(state.heard, [true, false]);
-  assert.equal(respondToSample(state, 'calm'), state);
-  state = respondToSample(finishSample(state), 'calm');
-  assert.equal(state.revealed, true);
-  assert.deepEqual(state.responses, ['tense', 'calm']);
+test('reading without audio opens the explanation without inventing a listen', () => {
+  const skipped = skipListening(createListeningState());
+  assert.equal(skipped.phase, 'explanation');
+  assert.equal(skipped.heardMistake, false);
+  const completed = finishMelody(skipped, 'correct');
+  assert.equal(completed.heardCorrect, true);
+  assert.equal(completed.heardMistake, false);
 });
 
-test('uncertainty is a valid impression and no answer is graded', () => {
-  let state = respondToSample(finishSample(createListeningState()), 'other');
-  state = respondToSample(finishSample(state), 'other');
-  assert.equal(state.revealed, true);
-  assert.deepEqual(state.responses, ['other', 'other']);
+test('replays and stale completion events cannot rewind or complete a different stage', () => {
+  let state = finishMelody(createListeningState(), 'mistake');
+  assert.equal(finishMelody(state, 'mistake'), state);
+  state = finishMelody(state, 'correct');
+  assert.equal(finishMelody(state, 'correct'), state);
+  assert.equal(finishMelody(state, 'mistake'), state);
+  assert.equal(skipListening(state), state);
+  assert.equal(finishMelody(state, 'unknown'), state);
 });
 
-test('skip opens the explanation without inventing listening or responses', () => {
-  const first = createListeningState();
-  const skipped = skipListening(first);
-  assert.equal(skipped.revealed, true);
-  assert.deepEqual(skipped.heard, [false, false]);
-  assert.deepEqual(skipped.responses, [null, null]);
-  assert.equal(finishSample(skipped), skipped);
-  assert.equal(respondToSample(skipped, 'calm'), skipped);
+test('restarting removes both completed performances', () => {
+  const completed = finishMelody(finishMelody(createListeningState(), 'mistake'), 'correct');
+  assert.equal(completed.phase, 'complete');
+  assert.deepEqual(createListeningState(), { phase: 'intro', heardMistake: false, heardCorrect: false });
 });
 
-test('restarting creates a fresh experiment and invalid responses do not advance', () => {
-  const fresh = createListeningState();
-  assert.deepEqual(fresh.responses, [null, null]);
-  const heard = finishSample(fresh);
-  assert.equal(respondToSample(heard, 'unexpected'), heard);
-  assert.deepEqual(fresh.heard, [false, false]);
+test('both performances share the same phrase until exactly one final note changes', () => {
+  const mistake = createMelody('mistake');
+  const correct = createMelody('correct');
+  assert.equal(mistake.duration, correct.duration);
+  const differences = [];
+  mistake.events.forEach((event, index) => {
+    const other = correct.events[index];
+    assert.deepEqual({ ...event, notes: [] }, { ...other, notes: [] });
+    event.notes.forEach((note, noteIndex) => {
+      if (note !== other.notes[noteIndex]) differences.push({ final: event.final, wrong: note, right: other.notes[noteIndex] });
+    });
+  });
+  assert.deepEqual(differences, [{ final: true, wrong: mistakenNote, right: expectedNote }]);
+  assert.equal(mistakenNote - tonicNote, 1);
+  assert.equal(noteFrequency(expectedNote) / noteFrequency(tonicNote), 2);
+});
+
+test('only two notes sound throughout the final hold, with no previous notes ringing into it', () => {
+  for (const version of ['mistake', 'correct']) {
+    const { events } = createMelody(version);
+    const ending = events.find((event) => event.final);
+    assert.deepEqual(ending.notes, [tonicNote, version === 'mistake' ? mistakenNote : expectedNote]);
+    assert.ok(ending.duration > 2.5);
+    for (const event of events.filter((event) => !event.final)) {
+      assert.ok(event.at + event.duration + .02 < ending.at, 'oscillator release must end before the dyad starts');
+    }
+  }
+});
+
+test('every audible note is represented on the piano and celebration follows the full tail', () => {
+  for (const version of ['mistake', 'correct']) {
+    const melody = createMelody(version);
+    let previous = -1;
+    for (const event of melody.events) {
+      assert.ok(event.at >= previous);
+      previous = event.at;
+      assert.ok(event.duration > 0);
+      assert.ok(event.at + event.duration < melody.duration);
+      assert.ok(event.notes.every((note) => note >= keyboardRange[0] && note <= keyboardRange[1]));
+    }
+    assert.equal(melody.events.filter((event) => event.final).length, 1);
+    assert.ok(melody.duration > 8 && melody.duration < 10);
+  }
 });

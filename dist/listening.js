@@ -1,28 +1,18 @@
-export const impressions = {
-  calm: 'спокойно',
-  tense: 'напряжённо',
-  other: 'неопределённо'
-};
-
+// A completed performance advances the story; stopping never does.
 export function createListeningState() {
-  return { step: 0, heard: [false, false], responses: [null, null], revealed: false };
+  return { phase: 'intro', heardMistake: false, heardCorrect: false };
 }
 
-export function finishSample(state) {
-  if (state.revealed) return state;
-  const heard = [...state.heard];
-  heard[state.step] = true;
-  return { ...state, heard };
-}
-
-export function respondToSample(state, impression) {
-  if (state.revealed || !state.heard[state.step] || !Object.hasOwn(impressions, impression)) return state;
-  const responses = [...state.responses];
-  responses[state.step] = impression;
-  const step = state.step + 1;
-  return { ...state, responses, step, revealed: step === 2 };
+export function finishMelody(state, version) {
+  if (version === 'mistake' && state.phase === 'intro') {
+    return { ...state, phase: 'explanation', heardMistake: true };
+  }
+  if (version === 'correct' && state.phase === 'explanation') {
+    return { ...state, phase: 'complete', heardCorrect: true };
+  }
+  return state;
 }
 
 export function skipListening(state) {
-  return { ...state, step: 2, revealed: true };
+  return state.phase === 'intro' ? { ...state, phase: 'explanation' } : state;
 }
