@@ -1,5 +1,5 @@
-import { mountPianoExperience } from './piano.js?v=story-1';
-import { mountGeometryStory } from './geometry-story.js?v=story-1';
+import { mountPianoExperience } from './piano.js?v=story-2';
+import { mountGeometryStory } from './geometry-story.js?v=story-2';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -33,9 +33,8 @@ $('#hierarchy-toggle').addEventListener('click', () => {
 const soundExperience = mountPianoExperience({ reducedMotion });
 const lowWindow = matchMedia('(max-height: 600px)');
 // Dots fill the whole screen; one of them becomes the yellow circle of the story.
-const geometryStory = mountGeometryStory($('#principle'));
+const geometryStory = mountGeometryStory($('#principle'), { isStatic: () => reducedMotion.matches || lowWindow.matches });
 
-const attention = $('#principle');
 const feeling = $('#feeling');
 const ending = $('#disappearance');
 const veil = $('.restart-veil');
@@ -56,7 +55,7 @@ function updateScroll() {
   soundExperience.updateScroll();
   const reduced = reducedMotion.matches;
   const staticScenes = reduced || lowWindow.matches;
-  if (!staticScenes) geometryStory.update(localProgress(attention));
+  geometryStory.check();
   const feelingProgress = localProgress(feeling);
   const soft = staticScenes || feelingProgress > .23;
   feeling.classList.toggle('has-softness', soft);
