@@ -1,4 +1,4 @@
-import { mountPianoExperience } from './piano.js';
+import { mountPianoExperience } from './piano.js?v=contrast-triton-9';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -27,7 +27,7 @@ $('#hierarchy-toggle').addEventListener('click', () => {
   const ordered = $('#poster').classList.toggle('is-ordered');
   $('#hierarchy-toggle').setAttribute('aria-pressed', String(ordered));
   $('#hierarchy-toggle').innerHTML = ordered ? 'Убрать иерархию <span aria-hidden="true">↙</span>' : 'Добавить иерархию <span aria-hidden="true">↗</span>';
-  $('#hierarchy-description').textContent = ordered ? 'Контраст подсказывает, что читать первым. Через масштаб, вес и пространство.' : 'Теперь всё одного веса. Глазу снова приходится искать начало.';
+  $('#hierarchy-description').textContent = ordered ? 'Слова остались прежними. Размер, вес и интервалы задали порядок чтения.' : 'Слова те же. Без иерархии начало приходится искать заново.';
 });
 
 const soundExperience = mountPianoExperience({ reducedMotion });
@@ -37,16 +37,10 @@ const feeling = $('#feeling');
 const ending = $('#disappearance');
 const veil = $('.restart-veil');
 let scrollTicking = false;
-let restartTimer;
 let restarting = false;
-let lastEndingProgress = 0;
 
 function localProgress(element) {
   return clamp(-element.getBoundingClientRect().top / Math.max(1, element.offsetHeight - innerHeight));
-}
-function cancelRestart() {
-  clearTimeout(restartTimer);
-  restartTimer = undefined;
 }
 function updateScroll() {
   scrollTicking = false;
@@ -66,17 +60,14 @@ function updateScroll() {
   const total = root.scrollHeight - innerHeight;
   $('.reading-progress span').style.transform = `scaleX(${clamp(scrollY / Math.max(1, total))})`;
   const progress = localProgress(ending);
-  lastEndingProgress = progress;
   ending.style.setProperty('--end-p', clamp(progress / .48).toFixed(4));
   ending.style.setProperty('--end-w', clamp((progress - .57) / .36).toFixed(4));
   ending.style.setProperty('--end-opacity', (1 - clamp((progress - .17) / .3)).toFixed(4));
   $('.reading-progress').style.opacity = String(1 - clamp((progress - .35) / .15));
   root.classList.toggle('ending-blank', progress > .48 && !reduced);
-  if (progress > .97 && !reduced && !document.hidden && !restarting) {
-    if (!restartTimer) restartTimer = setTimeout(() => {
-      if (lastEndingProgress > .97 && !document.hidden) restartEssay();
-    }, 1400);
-  } else if (progress <= .97 || reduced) cancelRestart();
+  // The white ending waits for the reader. Keep the exit in the tab order only
+  // once it is visible, and remove it again when scrolling back into the essay.
+  $('.ending-last').hidden = !reduced && progress < .93;
 }
 function queueScrollUpdate() {
   if (scrollTicking) return;
@@ -94,7 +85,6 @@ function resetExperiments() {
 function restartEssay() {
   if (restarting) return;
   restarting = true;
-  cancelRestart();
   soundExperience.stop();
   veil.classList.add('active');
   root.classList.remove('intro-ready');
@@ -121,11 +111,10 @@ addEventListener('resize', queueScrollUpdate, { passive: true });
 addEventListener('load', queueScrollUpdate);
 addEventListener('pagehide', () => soundExperience.stop());
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { soundExperience.stop(); cancelRestart(); }
+  if (document.hidden) soundExperience.stop();
   else queueScrollUpdate();
 });
 reducedMotion.addEventListener('change', () => {
-  soundExperience.motionChanged();
   queueScrollUpdate();
 });
 if ('ResizeObserver' in window) {

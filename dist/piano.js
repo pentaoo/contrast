@@ -1,10 +1,10 @@
-import { createListeningState, finishMelody, skipListening } from './listening.js';
-import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js';
-import { mountSpectrum } from './spectrum.js';
+import { createListeningState, finishMelody, skipListening } from './listening.js?v=contrast-triton-9';
+import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=contrast-comparison-7';
+import { mountSpectrum } from './spectrum.js?v=contrast-comparison-7';
+import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=contrast-triton-9';
 
 export function mountPianoExperience({ reducedMotion }) {
   const piano = document.querySelector('#piano');
-  const stage = document.querySelector('#piano-stage');
   const lab = document.querySelector('#sound-lab');
   const button = document.querySelector('#play-sound');
   const explanation = document.querySelector('#sound-explanation');
@@ -13,12 +13,16 @@ export function mountPianoExperience({ reducedMotion }) {
   const tonesCopy = document.querySelector('#sound-tones-copy');
   const instrument = document.querySelector('.sound-instrument');
   const skip = document.querySelector('#skip-audio');
+  const replayFirst = document.querySelector('#replay-first');
+  const outro = document.querySelector('#sound-outro');
+  const title = document.querySelector('#sound-title');
+  const prompt = document.querySelector('#listening-prompt');
   const status = document.querySelector('#sound-status');
   const error = document.querySelector('#audio-error');
   const spectrum = mountSpectrum(document.querySelector('#spectrum-canvas'), document.querySelector('#spectrum-caption'), reducedMotion);
+  const finale = mountTritonFinale({ lab, piano, stage: document.querySelector('#piano-stage'), reducedMotion });
   const keys = new Map();
   const voices = new Set();
-  const effects = new Set();
   let state = createListeningState();
   let context;
   let output;
@@ -28,10 +32,12 @@ export function mountPianoExperience({ reducedMotion }) {
   let busy = false;
   let generation = 0;
   let frame;
-  let shake;
   let finalStepVisible = false;
 
-  const isBlack = (note) => [1, 3, 6, 8, 10].includes(note % 12);
+  // The outer black keys sit off the white-key seams: the two-key group
+  // spreads slightly outward, as does the three-key group around G-sharp.
+  const blackOffsets = { 1: -.1, 3: .1, 6: -.2, 8: 0, 10: .2 };
+  const isBlack = (note) => Object.hasOwn(blackOffsets, note % 12);
   const whiteCount = Array.from({ length: keyboardRange[1] - keyboardRange[0] + 1 }, (_, index) => keyboardRange[0] + index).filter((note) => !isBlack(note)).length;
   let whiteIndex = 0;
   for (let note = keyboardRange[0]; note <= keyboardRange[1]; note++) {
@@ -40,8 +46,12 @@ export function mountPianoExperience({ reducedMotion }) {
     key.className = `piano-key ${black ? 'is-black' : 'is-white'}`;
     key.dataset.note = String(note);
     key.setAttribute('aria-hidden', 'true');
-    key.style.left = `${(whiteIndex - (black ? .3 : 0)) / whiteCount * 100}%`;
+    key.style.left = `${(whiteIndex + (black ? blackOffsets[note % 12] - .3 : 0)) / whiteCount * 100}%`;
     key.style.width = `${(black ? .6 : 1) / whiteCount * 100}%`;
+    const central = note >= 59 && note <= 76;
+    key.style.setProperty('--break-x', `${central ? Math.sin(note * 3.1) * 35 : (note < 59 ? -8 : 8)}px`);
+    key.style.setProperty('--break-y', `${central ? 30 + (note * 17 % 75) : 5 + note % 8}px`);
+    key.style.setProperty('--break-angle', `${central ? (note * 13 % 65) - 32 : (note < 59 ? -5 : 6)}deg`);
     piano.append(key);
     keys.set(note, key);
     if (!black) whiteIndex++;
@@ -55,86 +65,60 @@ export function mountPianoExperience({ reducedMotion }) {
   }
 
   function updateUI() {
+    const explaining = state.phase === 'explanation';
+    const openingExplanation = explanation.hidden && explaining;
+    const readingPosition = openingExplanation ? { top: window.scrollY, left: window.scrollX } : null;
+    const focusExplanation = openingExplanation && [button, skip].includes(document.activeElement);
+    if (focusExplanation) document.activeElement.blur();
     lab.dataset.phase = state.phase;
     lab.dataset.playing = active ? active.version : busy ? 'loading' : 'none';
-    opening.hidden = state.phase !== 'intro';
-    explanation.hidden = state.phase === 'intro';
-    finalStepVisible = state.phase !== 'intro' && finalStep.getBoundingClientRect().top <= innerHeight * .15;
-    lab.dataset.step = state.phase === 'intro' ? 'intro' : finalStepVisible ? 'final' : 'reading';
-    skip.hidden = state.phase !== 'intro';
-    document.querySelector('#listening-lead').textContent = state.heardMistake
-      ? 'Кажется, музыкант сбился. В финале остались две соседние ноты — до и ре-бемоль.'
-      : 'В финале мы намеренно оставили две соседние ноты — до и ре-бемоль.';
-    button.hidden = state.phase !== 'intro' && !finalStepVisible && !active && !busy;
+    opening.hidden = explaining;
+    explanation.hidden = !explaining;
+    title.innerHTML = 'Чего вы ждёте<br>от последней ноты?';
+    prompt.textContent = 'Послушайте короткую мелодию до конца.';
+    if (readingPosition) {
+      // Expanding the sticky grid can move the browser's scroll anchor to its
+      // end. Flush that layout, then keep the reader at the first paragraph.
+      explanation.getBoundingClientRect();
+      window.scrollTo({ ...readingPosition, behavior: 'instant' });
+      if (focusExplanation) document.querySelector('#listening-lead').focus({ preventScroll: true });
+    }
+    finalStepVisible = explaining && finalStep.getBoundingClientRect().top <= innerHeight * .15;
+    lab.dataset.step = !explaining ? 'intro' : finalStepVisible ? 'final' : 'reading';
+    skip.hidden = explaining;
+    replayFirst.hidden = !finalStepVisible || Boolean(active) || busy || finale.completed;
+    button.hidden = finale.completed || (explaining && !finalStepVisible && !active && !busy);
+    outro.hidden = !finale.completed;
     button.disabled = busy;
     button.setAttribute('aria-pressed', String(Boolean(active)));
     button.querySelector('.play-icon').textContent = active ? '■' : '▶';
     button.querySelector('.play-label').textContent = active ? 'Остановить' : busy ? 'Включаем звук…'
-      : state.phase === 'intro' ? 'Послушать'
-      : state.phase === 'explanation' ? 'Послушать без ошибки' : 'Послушать ещё раз';
+      : state.phase === 'intro' ? 'Послушать мелодию' : 'Послушать ещё раз';
     if (!active) {
-      const notes = lastCompletedVersion ? finalNotes(lastCompletedVersion) : [];
+      const notes = lastCompletedVersion && !finale.completed ? finalNotes(lastCompletedVersion) : [];
       lightKeys(new Set(notes), notes[1]);
     }
     updateSpectrumFocus();
+    if (explaining) finale.prepare().catch(() => {});
   }
 
   function updateSpectrumFocus() {
-    if (state.phase === 'intro') { spectrum.setFocus(false, 0); return; }
+    if (state.phase !== 'explanation') { spectrum.setFocus(false, 0); return; }
     const rect = tonesCopy.getBoundingClientRect();
     const readingArea = Math.max(1, Math.min(innerHeight, instrument.getBoundingClientRect().top));
     const showAnnotations = rect.top <= readingArea * .8;
-    const progress = (readingArea * .42 - rect.top) / Math.max(rect.height, readingArea * .5);
+    const progress = (readingArea * .64 - rect.top) / Math.max(rect.height, readingArea * .5);
     spectrum.setFocus(showAnnotations, Math.max(0, Math.min(1, progress)));
-  }
-
-  function clearEffects() {
-    shake?.cancel();
-    shake = undefined;
-    effects.forEach((effect) => effect.cancel());
-    effects.clear();
-    document.querySelector('.confetti-layer')?.remove();
-  }
-
-  function celebrate() {
-    const rect = stage.getBoundingClientRect();
-    const sceneRect = lab.getBoundingClientRect();
-    if (reducedMotion.matches || document.hidden || sceneRect.bottom <= 0 || sceneRect.top >= innerHeight) return;
-    const origin = rect.bottom > 0 && rect.top < innerHeight ? rect.top + rect.height * .55 : innerHeight * .45;
-    const layer = document.createElement('div');
-    layer.className = 'confetti-layer';
-    layer.setAttribute('aria-hidden', 'true');
-    document.body.append(layer);
-    const colors = ['#ee492c', '#f1f0eb', '#a8af99'];
-    const animations = [];
-    for (const side of [-1, 1]) {
-      for (let index = 0; index < 18; index++) {
-        const piece = document.createElement('i');
-        piece.style.background = colors[index % colors.length];
-        piece.style[side === 1 ? 'left' : 'right'] = '-8px';
-        piece.style.top = `${Math.min(innerHeight - 80, Math.max(100, origin))}px`;
-        layer.append(piece);
-        const distance = Math.min(innerWidth * .36, 300) * (.35 + Math.random() * .65);
-        const rise = 70 + Math.random() * 150;
-        const rotation = (120 + Math.random() * 360) * side;
-        const animation = piece.animate([
-          { transform: 'translate(0, 0) rotate(0deg)', opacity: 0 },
-          { transform: `translate(${side * distance * .7}px, ${-rise}px) rotate(${rotation * .4}deg)`, opacity: 1, offset: .36 },
-          { transform: `translate(${side * distance}px, ${180 + Math.random() * 170}px) rotate(${rotation}deg)`, opacity: 0 }
-        ], { duration: 1600 + Math.random() * 500, delay: Math.random() * 100, easing: 'linear' });
-        effects.add(animation);
-        animations.push(animation.finished.catch(() => {}).then(() => effects.delete(animation)));
-      }
-    }
-    Promise.all(animations).then(() => layer.remove());
   }
 
   function stop(completed = false) {
     generation++;
     cancelAnimationFrame(frame);
     const performance = active;
+    const focusOutro = completed && performance?.finaleStarted && document.activeElement === button;
     active = null;
     busy = false;
+    if (performance?.finaleStart !== undefined && !completed) finale.reset();
     if (context) {
       const now = context.currentTime;
       voices.forEach(({ oscillator, gain, at }) => {
@@ -145,18 +129,19 @@ export function mountPianoExperience({ reducedMotion }) {
       });
       voices.clear();
     }
-    const hadCorrectEnding = state.heardCorrect;
     if (completed && performance) {
       state = finishMelody(state, performance.version);
       lastCompletedVersion = performance.version;
       spectrum.finish(performance.snapshot, performance.version);
+      if (performance.finaleStarted) finale.finish();
     } else spectrum.restore();
     updateUI();
+    if (focusOutro) outro.querySelector('a').focus({ preventScroll: true });
+    if (!completed && performance) status.textContent = 'Воспроизведение остановлено. Можно послушать вариант заново.';
     if (completed && performance?.version === 'mistake') {
-      status.textContent = 'Мелодия завершилась неожиданным аккордом. Можно прочитать объяснение и затем послушать мелодию без ошибки.';
+      status.textContent = 'Мелодия завершилась двумя соседними нотами. Можно прочитать объяснение и затем послушать другой финал.';
     } else if (completed && performance?.version === 'correct') {
-      status.textContent = 'Мелодия завершилась. Можно продолжать чтение.';
-      if (!hadCorrectEnding && state.heardCorrect) celebrate();
+      status.textContent = 'После двух до в октаву тритон проломил клавиатуру. В момент удара прозвучали до и фа-диез. Тритон и обломки исчезли вниз; дальше — следующая история.';
     }
   }
 
@@ -190,6 +175,14 @@ export function mountPianoExperience({ reducedMotion }) {
     if (!active) return;
     if (context.state !== 'running') { stop(); return; }
     const elapsed = context.currentTime - active.start;
+    if (active.finaleStart !== undefined && elapsed >= active.finaleStart) {
+      if (!active.finaleStarted) { active.finaleStarted = true; finale.begin(); }
+      finale.render(elapsed - active.finaleStart, active.reduced || reducedMotion.matches);
+      lightKeys(new Set());
+      if (elapsed >= active.duration) { stop(true); return; }
+      frame = requestAnimationFrame(animateKeys);
+      return;
+    }
     const notes = new Set();
     for (const event of active.events) {
       if (elapsed >= event.at && elapsed < event.at + event.duration) {
@@ -197,12 +190,6 @@ export function mountPianoExperience({ reducedMotion }) {
       }
       if (event.final && elapsed >= event.at && !active.finalSeen) {
         active.finalSeen = true;
-        if (active.version === 'mistake' && !reducedMotion.matches) {
-          shake = stage.animate([
-            { transform: 'translateX(0)' }, { transform: 'translateX(-3px)' },
-            { transform: 'translateX(3px)' }, { transform: 'translateX(0)' }
-          ], { duration: 160, easing: 'ease-out' });
-        }
       }
     }
     const finalAt = active.events.find((event) => event.final).at;
@@ -213,37 +200,49 @@ export function mountPianoExperience({ reducedMotion }) {
     frame = requestAnimationFrame(animateKeys);
   }
 
-  async function play() {
+  async function ensureAudio() {
+    const Audio = window.AudioContext || window.webkitAudioContext;
+    if (!Audio) throw new Error('Web Audio unavailable');
+    if (!context) {
+      context = new Audio();
+      output = context.createBiquadFilter();
+      output.type = 'lowpass';
+      output.frequency.value = 5200;
+      output.Q.value = .5;
+      finalOutputs = spectrum.connect(context, output);
+    }
+    await context.resume();
+  }
+
+  async function play(requestedVersion) {
     if (busy) return;
     if (active) { stop(); return; }
-    if (state.phase !== 'intro' && !finalStepVisible) return;
-    clearEffects();
+    if (state.phase === 'explanation' && !finalStepVisible) return;
     const token = ++generation;
+    finale.reset();
     busy = true;
     error.textContent = '';
     updateUI();
     try {
-      const Audio = window.AudioContext || window.webkitAudioContext;
-      if (!Audio) throw new Error('Web Audio unavailable');
-      if (!context) {
-        context = new Audio();
-        output = context.createBiquadFilter();
-        output.type = 'lowpass';
-        output.frequency.value = 5200;
-        output.Q.value = .5;
-        finalOutputs = spectrum.connect(context, output);
-      }
-      await context.resume();
+      const version = requestedVersion || (state.phase === 'intro' ? 'mistake' : 'correct');
+      await Promise.all([ensureAudio(), version === 'correct' ? finale.prepare() : Promise.resolve()]);
       if (token !== generation) return;
-      const melody = createMelody(state.phase === 'intro' ? 'mistake' : 'correct');
+      const melody = createMelody(version);
       active = { ...melody, start: context.currentTime + .04, finalSeen: false };
+      if (version === 'correct') {
+        const schedule = createTritonSchedule(melody.duration, reducedMotion.matches);
+        active.finaleStart = schedule.start;
+        active.reduced = reducedMotion.matches;
+        active.duration = schedule.duration;
+        tritonNotes.forEach((note) => pianoTone(note, active.start + schedule.impact, tritonTiming.sustain, .74));
+      }
       spectrum.begin();
       for (const event of melody.events) {
         event.notes.forEach((note, index) => pianoTone(note, active.start + event.at, event.duration, event.velocity, event.final ? finalOutputs[index] : output));
       }
       busy = false;
       updateUI();
-      status.textContent = state.phase === 'intro' ? 'Звучит небольшая мелодия.' : 'Звучит мелодия без ошибки.';
+      status.textContent = active.version === 'mistake' ? 'Звучит небольшая мелодия.' : 'Та же мелодия с другим финалом.';
       frame = requestAnimationFrame(animateKeys);
     } catch {
       if (token !== generation) return;
@@ -252,34 +251,36 @@ export function mountPianoExperience({ reducedMotion }) {
     }
   }
 
-  button.addEventListener('click', play);
+  button.addEventListener('click', () => play());
+  replayFirst.addEventListener('click', () => play('mistake'));
   skip.addEventListener('click', () => {
     stop();
-    clearEffects();
     error.textContent = '';
     state = skipListening(state);
     updateUI();
     document.querySelector('#listening-lead').focus({ preventScroll: true });
   });
+  finale.reset();
   updateUI();
 
   return {
     updateScroll() {
-      const visible = state.phase !== 'intro' && finalStep.getBoundingClientRect().top <= innerHeight * .15;
+      if (active?.finaleStart !== undefined && (lab.getBoundingClientRect().bottom <= 0 || finalStep.getBoundingClientRect().top > innerHeight * .8)) { stop(); return; }
+      const visible = state.phase === 'explanation' && finalStep.getBoundingClientRect().top <= innerHeight * .15;
+      if (finale.completed && !visible) { finale.reset(); updateUI(); return; }
       if (visible !== finalStepVisible) updateUI();
       else updateSpectrumFocus();
     },
-    stop() { stop(); clearEffects(); },
+    stop,
     reset() {
       stop();
-      clearEffects();
       state = createListeningState();
+      finale.reset();
       lastCompletedVersion = undefined;
       spectrum.reset();
       error.textContent = '';
       status.textContent = '';
       updateUI();
-    },
-    motionChanged() { if (reducedMotion.matches) clearEffects(); }
+    }
   };
 }

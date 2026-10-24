@@ -3,14 +3,14 @@ import assert from 'node:assert/strict';
 import { createListeningState, finishMelody, skipListening } from '../dist/listening.js';
 import { createMelody, expectedNote, mistakenNote, tonicNote, keyboardRange, noteFrequency } from '../dist/melody.js';
 
-test('the corrected performance cannot precede the explanation', () => {
+test('the first performance opens the explanation; the octave follows the reading', () => {
   const state = createListeningState();
   assert.equal(finishMelody(state, 'correct'), state);
   const explained = finishMelody(state, 'mistake');
   assert.equal(explained.phase, 'explanation');
   assert.equal(explained.heardCorrect, false);
   const completed = finishMelody(explained, 'correct');
-  assert.equal(completed.phase, 'complete');
+  assert.equal(completed.phase, 'explanation');
   assert.equal(completed.heardCorrect, true);
 });
 
@@ -18,9 +18,11 @@ test('reading without audio opens the explanation without inventing a listen', (
   const skipped = skipListening(createListeningState());
   assert.equal(skipped.phase, 'explanation');
   assert.equal(skipped.heardMistake, false);
-  const completed = finishMelody(skipped, 'correct');
-  assert.equal(completed.heardCorrect, true);
-  assert.equal(completed.heardMistake, false);
+  assert.equal(skipped.heardCorrect, false);
+  const skippedComparison = skipListening(finishMelody(createListeningState(), 'mistake'));
+  assert.equal(skippedComparison.phase, 'explanation');
+  assert.equal(skippedComparison.heardMistake, true);
+  assert.equal(skippedComparison.heardCorrect, false);
 });
 
 test('replays and stale completion events cannot rewind or complete a different stage', () => {
@@ -35,7 +37,7 @@ test('replays and stale completion events cannot rewind or complete a different 
 
 test('restarting removes both completed performances', () => {
   const completed = finishMelody(finishMelody(createListeningState(), 'mistake'), 'correct');
-  assert.equal(completed.phase, 'complete');
+  assert.equal(completed.phase, 'explanation');
   assert.deepEqual(createListeningState(), { phase: 'intro', heardMistake: false, heardCorrect: false });
 });
 
@@ -68,7 +70,7 @@ test('only two notes sound throughout the final hold, with no previous notes rin
   }
 });
 
-test('every audible note is represented on the piano and celebration follows the full tail', () => {
+test('every audible note is represented on the piano and completion follows the full tail', () => {
   for (const version of ['mistake', 'correct']) {
     const melody = createMelody(version);
     let previous = -1;

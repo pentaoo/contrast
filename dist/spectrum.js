@@ -1,4 +1,4 @@
-import { finalNotes, noteFrequency } from './melody.js';
+import { finalNotes, noteFrequency } from './melody.js?v=contrast-comparison-7';
 
 // The display uses measured FFT data. Peak proximity/overlap is not a model of
 // roughness, and no noise or artificial broadening is added to either version.
@@ -107,8 +107,8 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
 
   function label(nextVersion) {
     version = nextVersion || null;
-    caption.textContent = version === 'mistake' ? 'До + ре-бемоль. Две близкие ноты.'
-      : version === 'correct' ? 'До + до. Тоника в октаву.' : 'Частоты звучащих нот';
+    caption.textContent = version === 'mistake' ? 'Первый финал'
+      : version === 'correct' ? 'Второй финал' : 'Частоты звучащих нот';
     canvas.dataset.version = version || 'melody';
     canvas.dataset.focus = focus >= .99 ? 'fundamentals' : focus > 0 ? 'zooming' : 'full';
     canvas.dataset.annotations = String(annotations);
