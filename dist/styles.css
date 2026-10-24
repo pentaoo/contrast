@@ -195,27 +195,11 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .js-enabled .story-copy>.story-bridge { opacity: var(--story-copy-3); }
 
 /* Появление сцен */
-.js-enabled .scene>.scene-heading, .js-enabled .scene>.hierarchy-lab, .js-enabled .scene>.sound-lab, .js-enabled .conclusion>h2 { opacity: 0; transform: translateY(22px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
-.js-enabled .scene.is-entered>.scene-heading, .js-enabled .scene.is-entered>.hierarchy-lab, .js-enabled .scene.is-entered>.sound-lab, .js-enabled .conclusion.is-entered>h2 { opacity: 1; transform: none; }
-.scene.is-entered>.hierarchy-lab, .scene.is-entered>.sound-lab { transition-delay: .12s; }
+.js-enabled .scene>.scene-heading, .js-enabled .scene>.sound-lab, .js-enabled .conclusion>h2 { opacity: 0; transform: translateY(22px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.js-enabled .scene.is-entered>.scene-heading, .js-enabled .scene.is-entered>.sound-lab, .js-enabled .conclusion.is-entered>h2 { opacity: 1; transform: none; }
+.scene.is-entered>.sound-lab { transition-delay: .12s; }
 
 /* 02 Плакат */
-.form-section { padding-top: var(--space-5); }
-.hierarchy-lab { max-width: var(--measure); }
-.poster { background: var(--paper-deep); height: 460px; padding: var(--space-4) 44px; display: flex; align-items: flex-start; flex-direction: column; position: relative; overflow: hidden; text-align: left; }
-.poster-kicker, .poster-title, .poster-description, .poster-cta { position: relative; z-index: 2; font-size: 15px; line-height: 1.8; font-weight: 400; color: var(--muted); letter-spacing: 0; transition: font-size .7s var(--ease), line-height .7s, letter-spacing .7s, color .7s, background .7s, padding .7s, font-weight .7s; }
-.poster-title, .poster-description, .poster-cta { margin-top: var(--space-3); }
-.poster-cta { display: inline-flex; align-items: center; gap: 30px; }
-.poster-mark { position: absolute; width: 230px; height: 260px; right: 8%; top: 22%; transform: rotate(-24deg); opacity: .08; transition: opacity .7s; }
-.poster-mark>span { position: absolute; width: 140px; height: 230px; left: 0; border-radius: 80px; background: var(--accent); mix-blend-mode: multiply; }
-.poster-mark>span+span { left: 80px; top: 60px; background: #636e53; }
-.poster.is-ordered .poster-kicker { font-size: 12px; letter-spacing: .08em; color: var(--ink); }
-.poster.is-ordered .poster-title { font-size: clamp(44px, 5.5vw, 76px); line-height: 1.05; letter-spacing: -.065em; font-weight: 800; color: var(--ink); }
-.poster.is-ordered .poster-description { font-size: 14px; }
-.poster.is-ordered .poster-cta { font-size: 13px; background: var(--ink); padding: 11px 16px; color: var(--paper); }
-.poster.is-ordered .poster-mark { opacity: 1; }
-.hierarchy-controls { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-3); }
-.hierarchy-insight { min-height: 3.3em; max-width: 520px; }
 
 /* 03 Звук */
 .sound-section { background: var(--ink); color: var(--paper); padding-bottom: var(--space-5); }
@@ -257,31 +241,13 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .audio-error:not(:empty) { position: absolute; bottom: 82px; left: var(--inline); right: var(--inline); padding: 12px; background: var(--ink); text-align: center; color: var(--muted-on-ink); }
 
 /* 04 Ожидание */
-.feeling-section { background: var(--paper-deep); }
-.js-enabled .feeling-section { height: 200vh; height: 200svh; }
-.feeling-stage { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 8%; padding-block: var(--space-5); }
-.feeling-art { width: 100%; aspect-ratio: 1; position: relative; display: grid; place-items: center; }
-.hard-shape { width: 100%; max-width: 400px; aspect-ratio: 1; }
-.hard-shape svg { width: 100%; height: 100%; fill: var(--moss); }
-.soft-shape { position: absolute; width: 52%; max-width: 210px; aspect-ratio: 1; background: var(--accent); border-radius: 48% 52% 58% 42% / 44% 40% 60% 56%; transform: scale(1); }
-.feeling-copy h2 { display: grid; }
-.feeling-copy h2>span { grid-area: 1/1; transition: opacity .6s, transform .6s var(--ease); }
-.feeling-first { opacity: 0; }
-.feeling-second { opacity: 1; }
-.feeling-story { margin-top: var(--space-3); transition: opacity .6s, transform .6s var(--ease); }
-.feeling-story>p+p { margin-top: var(--space-2); }
-.feeling-story .voice { margin-top: var(--space-3); color: var(--ink); }
-.js-enabled .soft-shape { opacity: 0; transform: scale(.2); transition: opacity .6s, transform .8s var(--ease); }
-.js-enabled .feeling-first { opacity: 1; }
-.js-enabled .feeling-second { opacity: 0; transform: translateY(12px); }
-.js-enabled .feeling-story { opacity: 0; transform: translateY(15px); }
-.js-enabled .has-softness .soft-shape { opacity: 1; transform: scale(1); }
-.js-enabled .has-softness .feeling-first { opacity: 0; transform: translateY(-12px); }
-.js-enabled .has-softness .feeling-second { opacity: 1; transform: none; }
-.js-enabled .has-story .feeling-story { opacity: 1; transform: none; }
 
 /* 05 Вывод */
 .conclusion { padding-bottom: var(--space-5); }
+/* Третий акт: тритон чужой не по цвету, а по происхождению. */
+.stranger-copy { max-width: var(--measure-text); margin-top: var(--space-4); }
+.stranger-copy>.body-copy+.body-copy { margin-top: var(--space-2); }
+.stranger-sum { margin-top: var(--space-4); color: var(--ink); }
 .ending-link { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-5); transition: color .2s; }
 .ending-link:hover { color: var(--accent); }
 .ending-link>span { font: 32px var(--sans); }
@@ -321,10 +287,6 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
 }
 @media (max-width: 800px) {
   .section-pad { padding-block: var(--space-5); }
-  .poster { padding: 32px; }
-  .poster-mark { right: 2%; transform: scale(.8) rotate(-24deg); transform-origin: right center; }
-  .poster.is-ordered .poster-title { font-size: 58px; }
-  .feeling-stage { gap: 5%; }
 }
 @media (max-width: 600px) {
   :root { --text-ui: 14px; }
@@ -335,37 +297,15 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .story-copy .body-copy { margin-top: var(--space-2); }
   .story-bridge { margin-top: var(--space-3); font-size: 19px; }
   .js-enabled .story-copy { bottom: var(--space-4); }
-  .form-section { padding-top: var(--space-4); }
-  .poster { padding: 28px 23px; height: 420px; }
-  .poster-kicker, .poster-title, .poster-description, .poster-cta { font-size: 13px; }
-  .poster.is-ordered .poster-kicker { font-size: 11px; }
-  .poster.is-ordered .poster-title { font-size: 50px; }
-  .poster.is-ordered .poster-description { font-size: 13px; }
-  .poster.is-ordered .poster-cta { font-size: 12px; gap: 20px; }
-  .poster-mark { right: -30px; top: 30%; transform: scale(.55) rotate(-24deg); opacity: .05; }
-  .poster.is-ordered .poster-mark { opacity: .5; }
-  .hierarchy-controls { flex-direction: column; align-items: stretch; }
-  .hierarchy-insight { min-height: 5em; }
   .listening-actions { gap: var(--space-2); }
   .button { padding-inline: 16px; }
   .piano { height: clamp(84px, 14svh, 120px); }
   .piano-key[data-label]::after { display: none; }
-  .feeling-stage { display: flex; flex-direction: column; justify-content: center; gap: var(--space-3); padding-block: var(--space-4); }
-  .feeling-art { width: min(52vw, 220px); flex-shrink: 0; }
-  .feeling-copy { width: 100%; }
-  .feeling-copy h2 { font-size: 9vw; }
-  .feeling-story { margin-top: var(--space-2); font-size: 15px; line-height: 1.6; }
-  .feeling-story>p+p { margin-top: 10px; }
-  .feeling-story .voice { margin-top: var(--space-2); font-size: 19px; }
   .source-list>a { gap: 8px; grid-template-columns: 22px 1fr 16px; }
   .ending-link>span { font-size: 26px; }
   .ending-content h2 { font-size: 14vw; }
 }
 @media (max-height: 700px) and (max-width: 600px) {
-  .feeling-art { width: 140px; }
-  .feeling-stage { gap: 12px; padding-block: var(--space-3); }
-  .feeling-story { font-size: 14px; }
-  .feeling-copy h2 { font-size: 32px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .js-enabled .sound-lab { height: auto; overflow: visible; }
@@ -373,10 +313,8 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   *, *:before, *:after { transition: none !important; animation: none !important; }
   .js-enabled .scroll-scene { height: auto; }
   .scene-sticky { position: relative; }
-  .js-enabled .scene>.scene-heading, .js-enabled .scene>.hierarchy-lab, .js-enabled .scene>.sound-lab,
-  .js-enabled .conclusion>h2, .js-enabled .hero-title, .js-enabled .hero-statement,
-  .js-enabled .feeling-second, .js-enabled .feeling-story, .js-enabled .soft-shape { opacity: 1; transform: none; visibility: visible; }
-  .js-enabled .feeling-first { opacity: 0; }
+  .js-enabled .scene>.scene-heading, .js-enabled .scene>.sound-lab,
+  .js-enabled .conclusion>h2, .js-enabled .hero-title, .js-enabled .hero-statement { opacity: 1; transform: none; visibility: visible; }
   .js-enabled .attention-stage { position: relative; height: auto; padding: var(--space-5) var(--gutter); }
   .js-enabled .story-canvas { display: none; }
   .js-enabled .story-frames { position: static; width: 100%; height: auto; margin: 0 auto; overflow: visible; clip: auto; }
@@ -388,14 +326,12 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
 }
 @media (max-height: 600px) {
   .js-enabled .sound-lab { height: auto; overflow: visible; }
-  .js-enabled .attention-scene, .js-enabled .feeling-section { height: auto; }
-  .feeling-stage { position: relative; height: auto; min-height: 100svh; }
+  .js-enabled .attention-scene { height: auto; }
   .js-enabled .attention-stage { position: relative; height: auto; padding: var(--space-4) var(--gutter); }
   .js-enabled .story-canvas { display: none; }
   .js-enabled .story-frames { position: static; width: 100%; height: auto; margin: 0 auto; overflow: visible; clip: auto; }
   .js-enabled .story-copy { position: static; width: 100%; pointer-events: auto; }
   .js-enabled .story-copy>* { opacity: 1; }
-  .feeling-stage { padding-top: 45px; padding-bottom: 45px; }
 }
 
 /* Рисованный тритон и распадающаяся клавиатура */
