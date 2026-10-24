@@ -1,8 +1,8 @@
 // Тритон лежит на белом экране рядом с кругом и квадратом. При прокрутке
-// волны его мира заливают экран: теперь чужие — круг и квадрат.
+// рисованные волны его мира заливают экран: теперь чужие — круг и квадрат.
 // Контекст влияет на контраст.
 
-export const seaTiming = { rise: [.2, .62], textA: [.14, .28], textB: [.6, .72] };
+export const seaTiming = { rise: [.2, .62], textA: [.14, .28], textB: [.56, .7] };
 
 const ramp = (value, [from, to]) => Math.min(1, Math.max(0, (value - from) / (to - from)));
 
@@ -14,43 +14,15 @@ export function seaAt(progress) {
   };
 }
 
-// A trochoid gives sharp crests and round troughs, like engraved sea waves.
-export function crestPath(width, wavelength, radius, baseline, height) {
-  const k = 2 * Math.PI / wavelength;
-  const points = [];
-  for (let t = -wavelength; ; t += 3) {
-    const x = t - radius * .9 * Math.sin(k * t);
-    points.push([x, baseline + radius * Math.cos(k * t)]);
-    if (x > width + wavelength) break;
-  }
-  const line = (dy) => points.map(([x, y], index) => `${index ? 'L' : 'M'}${x.toFixed(1)} ${(y + dy).toFixed(1)}`).join('');
-  return { body: `${line(0)}L${width + wavelength} ${height}L${-wavelength} ${height}Z`, foam: line(-3), line: line(9) };
-}
-
 export function mountStranger(section, { reducedMotion, isStatic }) {
   const scroll = section.querySelector('.stranger-scroll');
   const sea = section.querySelector('.sea');
   const frames = [...section.querySelectorAll('.stranger-triton img')];
-  const ns = 'http://www.w3.org/2000/svg';
-  // Three layers of water, each with its own crest and drift speed. The crest is
-  // drawn twice as wide as the screen and every wavelength divides 1440, so a
-  // drift by half its width loops without a seam.
-  [[180, 15, 'far'], [240, 20, 'mid'], [160, 12, 'near']].forEach(([wavelength, radius, depth]) => {
+  // Three layers of the same drawn sea, each with its own size and drift speed.
+  ['far', 'mid', 'near'].forEach((depth) => {
     const layer = document.createElement('div');
     layer.className = `sea-layer sea-layer--${depth}`;
-    const svg = document.createElementNS(ns, 'svg');
-    svg.setAttribute('class', 'sea-crest');
-    svg.setAttribute('viewBox', '0 0 2880 100');
-    svg.setAttribute('preserveAspectRatio', 'none');
-    svg.setAttribute('aria-hidden', 'true');
-    const shape = crestPath(2880, wavelength, radius, 40, 100);
-    [['sea-body', shape.body], ['sea-foam', shape.foam], ['sea-line', shape.line]].forEach(([name, d]) => {
-      const path = document.createElementNS(ns, 'path');
-      path.setAttribute('class', name);
-      path.setAttribute('d', d);
-      svg.append(path);
-    });
-    layer.append(svg);
+    layer.innerHTML = '<div class="sea-drift"><div class="sea-waves"></div><div class="sea-deep"></div></div>';
     sea.append(layer);
   });
 

@@ -250,17 +250,19 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .stranger-scroll { height: 100vh; height: 100svh; }
 .js-enabled .stranger-scroll { height: 340vh; height: 340svh; }
 .stranger-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--paper); }
-.sea { position: absolute; inset: -14% 0 0; transform: translateY(calc((1 - var(--sea)) * 100%)); will-change: transform; }
-.sea-layer { position: absolute; inset: var(--top) 0 0; --crest: clamp(48px, 7vw, 84px); }
-.sea-layer::after { content: ''; position: absolute; inset: calc(var(--crest) - 1px) 0 0; background: repeating-linear-gradient(180deg, transparent 0 9px, rgb(241 240 235 / .07) 9px 10px), var(--water); }
-.sea-layer--far { --top: 0%; --water: #3b9a8f; --foam: #f4a493; --drift: 46s; }
-.sea-layer--mid { --top: 6%; --water: #217470; --foam: var(--paper); --drift: 34s; }
-.sea-layer--near { --top: 13%; --water: #0f4c52; --foam: var(--paper); --drift: 24s; }
-.sea-crest { position: absolute; top: 0; left: 0; width: 200%; height: var(--crest); overflow: visible; animation: sea-drift var(--drift) linear infinite; }
-.sea-body { fill: var(--water); }
-.sea-foam { fill: none; stroke: var(--foam); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
-.sea-line { fill: none; stroke: rgb(241 240 235 / .3); stroke-width: 1; vector-effect: non-scaling-stroke; }
-@keyframes sea-drift { to { transform: translateX(-50%); } }
+.sea { position: absolute; inset: 44% 0 0; transform: translateY(calc((1 - var(--sea)) * 100%)); will-change: transform; }
+/* Рисунок волн 1683×748 повторяется по горизонтали; --tile — ширина одного повтора.
+   Ниже рисунка — глубина цвета его нижнего края с тонкой штриховкой. */
+.sea-layer { position: absolute; inset: var(--top) 0 0; overflow: hidden; --crest: calc(var(--wave) * var(--scale)); --tile: calc(var(--crest) * 1683 / 748); }
+.sea-drift { position: absolute; inset: 0 auto 0 0; width: calc(100% + var(--tile)); display: flex; flex-direction: column; animation: sea-drift var(--drift) linear infinite; }
+.sea-waves { flex: none; height: var(--crest); background: url(assets/sea/sea-waves.webp) repeat-x 0 0 / var(--tile) var(--crest); }
+.sea-deep { flex: 1; margin-top: -2px; background: repeating-linear-gradient(180deg, transparent 0 6px, rgb(70 150 135 / .16) 6px 7px), #0a4440; }
+.stranger { --wave: clamp(260px, max(30vw, 42svh), 460px); }
+.sea-layer--far { --top: 0%; --scale: .6; --drift: 120s; filter: saturate(.8) brightness(1.08); }
+.sea-layer--mid { --top: 10%; --scale: .8; --drift: 95s; }
+.sea-layer--mid .sea-drift { animation-direction: reverse; }
+.sea-layer--near { --top: 24%; --scale: 1; --drift: 70s; }
+@keyframes sea-drift { to { transform: translateX(calc(-1 * var(--tile))); } }
 .stranger-cast { position: absolute; left: 0; right: 0; bottom: clamp(56px, 11svh, 120px); height: 0; }
 .stranger-triton { position: absolute; right: var(--tr); bottom: 0; width: var(--tw); aspect-ratio: 1; }
 .stranger-triton img { display: block; width: 100%; height: 100%; translate: 0 7%; }
@@ -276,14 +278,10 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .stranger-text .body-copy { margin-top: var(--space-3); }
 .js-enabled .stranger-text--a { opacity: var(--text-a); }
 .js-enabled .stranger-text--b { opacity: var(--text-b); }
-.stranger-text--b h2 { color: var(--paper); }
-.stranger-text--b .body-copy { color: #cfe0d9; }
 .stranger.is-still .stranger-scroll { height: auto; }
 .stranger.is-still .stranger-stage { position: relative; height: auto; display: flex; flex-direction: column; }
 .stranger.is-still .stranger-copy { order: -1; position: relative; top: auto; display: block; padding-block: var(--space-6) var(--space-5); }
 .stranger.is-still .stranger-text + .stranger-text { margin-top: var(--space-5); }
-.stranger.is-still .stranger-text--b h2 { color: var(--ink); }
-.stranger.is-still .stranger-text--b .body-copy { color: var(--muted); }
 .stranger.is-still .sea { inset: auto 0 0; height: 62svh; }
 .stranger.is-still .stranger-cast { position: relative; bottom: auto; height: 62svh; }
 .stranger.is-still .stranger-triton { bottom: 14svh; }
