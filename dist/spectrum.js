@@ -1,4 +1,4 @@
-import { finalNotes, noteFrequency } from './melody.js?v=contrast-triton-13';
+import { finalNotes, noteFrequency } from './melody.js?v=ball-1';
 
 // The display uses measured FFT data. Peak proximity/overlap is not a model of
 // roughness, and no noise or artificial broadening is added to either version.
@@ -17,6 +17,8 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
   let annotations = false;
   let version = null;
   let lastLive = 0;
+  let keyFraction = null;
+  let layout = null;
   const colors = ['#ee492c', '#a8af99'];
 
   function connect(context, normalOutput) {
@@ -43,16 +45,39 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
     });
   }
 
+  // Horizontal axis. With the piano's key layout each peak stands over its own
+  // key; zooming blends towards a plain log scale of 240–560 Hz.
+  function axis(focused) {
+    const midi = (frequency) => 69 + 12 * Math.log2(frequency / 440);
+    const full = keyFraction ? (frequency) => keyFraction(midi(frequency)) : (frequency) => Math.log(frequency / 200) / Math.log(20);
+    const zoom = (frequency) => Math.log(frequency / 240) / Math.log(560 / 240);
+    const toFrac = focused > 0 ? (frequency) => full(frequency) * (1 - focused) + zoom(frequency) * focused : full;
+    const toFreq = (fraction) => {
+      let low = Math.log(30);
+      let high = Math.log(16000);
+      for (let step = 0; step < 30; step++) {
+        const middle = (low + high) / 2;
+        if (toFrac(Math.exp(middle)) < fraction) low = middle;
+        else high = middle;
+      }
+      return Math.exp((low + high) / 2);
+    };
+    return { toFrac, toFreq };
+  }
+
   function draw() {
     if (!ctx || !width || !height) return;
     ctx.clearRect(0, 0, width, height);
     const focused = shown?.length === 2 ? focus : 0;
-    const minimum = 200 * (240 / 200) ** focused;
-    const maximum = 4000 * (560 / 4000) ** focused;
-    const xAt = (frequency) => Math.log(frequency / minimum) / Math.log(maximum / minimum) * width;
+    const { toFrac, toFreq } = axis(focused);
+    const minimum = toFreq(0);
+    const maximum = toFreq(1);
+    const xAt = (frequency) => toFrac(frequency) * width;
     const baseline = height - 28;
     const plotTop = annotations ? Math.min(30, baseline * .35) : 8;
     const plotHeight = Math.max(0, baseline - plotTop);
+    const count = Math.max(90, Math.round(width / 4));
+    layout = { toFrac, baseline, plotHeight, count, levels: new Float32Array(count) };
     ctx.strokeStyle = '#a8af992b';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -67,24 +92,34 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
     ctx.textAlign = 'right';
     ctx.fillText(`${Math.round(maximum)} Гц`, width, height);
     if (!shown || !audio) return;
-    const count = Math.max(90, Math.round(width / 4));
     const barWidth = width / count;
     const hzPerBin = audio.sampleRate / master.fftSize;
     const fundamentals = version ? finalNotes(version).map(noteFrequency) : [];
+    const edges = Array.from({ length: count + 1 }, (_, bar) => toFreq(bar / count));
     shown.forEach((data, channel) => {
-      ctx.fillStyle = shown.length === 1 ? '#c8cdbf' : colors[channel];
+      const color = shown.length === 1 ? '#f1f0eb' : colors[channel];
+      // The bars fade towards the floor; a bright cap marks each level.
+      const fill = ctx.createLinearGradient(0, plotTop, 0, baseline);
+      fill.addColorStop(0, color);
+      fill.addColorStop(1, `${color}22`);
       for (let bar = 0; bar < count; bar++) {
-        const low = minimum * (maximum / minimum) ** (bar / count);
-        const high = minimum * (maximum / minimum) ** ((bar + 1) / count);
         let db = -Infinity;
         let peakFrequency = 0;
-        for (let bin = Math.floor(low / hzPerBin); bin <= Math.ceil(high / hzPerBin); bin++) {
+        for (let bin = Math.floor(edges[bar] / hzPerBin); bin <= Math.ceil(edges[bar + 1] / hzPerBin); bin++) {
           if (data[bin] > db) { db = data[bin]; peakFrequency = bin * hzPerBin; }
         }
         const fundamental = shown.length === 2 && Math.abs(peakFrequency - fundamentals[channel]) <= Math.max(8, hzPerBin * 3);
-        const level = Math.max(0, Math.min(1, (db + 85) / 58 * (fundamental ? 1 + focused * .8 : 1)));
-        ctx.globalAlpha = shown.length === 1 ? .7 : .8 * (fundamental ? 1 : 1 - focused);
-        if (level > .015) ctx.fillRect(bar * barWidth, baseline - level * plotHeight, Math.max(1, barWidth - 1), level * plotHeight);
+        const level = Math.max(0, Math.min(1, (db + 90) / 46 * (fundamental ? 1 + focused * .8 : 1)));
+        layout.levels[bar] = Math.max(layout.levels[bar], level);
+        if (level <= .015) continue;
+        const x = bar * barWidth;
+        const top = baseline - level * plotHeight;
+        const barSize = Math.max(1, barWidth - 1);
+        ctx.globalAlpha = shown.length === 1 ? .78 : .85 * (fundamental ? 1 : 1 - focused);
+        ctx.fillStyle = fill;
+        ctx.fillRect(x, top, barSize, level * plotHeight);
+        ctx.fillStyle = color;
+        ctx.fillRect(x, top, barSize, 2);
       }
     });
     ctx.globalAlpha = 1;
@@ -118,7 +153,7 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
       : version === 'mistake'
       ? 'Спектры двух нот: до и ре-бемоль. Близкие пики основных тонов и обертонов.'
       : version === 'correct' ? 'Спектры двух до в октаву. Некоторые гармоники совпадают по частоте.'
-      : 'Измеренный спектр звучащей мелодии, от 200 до 4000 герц.');
+      : 'Измеренный спектр звучащей мелодии. Пики стоят над своими клавишами.');
   }
 
   function resize() {
@@ -138,6 +173,16 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
 
   return {
     connect,
+    // The piano passes its key layout: a MIDI note (fractional too) → 0…1 of the width.
+    setAxis(fraction) { keyFraction = fraction; draw(); },
+    // Where a frequency stands on the drawn graph: x and the top of its bar, in px.
+    point(frequency) {
+      if (!layout || !width) return null;
+      const fraction = layout.toFrac(frequency);
+      const bar = Math.max(0, Math.min(layout.count - 1, Math.floor(fraction * layout.count)));
+      const level = Math.max(layout.levels[bar - 1] || 0, layout.levels[bar], layout.levels[bar + 1] || 0);
+      return { x: fraction * width, y: layout.baseline - level * layout.plotHeight, floor: layout.baseline, width };
+    },
     setFocus(showAnnotations, amount) {
       const next = reducedMotion.matches ? Number(amount >= .5) : Math.max(0, Math.min(1, amount));
       if (annotations === showAnnotations && Math.abs(next - focus) < .002) return;

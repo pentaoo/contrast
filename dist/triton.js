@@ -71,6 +71,7 @@ export function mountTritonFinale({ lab, stage, piano, reducedMotion }) {
       visibleKey = key;
     }
     lab.dataset.finale = completed ? 'done' : 'playing';
+    lab.dataset.broken = String(sample.broken);
     stage.dataset.broken = String(sample.broken);
     stage.dataset.gone = String(sample.gone);
     stage.dataset.pose = sample.pose;
@@ -79,7 +80,7 @@ export function mountTritonFinale({ lab, stage, piano, reducedMotion }) {
     stage.style.setProperty('--wreck-spin', `${sample.debris * 24}deg`);
     caption.hidden = !sample.broken;
     piano.setAttribute('aria-label', sample.gone ? 'Клавиатура рассыпалась и исчезла вниз вслед за тритоном.' : sample.broken ? 'Тритон проломил клавиатуру.' : intactLabel);
-    return sample;
+    return { ...sample, drop: sample.debris * dropDistance, spin: sample.debris * 24 };
   }
 
   return {
@@ -97,6 +98,7 @@ export function mountTritonFinale({ lab, stage, piano, reducedMotion }) {
       completed = false;
       visibleKey = undefined;
       lab.dataset.finale = 'idle';
+      lab.dataset.broken = 'false';
       stage.dataset.broken = 'false';
       stage.dataset.gone = 'false';
       delete stage.dataset.pose;

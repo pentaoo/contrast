@@ -1,8 +1,9 @@
-import { computerKeys, describeChord, noteName } from './notes.js?v=contrast-triton-13';
-import { createListeningState, finishMelody, skipListening } from './listening.js?v=contrast-triton-13';
-import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=contrast-triton-13';
-import { mountSpectrum } from './spectrum.js?v=contrast-triton-13';
-import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=contrast-triton-13';
+import { computerKeys, describeChord, noteName } from './notes.js?v=ball-1';
+import { createListeningState, finishMelody, skipListening } from './listening.js?v=ball-1';
+import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=ball-1';
+import { mountSpectrum } from './spectrum.js?v=ball-1';
+import { mountBall } from './ball.js?v=ball-1';
+import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=ball-1';
 
 export function mountPianoExperience({ reducedMotion }) {
   const piano = document.querySelector('#piano');
@@ -13,16 +14,15 @@ export function mountPianoExperience({ reducedMotion }) {
   const finalStep = document.querySelector('#sound-final-step');
   const tonesCopy = document.querySelector('#sound-tones-copy');
   const instrument = document.querySelector('.sound-instrument');
-  const skip = document.querySelector('#skip-audio');
   const replayFirst = document.querySelector('#replay-first');
   const outro = document.querySelector('#sound-outro');
-  const title = document.querySelector('#sound-title');
-  const prompt = document.querySelector('#listening-prompt');
   const status = document.querySelector('#sound-status');
   const error = document.querySelector('#audio-error');
   const spectrum = mountSpectrum(document.querySelector('#spectrum-canvas'), document.querySelector('#spectrum-caption'), reducedMotion);
+  const ball = mountBall({ floor: document.querySelector('#ball-floor'), spectrum, reducedMotion });
   const finale = mountTritonFinale({ lab, piano, stage: document.querySelector('#piano-stage'), reducedMotion });
   const keys = new Map();
+  const centers = new Map();
   const voices = new Set();
   const sources = new Map();
   let freeFrame;
@@ -60,8 +60,19 @@ export function mountPianoExperience({ reducedMotion }) {
     key.style.setProperty('--break-angle', `${central ? (note * 13 % 65) - 32 : (note < 59 ? -5 : 6)}deg`);
     piano.append(key);
     keys.set(note, key);
+    centers.set(note, (whiteIndex + (black ? blackOffsets[note % 12] : .5)) / whiteCount);
     if (!black) whiteIndex++;
   }
+
+  // The spectrum spans the keyboard: each peak stands over its own key.
+  spectrum.setAxis((midi) => {
+    const [low, high] = keyboardRange;
+    const slope = 7 / 12 / whiteCount;
+    if (midi <= low) return centers.get(low) + (midi - low) * slope;
+    if (midi >= high) return centers.get(high) + (midi - high) * slope;
+    const base = Math.floor(midi);
+    return centers.get(base) + (centers.get(base + 1) - centers.get(base)) * (midi - base);
+  });
 
   function lightKeys(notes = new Set(), secondNote) {
     keys.forEach((key, note) => {
@@ -74,14 +85,14 @@ export function mountPianoExperience({ reducedMotion }) {
     const explaining = state.phase === 'explanation';
     const openingExplanation = explanation.hidden && explaining;
     const readingPosition = openingExplanation ? { top: window.scrollY, left: window.scrollX } : null;
-    const focusExplanation = openingExplanation && [button, skip].includes(document.activeElement);
+    const focusExplanation = openingExplanation && document.activeElement === button;
     if (focusExplanation) document.activeElement.blur();
     lab.dataset.phase = state.phase;
     lab.dataset.playing = active ? active.version : busy ? 'loading' : 'none';
     opening.hidden = explaining;
     explanation.hidden = !explaining;
-    title.innerHTML = 'Чего вы ждёте<br>от последней ноты?';
-    prompt.textContent = 'Послушайте короткую мелодию до конца.';
+    // After the dancers run off, the first paragraph rises after a pause.
+    if (openingExplanation && !reducedMotion.matches) explanation.classList.add('is-arriving');
     if (readingPosition) {
       // Expanding the sticky grid can move the browser's scroll anchor to its
       // end. Flush that layout, then keep the reader at the first paragraph.
@@ -91,7 +102,6 @@ export function mountPianoExperience({ reducedMotion }) {
     }
     finalStepVisible = explaining && finalStep.getBoundingClientRect().top <= innerHeight * .15;
     lab.dataset.step = !explaining ? 'intro' : finalStepVisible ? 'final' : 'reading';
-    skip.hidden = explaining;
     replayFirst.hidden = !finalStepVisible || Boolean(active) || busy || finale.completed;
     button.hidden = finale.completed || (explaining && !finalStepVisible && !active && !busy);
     outro.hidden = !finale.completed;
@@ -99,7 +109,7 @@ export function mountPianoExperience({ reducedMotion }) {
     button.setAttribute('aria-pressed', String(Boolean(active)));
     button.querySelector('.play-icon').textContent = active ? '■' : '▶';
     button.querySelector('.play-label').textContent = active ? 'Остановить' : busy ? 'Включаем звук…'
-      : state.phase === 'intro' ? 'Послушать мелодию' : 'Послушать ещё раз';
+      : state.phase === 'intro' ? 'Начать бал' : 'Сыграть ещё раз';
     if (!active && !sources.size) {
       const notes = lastCompletedVersion && !finale.completed ? finalNotes(lastCompletedVersion) : [];
       lightKeys(new Set(notes), notes[1]);
@@ -109,7 +119,9 @@ export function mountPianoExperience({ reducedMotion }) {
   }
 
   function updateSpectrumFocus() {
-    if (state.phase !== 'explanation') { spectrum.setFocus(false, 0); return; }
+    // While the ball goes on, the graph stays over the keys: the octave's shared
+    // frequency is only visible together with the overtones.
+    if (state.phase !== 'explanation' || active || busy) { spectrum.setFocus(false, 0); return; }
     const rect = tonesCopy.getBoundingClientRect();
     const readingArea = Math.max(1, Math.min(innerHeight, instrument.getBoundingClientRect().top));
     const showAnnotations = rect.top <= readingArea * .8;
@@ -129,6 +141,7 @@ export function mountPianoExperience({ reducedMotion }) {
     const focusOutro = completed && performance?.finaleStarted && document.activeElement === button;
     active = null;
     busy = false;
+    ball.hide();
     if (performance?.finaleStart !== undefined && !completed) finale.reset();
     if (context) {
       const now = context.currentTime;
@@ -150,9 +163,9 @@ export function mountPianoExperience({ reducedMotion }) {
     if (focusOutro) outro.querySelector('a').focus({ preventScroll: true });
     if (!completed && performance) status.textContent = 'Воспроизведение остановлено. Можно послушать вариант заново.';
     if (completed && performance?.version === 'mistake') {
-      status.textContent = 'Мелодия завершилась двумя соседними нотами. Можно прочитать объяснение и затем послушать другой финал.';
+      status.textContent = 'В финале прозвучали до и ре-бемоль. Круг и квадрат сбились и разбежались. Дальше — объяснение и другой финал.';
     } else if (completed && performance?.version === 'correct') {
-      status.textContent = 'После двух до в октаву тритон проломил клавиатуру. В момент удара прозвучали до и фа-диез. Тритон и обломки исчезли вниз; дальше — следующая история.';
+      status.textContent = 'На двух до в октаву круг и квадрат сошлись в одну фигуру. Затем тритон проломил клавиатуру, и фигуры упали вместе с ней. В момент удара прозвучали до и фа-диез.';
     }
   }
 
@@ -263,7 +276,8 @@ export function mountPianoExperience({ reducedMotion }) {
     const elapsed = context.currentTime - active.start;
     if (active.finaleStart !== undefined && elapsed >= active.finaleStart) {
       if (!active.finaleStarted) { active.finaleStarted = true; finale.begin(); }
-      finale.render(elapsed - active.finaleStart, active.reduced || reducedMotion.matches);
+      const wreck = finale.render(elapsed - active.finaleStart, active.reduced || reducedMotion.matches);
+      ball.render(elapsed, active, wreck);
       lightKeys(new Set());
       if (elapsed >= active.duration) { stop(true); return; }
       frame = requestAnimationFrame(animateKeys);
@@ -281,6 +295,7 @@ export function mountPianoExperience({ reducedMotion }) {
     const finalAt = active.events.find((event) => event.final).at;
     const snapshot = spectrum.update(elapsed, active.version, finalAt, !active.snapshot);
     if (!active.snapshot && snapshot) active.snapshot = snapshot;
+    ball.render(elapsed, active);
     lightKeys(notes, active.finalSeen ? finalNotes(active.version)[1] : undefined);
     if (elapsed >= active.duration) { stop(true); return; }
     frame = requestAnimationFrame(animateKeys);
@@ -324,17 +339,21 @@ export function mountPianoExperience({ reducedMotion }) {
         tritonNotes.forEach((note) => pianoTone(note, active.start + schedule.impact, tritonTiming.sustain, .74));
       }
       spectrum.begin();
+      ball.begin();
       for (const event of melody.events) {
         event.notes.forEach((note, index) => pianoTone(note, active.start + event.at, event.duration, event.velocity, event.final ? finalOutputs[index] : output));
       }
       busy = false;
       updateUI();
-      status.textContent = active.version === 'mistake' ? 'Звучит небольшая мелодия.' : 'Та же мелодия с другим финалом.';
+      status.textContent = active.version === 'mistake' ? 'Звучит мелодия, круг и квадрат танцуют.' : 'Та же мелодия с другим финалом. Круг и квадрат снова танцуют.';
       frame = requestAnimationFrame(animateKeys);
     } catch {
       if (token !== generation) return;
       stop();
-      error.textContent = 'Не удалось включить звук. Попробуйте ещё раз или продолжайте чтение.';
+      // Without sound the reader still gets the explanation instead of a closed screen.
+      state = skipListening(state);
+      updateUI();
+      error.textContent = 'Не удалось включить звук. Объяснение можно прочитать и без него.';
     }
   }
 
@@ -371,15 +390,9 @@ export function mountPianoExperience({ reducedMotion }) {
   document.addEventListener('keyup', (event) => release(event.code));
   window.addEventListener('blur', releaseAll);
 
+  explanation.addEventListener('animationend', () => explanation.classList.remove('is-arriving'));
   button.addEventListener('click', () => play());
   replayFirst.addEventListener('click', () => play('mistake'));
-  skip.addEventListener('click', () => {
-    stop();
-    error.textContent = '';
-    state = skipListening(state);
-    updateUI();
-    document.querySelector('#listening-lead').focus({ preventScroll: true });
-  });
   finale.reset();
   updateUI();
 
@@ -406,6 +419,7 @@ export function mountPianoExperience({ reducedMotion }) {
       finale.reset();
       lastCompletedVersion = undefined;
       spectrum.reset();
+      explanation.classList.remove('is-arriving');
       error.textContent = '';
       status.textContent = '';
       updateUI();
