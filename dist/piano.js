@@ -1,7 +1,8 @@
-import { createListeningState, finishMelody, skipListening } from './listening.js?v=contrast-triton-9';
-import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=contrast-comparison-7';
-import { mountSpectrum } from './spectrum.js?v=contrast-comparison-7';
-import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=contrast-triton-9';
+import { computerKeys, describeChord, noteName } from './notes.js?v=contrast-triton-10';
+import { createListeningState, finishMelody, skipListening } from './listening.js?v=contrast-triton-10';
+import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=contrast-triton-10';
+import { mountSpectrum } from './spectrum.js?v=contrast-triton-10';
+import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=contrast-triton-10';
 
 export function mountPianoExperience({ reducedMotion }) {
   const piano = document.querySelector('#piano');
@@ -23,6 +24,10 @@ export function mountPianoExperience({ reducedMotion }) {
   const finale = mountTritonFinale({ lab, piano, stage: document.querySelector('#piano-stage'), reducedMotion });
   const keys = new Map();
   const voices = new Set();
+  const sources = new Map();
+  let freeFrame;
+  let ringingUntil = 0;
+  let lastChord = [];
   let state = createListeningState();
   let context;
   let output;
@@ -45,6 +50,7 @@ export function mountPianoExperience({ reducedMotion }) {
     const black = isBlack(note);
     key.className = `piano-key ${black ? 'is-black' : 'is-white'}`;
     key.dataset.note = String(note);
+    if (note % 12 === 0) key.dataset.label = noteName(note);
     key.setAttribute('aria-hidden', 'true');
     key.style.left = `${(whiteIndex + (black ? blackOffsets[note % 12] - .3 : 0)) / whiteCount * 100}%`;
     key.style.width = `${(black ? .6 : 1) / whiteCount * 100}%`;
@@ -94,7 +100,7 @@ export function mountPianoExperience({ reducedMotion }) {
     button.querySelector('.play-icon').textContent = active ? '■' : '▶';
     button.querySelector('.play-label').textContent = active ? 'Остановить' : busy ? 'Включаем звук…'
       : state.phase === 'intro' ? 'Послушать мелодию' : 'Послушать ещё раз';
-    if (!active) {
+    if (!active && !sources.size) {
       const notes = lastCompletedVersion && !finale.completed ? finalNotes(lastCompletedVersion) : [];
       lightKeys(new Set(notes), notes[1]);
     }
@@ -112,6 +118,11 @@ export function mountPianoExperience({ reducedMotion }) {
   }
 
   function stop(completed = false) {
+    releaseAll();
+    cancelAnimationFrame(freeFrame);
+    freeFrame = undefined;
+    ringingUntil = 0;
+    lastChord = [];
     generation++;
     cancelAnimationFrame(frame);
     const performance = active;
@@ -149,6 +160,7 @@ export function mountPianoExperience({ reducedMotion }) {
     // Fast hammer attack; the upper partials decay faster than the fundamental.
     // This is a lightweight piano-like synthesis, with no downloaded samples.
     const frequency = noteFrequency(note);
+    const tone = [];
     [1, .36, .16, .08, .035, .016].forEach((weight, index) => {
       const oscillator = context.createOscillator();
       const gain = context.createGain();
@@ -161,6 +173,7 @@ export function mountPianoExperience({ reducedMotion }) {
       gain.connect(destination);
       const voice = { oscillator, gain, at };
       voices.add(voice);
+      tone.push(voice);
       oscillator.onended = () => {
         oscillator.disconnect();
         gain.disconnect();
@@ -169,6 +182,79 @@ export function mountPianoExperience({ reducedMotion }) {
       oscillator.start(at);
       oscillator.stop(at + partialDuration + .02);
     });
+    return tone;
+  }
+
+  function heldNotes() {
+    return [...new Set([...sources.values()].map(({ note }) => note))];
+  }
+
+  function release(id) {
+    const source = sources.get(id);
+    if (!source) return;
+    sources.delete(id);
+    if (context && source.tone) {
+      const now = context.currentTime;
+      source.tone.forEach(({ oscillator, gain }) => {
+        if (gain.gain.cancelAndHoldAtTime) gain.gain.cancelAndHoldAtTime(now);
+        else gain.gain.cancelScheduledValues(now);
+        gain.gain.setTargetAtTime(0, now, .09);
+        try { oscillator.stop(now + .6); } catch {}
+      });
+      ringingUntil = Math.max(ringingUntil, now + .6);
+    }
+    queueFreeFrame();
+  }
+
+  function releaseAll() {
+    [...sources.keys()].forEach(release);
+  }
+
+  async function press(id, note) {
+    if (active || busy || finale.completed || lab.dataset.finale !== 'idle' || !keys.has(note)) return;
+    release(id);
+    const source = { note };
+    sources.set(id, source);
+    lastChord = heldNotes();
+    queueFreeFrame();
+    try {
+      await ensureAudio();
+    } catch {
+      error.textContent = 'Не удалось включить звук. Попробуйте ещё раз или продолжайте чтение.';
+      return;
+    }
+    // The key may already be up, or a melody may have started meanwhile.
+    if (sources.get(id) !== source || active || busy) return;
+    error.textContent = '';
+    source.tone = pianoTone(note, context.currentTime + .005, 3.2, .7);
+    ringingUntil = Math.max(ringingUntil, context.currentTime + 3.3);
+  }
+
+  function queueFreeFrame() {
+    if (!freeFrame) freeFrame = requestAnimationFrame(drawFreePlay);
+  }
+
+  function drawFreePlay() {
+    freeFrame = undefined;
+    if (active) return;
+    const notes = heldNotes();
+    if (notes.length) lastChord = notes;
+    const ringing = context && context.currentTime < ringingUntil;
+    if (notes.length || ringing) {
+      const sorted = [...notes].sort((a, b) => a - b);
+      lightKeys(new Set(notes), sorted.length === 2 ? sorted[1] : undefined);
+      spectrum.live(describeChord(lastChord));
+      queueFreeFrame();
+    } else {
+      lastChord = [];
+      updateUI();
+      spectrum.restore();
+    }
+  }
+
+  function noteAt(x, y) {
+    const key = document.elementFromPoint(x, y)?.closest('.piano-key');
+    return key && piano.contains(key) ? Number(key.dataset.note) : null;
   }
 
   function animateKeys() {
@@ -218,6 +304,7 @@ export function mountPianoExperience({ reducedMotion }) {
     if (busy) return;
     if (active) { stop(); return; }
     if (state.phase === 'explanation' && !finalStepVisible) return;
+    releaseAll();
     const token = ++generation;
     finale.reset();
     busy = true;
@@ -251,6 +338,39 @@ export function mountPianoExperience({ reducedMotion }) {
     }
   }
 
+  piano.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return;
+    const note = noteAt(event.clientX, event.clientY);
+    if (note === null) return;
+    event.preventDefault();
+    piano.setPointerCapture?.(event.pointerId);
+    press(`pointer-${event.pointerId}`, note);
+  });
+  piano.addEventListener('pointermove', (event) => {
+    const id = `pointer-${event.pointerId}`;
+    if (!sources.has(id)) return;
+    const note = noteAt(event.clientX, event.clientY);
+    if (note !== null && note !== sources.get(id).note) press(id, note);
+  });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((type) => {
+    piano.addEventListener(type, (event) => release(`pointer-${event.pointerId}`));
+  });
+  piano.addEventListener('contextmenu', (event) => event.preventDefault());
+
+  const instrumentInView = () => {
+    const rect = instrument.getBoundingClientRect();
+    return rect.bottom > 0 && rect.top < innerHeight && lab.getBoundingClientRect().top < innerHeight;
+  };
+  document.addEventListener('keydown', (event) => {
+    const note = computerKeys[event.code];
+    if (note === undefined || event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.target.closest?.('input, textarea, select, [contenteditable="true"]') || !instrumentInView()) return;
+    event.preventDefault();
+    press(event.code, note);
+  });
+  document.addEventListener('keyup', (event) => release(event.code));
+  window.addEventListener('blur', releaseAll);
+
   button.addEventListener('click', () => play());
   replayFirst.addEventListener('click', () => play('mistake'));
   skip.addEventListener('click', () => {
@@ -272,6 +392,9 @@ export function mountPianoExperience({ reducedMotion }) {
       else updateSpectrumFocus();
     },
     stop,
+    motionChanged() {
+      if (active?.finaleStarted && reducedMotion.matches) finale.render(context.currentTime - active.start - active.finaleStart, true);
+    },
     reset() {
       stop();
       state = createListeningState();
