@@ -169,14 +169,15 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 /* Общие sticky-сцены */
 .scene-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; }
 
-/* 01 Точки и фигуры. Кадр рисует geometry-story.js по прогрессу прокрутки. */
-.attention-scene { --story-yellow: #d99c12; --story-copy-1: 1; --story-copy-2: 1; --story-copy-3: 1; }
-.js-enabled .attention-scene { height: 420vh; height: 420svh; }
+/* 01 Точки и фигуры. Сцену проигрывает geometry-story.js; на время показа прокрутка заблокирована. */
+.attention-scene { --story-accent: var(--accent); --story-copy-1: 1; --story-copy-2: 1; --story-copy-3: 1; }
+.js-enabled .attention-scene { height: 100vh; height: 100svh; }
+html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .attention-stage { position: relative; height: auto; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: var(--space-5); padding: var(--space-5) var(--gutter); }
 .story-canvas { display: none; }
 .story-canvas g circle, .story-dot circle { fill: var(--dot); }
-.story-canvas rect, .story-square { fill: var(--ink); }
-.story-frame .story-circle { fill: var(--story-yellow); }
+.story-canvas rect:not([fill]), .story-square { fill: var(--ink); }
+.story-frame .story-circle, .story-frame .story-square--small { fill: var(--story-accent); }
 /* Без JS и в статичном режиме — четыре кадра подряд, затем вопрос. */
 .story-frames { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: var(--space-4) var(--space-3); max-width: var(--measure); width: 100%; margin: 0 auto; padding: 0; list-style: none; }
 .story-frame svg { display: block; width: 100%; height: auto; background: var(--paper-deep); }
@@ -275,6 +276,7 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .ending-content { position: absolute; inset: 0; display: grid; place-items: center; color: white; mix-blend-mode: difference; opacity: var(--end-opacity); }
 .ending-content h2 { font-size: clamp(48px, 10vw, 150px); }
 .ending-last { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); color: var(--muted); text-align: center; padding: var(--space-3); }
+.ending-last:not([hidden]) { display: flex; }
 .restart-veil { position: fixed; inset: 0; z-index: 90; background: white; opacity: 0; pointer-events: none; transition: opacity .8s; }
 .restart-veil.active { opacity: 1; transition: opacity .25s; }
 html.ending-blank { scrollbar-width: none; }
@@ -312,7 +314,6 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .story-copy .body-copy { margin-top: var(--space-2); }
   .story-bridge { margin-top: var(--space-3); font-size: 19px; }
   .js-enabled .story-copy { bottom: var(--space-4); }
-  .js-enabled .attention-scene { height: 380vh; height: 380svh; }
   .form-section { padding-top: var(--space-4); }
   .poster { padding: 28px 23px; height: 420px; }
   .poster-kicker, .poster-title, .poster-description, .poster-cta { font-size: 13px; }

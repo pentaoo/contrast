@@ -1,13 +1,16 @@
-// История жёлтой точки: поле точек → круг, большой и маленький квадрат.
-// Кадр зависит только от прогресса прокрутки: одинаковый прогресс — одинаковый кадр.
+// История оранжевой точки: поле точек → круг, большой и маленький квадрат.
+// Сцена проигрывается сама, по времени; прокрутка на это время заблокирована.
+// Кадр зависит только от прогресса: одинаковый прогресс — одинаковый кадр.
 
 const SVG = 'http://www.w3.org/2000/svg';
+export const DURATION = 18000;
+const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ', 'Spacebar']);
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 const ease = (t) => t * t * (3 - 2 * t);
 const span = (p, from, to) => ease(clamp((p - from) / (to - from)));
 
 // Размеры в единицах сцены: диаметр круга — 1.
-export const SIZES = { circle: 1, small: 1.6, big: 3.3 };
+export const SIZES = { circle: 1, small: 1.6, big: 4.4 };
 
 // Ключевые кадры: [прогресс, x, y]. Между ними — плавный ход с остановкой на каждом кадре.
 function track(p, keys) {
@@ -50,22 +53,22 @@ export function storyFrame(progress, view) {
     [.91, leftOut + .6, 3.4],
   ];
   const bigKeys = [
-    [.27, leftOut, 0],
-    [.32, -3.2, 0],
-    [.36, -3.2, 0],
-    [.39, -1, 0],
-    [.435, -1, 0],
-    [.465, 1.4, -2.2], // перекрывает путь
-    [.5, 1.4, -2.2],
-    [.535, 2.2, -.8],
-    [.645, 2.2, -.8],
-    [.665, 1.6, -.8], // ответ на маленький квадрат
-    [.68, 1.6, -.8],
-    [.71, 2.4, -.6],
-    [.735, 2.4, -.6],
-    [.78, 2.2, -2.6], // за маленьким, вверх
-    [.885, 2.2, -2.6],
-    [.93, .2, -1.2], // поздно оборачивается
+    [.27, leftOut - 1, 0],
+    [.32, -3.75, 0],
+    [.36, -3.75, 0],
+    [.39, -1.55, 0],
+    [.435, -1.55, 0],
+    [.465, .85, -2.75], // перекрывает путь
+    [.5, .85, -2.75],
+    [.535, 1.65, -1.1],
+    [.645, 1.65, -1.1],
+    [.665, 1.05, -1.1], // ответ на маленький квадрат
+    [.68, 1.05, -1.1],
+    [.71, 1.85, -.9],
+    [.735, 1.85, -.9],
+    [.78, 1.65, -3.15], // за маленьким, вверх
+    [.885, 1.65, -3.15],
+    [.93, -.35, -1.75], // поздно оборачивается
   ];
   const smallKeys = [
     [.55, halfW + 2, -halfH - 2],
@@ -123,7 +126,7 @@ function parseColor(value) {
   return [0, 2, 4].map((at) => parseInt(full.slice(at, at + 2), 16) || 0);
 }
 
-export function mountGeometryStory(section) {
+export function mountGeometryStory(section, { isStatic }) {
   const svg = section.querySelector('#story-canvas');
   const dotsLayer = create('g');
   const big = create('rect');
@@ -172,7 +175,7 @@ export function mountGeometryStory(section) {
       originX,
       originY,
       grey: parseColor(style.getPropertyValue('--dot') || '#c0c2b6'),
-      yellow: parseColor(style.getPropertyValue('--story-yellow') || '#d99c12'),
+      accent: parseColor(style.getPropertyValue('--story-accent') || '#ee492c'),
       view: {
         halfW: width / 2 / unit,
         halfH: height / 2 / unit,
@@ -193,30 +196,109 @@ export function mountGeometryStory(section) {
     node.setAttribute('visibility', shape.visible ? 'visible' : 'hidden');
   }
 
-  function update(progress) {
+  function render(progress) {
     if (!layout) measure();
     if (!layout) return;
     const key = `${layout.key}:${progress.toFixed(4)}`;
     if (key === lastKey) return;
     lastKey = key;
     const frame = storyFrame(progress, layout.view);
-    const { unit, originX, originY, grey, yellow } = layout;
+    const { unit, originX, originY, grey, accent } = layout;
     dotsLayer.setAttribute('opacity', frame.dots.toFixed(3));
     dotsLayer.setAttribute('visibility', frame.dots > 0 ? 'visible' : 'hidden');
     placeSquare(big, frame.big);
     placeSquare(small, frame.small);
     const tint = frame.circle.tint;
-    const [r, g, b] = grey.map((value, index) => Math.round(value + (yellow[index] - value) * tint));
+    const [r, g, b] = grey.map((value, index) => Math.round(value + (accent[index] - value) * tint));
     circle.setAttribute('cx', (originX + frame.circle.x * unit).toFixed(2));
     circle.setAttribute('cy', (originY + frame.circle.y * unit).toFixed(2));
     circle.setAttribute('r', (frame.circle.r * unit).toFixed(2));
-    circle.setAttribute('fill', `rgb(${r} ${g} ${b})`);
+    const fill = `rgb(${r} ${g} ${b})`;
+    circle.setAttribute('fill', fill);
+    small.setAttribute('fill', fill);
     frame.copy.forEach((value, index) => section.style.setProperty(`--story-copy-${index + 1}`, value.toFixed(3)));
+  }
+
+  const root = document.documentElement;
+  let progress = 0;
+  let played = false;
+  let playing = false;
+  let frameId;
+  let failsafe;
+  let lastTime = 0;
+  const block = (event) => event.preventDefault();
+  function blockKeys(event) {
+    if (event.key === 'Escape') finish();
+    else if (SCROLL_KEYS.has(event.key)) event.preventDefault();
+  }
+  function lock() {
+    root.classList.add('story-locked');
+    addEventListener('wheel', block, { passive: false });
+    addEventListener('touchmove', block, { passive: false });
+    addEventListener('keydown', blockKeys);
+  }
+  function unlock() {
+    root.classList.remove('story-locked');
+    removeEventListener('wheel', block);
+    removeEventListener('touchmove', block);
+    removeEventListener('keydown', blockKeys);
+  }
+  function stop() {
+    cancelAnimationFrame(frameId);
+    clearTimeout(failsafe);
+    playing = false;
+    unlock();
+  }
+  function finish() {
+    stop();
+    progress = 1;
+    render(progress);
+  }
+  // Пауза вкладки не проматывает сцену: шаг времени ограничен.
+  function tick(now) {
+    progress = clamp(progress + Math.min(100, now - lastTime) / DURATION);
+    lastTime = now;
+    render(progress);
+    if (progress >= 1) finish();
+    else frameId = requestAnimationFrame(tick);
+  }
+  function play() {
+    played = true;
+    playing = true;
+    const previous = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
+    scrollTo({ top: section.getBoundingClientRect().top + scrollY, behavior: 'instant' });
+    root.style.scrollBehavior = previous;
+    lock();
+    // Страница не должна застрять, даже если анимация оборвётся.
+    failsafe = setTimeout(finish, DURATION * 2);
+    lastTime = performance.now();
+    frameId = requestAnimationFrame(tick);
+  }
+
+  // Вызывается при прокрутке и смене размеров: запускает сцену, когда она заняла экран.
+  function check() {
+    if (isStatic()) {
+      if (playing) finish();
+      return;
+    }
+    if (playing) return;
+    if (!played) {
+      const { top, bottom } = section.getBoundingClientRect();
+      if (top <= 1 && bottom > innerHeight * .25) { play(); return; }
+    }
+    render(progress);
   }
 
   return {
     layout() { measure(); },
-    update,
-    reset() { lastKey = ''; },
+    check,
+    reset() {
+      stop();
+      played = false;
+      progress = 0;
+      lastKey = '';
+      render(progress);
+    },
   };
 }
