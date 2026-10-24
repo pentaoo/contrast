@@ -246,7 +246,7 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .conclusion { padding-bottom: var(--space-5); }
 /* Третий акт: тритон лежит на белом экране, потом приходит его море.
    Контекст влияет на контраст. */
-.stranger { --sea: 0; --text-a: 1; --text-b: 0; --tw: clamp(280px, 44vw, 640px); --tr: max(var(--gutter), calc(50% - 620px)); --fig: clamp(30px, 3.4vw, 50px); }
+.stranger { --sea: 0; --text-a: 1; --text-b: 0; --tw: clamp(280px, 44vw, 640px); --tr: max(var(--gutter), calc(50% - 620px)); --fig: clamp(64px, 8.5vw, 136px); }
 .stranger-scroll { height: 100vh; height: 100svh; }
 .js-enabled .stranger-scroll { height: 340vh; height: 340svh; }
 .stranger-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--paper); }
@@ -329,7 +329,7 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .section-pad { padding-block: var(--space-5); }
 }
 @media (max-width: 600px) {
-  .stranger { --tw: 76vw; --tr: -2vw; }
+  .stranger { --tw: 64vw; --tr: 0px; --fig: 44px; }
   :root { --text-ui: 14px; }
   .hero-subline { align-items: flex-start; gap: var(--space-3); }
   .circle-link { width: 44px; height: 44px; font-size: 22px; }
