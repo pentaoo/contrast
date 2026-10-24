@@ -1,8 +1,8 @@
-import { computerKeys, describeChord, noteName } from './notes.js?v=contrast-triton-12';
-import { createListeningState, finishMelody, skipListening } from './listening.js?v=contrast-triton-12';
-import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=contrast-triton-12';
-import { mountSpectrum } from './spectrum.js?v=contrast-triton-12';
-import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=contrast-triton-12';
+import { computerKeys, describeChord, noteName } from './notes.js?v=contrast-triton-13';
+import { createListeningState, finishMelody, skipListening } from './listening.js?v=contrast-triton-13';
+import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=contrast-triton-13';
+import { mountSpectrum } from './spectrum.js?v=contrast-triton-13';
+import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=contrast-triton-13';
 
 export function mountPianoExperience({ reducedMotion }) {
   const piano = document.querySelector('#piano');
@@ -384,6 +384,11 @@ export function mountPianoExperience({ reducedMotion }) {
   updateUI();
 
   return {
+    // The piano screen keeps the page until the block is done: before the
+    // melody, while it sounds, and until the reader reaches the last step.
+    holdsPage() {
+      return !finale.completed && (state.phase !== 'explanation' || Boolean(active) || busy || !finalStepVisible);
+    },
     updateScroll() {
       if (active?.finaleStart !== undefined && (lab.getBoundingClientRect().bottom <= 0 || finalStep.getBoundingClientRect().top > innerHeight * .8)) { stop(); return; }
       const visible = state.phase === 'explanation' && finalStep.getBoundingClientRect().top <= innerHeight * .15;

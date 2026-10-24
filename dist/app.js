@@ -1,5 +1,6 @@
-import { mountPianoExperience } from './piano.js?v=contrast-triton-12';
-import { mountGeometryStory } from './geometry-story.js?v=contrast-triton-12';
+import { mountPianoExperience } from './piano.js?v=contrast-triton-13';
+import { mountGeometryStory } from './geometry-story.js?v=contrast-triton-13';
+import { mountSoundScreen } from './sound-screen.js?v=contrast-triton-13';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -31,6 +32,12 @@ $('#hierarchy-toggle').addEventListener('click', () => {
 });
 
 const soundExperience = mountPianoExperience({ reducedMotion });
+const soundScreen = mountSoundScreen({
+  lab: $('#sound-lab'),
+  holdsPage: () => soundExperience.holdsPage(),
+  isStatic: () => reducedMotion.matches || matchMedia('(max-height: 600px)').matches,
+  onScroll: () => queueScrollUpdate(),
+});
 const lowWindow = matchMedia('(max-height: 600px)');
 // Dots fill the whole screen; one of them becomes the orange circle of the story.
 const geometryStory = mountGeometryStory($('#principle'), { isStatic: () => reducedMotion.matches || lowWindow.matches });
@@ -46,6 +53,7 @@ function localProgress(element) {
 }
 function updateScroll() {
   scrollTicking = false;
+  soundScreen.check();
   soundExperience.updateScroll();
   const reduced = reducedMotion.matches;
   const staticScenes = reduced || lowWindow.matches;
@@ -80,6 +88,7 @@ function resetExperiments() {
   $('#hierarchy-description').textContent = '';
   geometryStory.reset();
   soundExperience.reset();
+  soundScreen.reset();
   $('#sources').open = false;
 }
 function restartEssay() {

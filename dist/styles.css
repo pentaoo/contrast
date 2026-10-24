@@ -220,6 +220,10 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .sound-section { background: var(--ink); color: var(--paper); padding-bottom: var(--space-5); }
 .sound-lab { --sound-deck-height: clamp(380px, 46svh, 460px); position: relative; display: grid; overflow-anchor: none; }
 .sound-story, .sound-instrument { grid-area: 1 / 1; }
+/* Экран с пианино: на время блока страница стоит, прокручиваются только тексты внутри (sound-screen.js). */
+.js-enabled .sound-lab { height: 100vh; height: 100svh; overflow: hidden; scrollbar-width: none; }
+.js-enabled .sound-lab::-webkit-scrollbar { display: none; }
+.js-enabled .sound-lab.is-pinned { overflow-y: auto; }
 .sound-step { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding-top: clamp(20px, 4svh, 48px); padding-bottom: calc(var(--sound-deck-height) + clamp(20px, 4svh, 48px)); }
 .sound-copy { width: 100%; max-width: 1000px; font-size: clamp(28px, min(4.2vw, 6svh), 60px); font-weight: 600; line-height: 1.22; letter-spacing: -.045em; text-wrap: pretty; }
 .sound-copy h2 { font: inherit; letter-spacing: inherit; }
@@ -347,6 +351,7 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .feeling-copy h2 { font-size: 32px; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .js-enabled .sound-lab { height: auto; overflow: visible; }
   html { scroll-behavior: auto; }
   *, *:before, *:after { transition: none !important; animation: none !important; }
   .js-enabled .scroll-scene { height: auto; }
@@ -365,6 +370,7 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .ending-last { display: flex; background: var(--paper); }
 }
 @media (max-height: 600px) {
+  .js-enabled .sound-lab { height: auto; overflow: visible; }
   .js-enabled .attention-scene, .js-enabled .feeling-section { height: auto; }
   .feeling-stage { position: relative; height: auto; min-height: 100svh; }
   .js-enabled .attention-stage { position: relative; height: auto; padding: var(--space-4) var(--gutter); }
