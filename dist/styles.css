@@ -171,7 +171,7 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 
 /* 01 Точки и фигуры. Сцену проигрывает geometry-story.js; на время показа прокрутка заблокирована. */
 .attention-scene { --story-accent: var(--accent); --story-copy-1: 1; --story-copy-2: 1; --story-copy-3: 1; }
-.js-enabled .attention-scene { height: 100vh; height: 100svh; }
+.js-enabled .attention-scene { height: 200vh; height: 200svh; }
 html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .attention-stage { position: relative; height: auto; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: var(--space-5); padding: var(--space-5) var(--gutter); }
 .story-canvas { display: none; }

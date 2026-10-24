@@ -102,6 +102,18 @@ export function storyFrame(progress, view) {
   };
 }
 
+// После истории прокрутка растит большой квадрат, пока он не закроет весь экран.
+export function growSquare(square, grow, view) {
+  const t = ease(clamp(grow / .85));
+  const cover = 2 * Math.max(view.halfW, view.halfH + Math.abs(view.centerY)) + 1;
+  return {
+    ...square,
+    x: square.x * (1 - t),
+    y: square.y + (view.centerY - square.y) * t,
+    size: square.size * (cover / square.size) ** t,
+  };
+}
+
 // Сколько единиц от края круга до квадрата (отрицательно — наложение).
 export function circleGap(circle, square) {
   const half = square.size / 2;
@@ -179,6 +191,7 @@ export function mountGeometryStory(section, { isStatic }) {
       view: {
         halfW: width / 2 / unit,
         halfH: height / 2 / unit,
+        centerY: (height / 2 - originY) / unit,
         dotR: dotR / unit,
         start: { x: (left + heroCol * step - originX) / unit, y: (top + heroRow * step - originY) / unit },
       },
@@ -196,13 +209,15 @@ export function mountGeometryStory(section, { isStatic }) {
     node.setAttribute('visibility', shape.visible ? 'visible' : 'hidden');
   }
 
-  function render(progress) {
+  function render(progress, grow = 0) {
     if (!layout) measure();
     if (!layout) return;
-    const key = `${layout.key}:${progress.toFixed(4)}`;
+    const key = `${layout.key}:${progress.toFixed(4)}:${grow.toFixed(4)}`;
     if (key === lastKey) return;
     lastKey = key;
     const frame = storyFrame(progress, layout.view);
+    if (grow > 0) frame.big = growSquare(frame.big, grow, layout.view);
+    const textLeft = 1 - clamp(grow / .3);
     const { unit, originX, originY, grey, accent } = layout;
     dotsLayer.setAttribute('opacity', frame.dots.toFixed(3));
     dotsLayer.setAttribute('visibility', frame.dots > 0 ? 'visible' : 'hidden');
@@ -216,7 +231,7 @@ export function mountGeometryStory(section, { isStatic }) {
     const fill = `rgb(${r} ${g} ${b})`;
     circle.setAttribute('fill', fill);
     small.setAttribute('fill', fill);
-    frame.copy.forEach((value, index) => section.style.setProperty(`--story-copy-${index + 1}`, value.toFixed(3)));
+    frame.copy.forEach((value, index) => section.style.setProperty(`--story-copy-${index + 1}`, (value * textLeft).toFixed(3)));
   }
 
   const root = document.documentElement;
@@ -276,6 +291,12 @@ export function mountGeometryStory(section, { isStatic }) {
     frameId = requestAnimationFrame(tick);
   }
 
+  // Доля прокрутки секции после первого экрана: на ней квадрат растёт.
+  function growProgress() {
+    const { top } = section.getBoundingClientRect();
+    return clamp(-top / Math.max(1, section.offsetHeight - innerHeight));
+  }
+
   // Вызывается при прокрутке и смене размеров: запускает сцену, когда она заняла экран.
   function check() {
     if (isStatic()) {
@@ -287,7 +308,7 @@ export function mountGeometryStory(section, { isStatic }) {
       const { top, bottom } = section.getBoundingClientRect();
       if (top <= 1 && bottom > innerHeight * .25) { play(); return; }
     }
-    render(progress);
+    render(progress, progress >= 1 ? growProgress() : 0);
   }
 
   return {
