@@ -1,4 +1,4 @@
-import { mountPianoExperience } from './piano.js?v=ui-kit-1';
+import { mountPianoExperience } from './piano.js?v=read-button-1';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];

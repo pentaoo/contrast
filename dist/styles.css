@@ -153,15 +153,18 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 
 /* Обложка */
 .hero { min-height: 100vh; min-height: 100svh; padding-block: var(--space-5); padding-inline: max(var(--gutter), calc((100% - 1470px) / 2)); display: flex; flex-direction: column; justify-content: center; }
-.hero h1 { font: 600 clamp(80px, 21.4vw, 340px)/1.12 var(--display); letter-spacing: -.052em; white-space: nowrap; }
-.title-dot { color: var(--accent); font-family: var(--sans); font-size: .65em; position: relative; bottom: -.035em; margin-left: -.025em; }
+.hero-title { font: 600 clamp(64px, 19.6vw, 340px)/1.12 var(--display); letter-spacing: -.05em; white-space: nowrap; }
+.hero-title h1 { display: inline; font: inherit; letter-spacing: inherit; }
+/* Точка заголовка — кнопка «читать». Пропорции из макета: высота ≈ 0,2 кегля, нижний край на базовой линии. */
+.read-button { display: inline-block; overflow: hidden; vertical-align: baseline; margin-left: .3em; font-size: max(14px, .058em); line-height: 2.45; letter-spacing: 0; padding: .33em .33em .58em; background: var(--accent); color: #fff; transition: background .2s; }
+.read-button:hover { background: var(--accent-hover); }
+.read-button:focus-visible { outline-offset: 4px; }
 .hero-subline { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); margin-top: var(--space-3); }
 .hero-statement { font-size: var(--text-voice); line-height: 1.4; letter-spacing: -.04em; font-weight: 600; }
 .hero-statement em { font-family: var(--serif); font-size: 1.08em; font-weight: 400; letter-spacing: -.02em; }
-.js-enabled .hero h1, .js-enabled .hero-statement, .js-enabled .hero .circle-link { opacity: 0; transform: translateY(22px); transition: opacity .85s var(--ease), transform .85s var(--ease); }
-.js-enabled.intro-ready .hero h1, .js-enabled.intro-ready .hero-statement, .js-enabled.intro-ready .hero .circle-link { opacity: 1; transform: none; }
+.js-enabled .hero-title, .js-enabled .hero-statement { opacity: 0; transform: translateY(22px); transition: opacity .85s var(--ease), transform .85s var(--ease); }
+.js-enabled.intro-ready .hero-title, .js-enabled.intro-ready .hero-statement { opacity: 1; transform: none; }
 .intro-ready .hero-statement { transition-delay: .25s; }
-.intro-ready .hero .circle-link { transition-delay: .5s; }
 
 /* Общие sticky-сцены */
 .scene-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; }
@@ -272,7 +275,7 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
 /* 7. Адаптивность и доступность ----------------------------- */
 @media (min-width: 1600px) {
-  .hero h1 { font-size: 340px; }
+  .hero-title { font-size: 340px; }
 }
 @media (max-height: 500px) {
   .sound-lab { --sound-deck-height: 220px; }
@@ -343,7 +346,7 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .scene-sticky { position: relative; }
   .js-enabled .attention-insight, .js-enabled .attention-next,
   .js-enabled .scene>.scene-heading, .js-enabled .scene>.hierarchy-lab, .js-enabled .scene>.sound-lab,
-  .js-enabled .conclusion>h2, .js-enabled .hero h1, .js-enabled .hero-statement, .js-enabled .hero .circle-link,
+  .js-enabled .conclusion>h2, .js-enabled .hero-title, .js-enabled .hero-statement,
   .js-enabled .feeling-second, .js-enabled .feeling-story, .js-enabled .soft-shape { opacity: 1; transform: none; visibility: visible; }
   .js-enabled .feeling-first { opacity: 0; }
   .dot-field i:nth-child(43) { background: var(--accent); }
