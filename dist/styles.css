@@ -169,18 +169,28 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 /* Общие sticky-сцены */
 .scene-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; }
 
-/* 01 Точки */
-.js-enabled .attention-scene { height: 180vh; height: 180svh; }
-.attention-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-5); padding: var(--space-5) var(--gutter); }
-/* Сетка точек на весь экран: шаг задаёт app.js, остаток делится поровну по краям. */
-.dot-field { --dot-step: 60px; position: absolute; inset: 0; display: grid; grid-template-columns: repeat(var(--dot-cols, 12), var(--dot-step)); grid-auto-rows: var(--dot-step); place-content: center; place-items: center; }
-.dot-field i { display: block; width: clamp(9px, .25 * var(--dot-step), 15px); aspect-ratio: 1; border-radius: 50%; background: var(--dot); transition: background .35s, transform .5s var(--ease); }
-.attention-scene.has-difference .dot-field i.is-different { background: var(--accent); transform: scale(1.15); }
-.attention-insight, .attention-next { position: relative; z-index: 1; background: var(--paper); box-shadow: 0 0 0 var(--space-2) var(--paper); }
-.attention-insight { text-align: center; }
-.attention-next { position: absolute; z-index: 1; bottom: var(--space-4); left: var(--gutter); right: var(--gutter); text-align: center; }
-.js-enabled .attention-insight, .js-enabled .attention-next { opacity: 0; transform: translateY(12px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
-.has-insight .attention-insight, .has-next .attention-next { opacity: 1; transform: none; }
+/* 01 Точки и фигуры. Кадр рисует geometry-story.js по прогрессу прокрутки. */
+.attention-scene { --story-yellow: #d99c12; --story-copy-1: 1; --story-copy-2: 1; --story-copy-3: 1; }
+.js-enabled .attention-scene { height: 420vh; height: 420svh; }
+.attention-stage { position: relative; height: auto; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: var(--space-5); padding: var(--space-5) var(--gutter); }
+.story-canvas { display: none; }
+.story-canvas g circle, .story-dot circle { fill: var(--dot); }
+.story-canvas rect, .story-square { fill: var(--ink); }
+.story-frame .story-circle { fill: var(--story-yellow); }
+/* Без JS и в статичном режиме — четыре кадра подряд, затем вопрос. */
+.story-frames { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: var(--space-4) var(--space-3); max-width: var(--measure); width: 100%; margin: 0 auto; padding: 0; list-style: none; }
+.story-frame svg { display: block; width: 100%; height: auto; background: var(--paper-deep); }
+.story-frame .label { margin-top: var(--space-1); }
+.story-copy { max-width: var(--measure); width: 100%; margin: 0 auto; }
+.story-copy .body-copy { margin-top: var(--space-3); }
+.story-bridge { margin-top: var(--space-4); }
+.js-enabled .attention-stage { position: sticky; height: 100vh; height: 100svh; padding: 0; }
+.js-enabled .story-canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+.js-enabled .story-frames { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); }
+.js-enabled .story-copy { position: absolute; z-index: 1; left: var(--gutter); right: var(--gutter); bottom: var(--space-5); width: auto; pointer-events: none; }
+.js-enabled .story-copy>h2 { opacity: var(--story-copy-1); }
+.js-enabled .story-copy>.body-copy { opacity: var(--story-copy-2); }
+.js-enabled .story-copy>.story-bridge { opacity: var(--story-copy-3); }
 
 /* Появление сцен */
 .js-enabled .scene>.scene-heading, .js-enabled .scene>.hierarchy-lab, .js-enabled .scene>.sound-lab, .js-enabled .conclusion>h2 { opacity: 0; transform: translateY(22px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
@@ -298,7 +308,11 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .hero-subline { align-items: flex-start; gap: var(--space-3); }
   .circle-link { width: 44px; height: 44px; font-size: 22px; }
   .attention-stage { gap: var(--space-4); }
-  .attention-insight .h2 { font-size: 8vw; }
+  .story-copy .h2 { font-size: 8vw; }
+  .story-copy .body-copy { margin-top: var(--space-2); }
+  .story-bridge { margin-top: var(--space-3); font-size: 19px; }
+  .js-enabled .story-copy { bottom: var(--space-4); }
+  .js-enabled .attention-scene { height: 380vh; height: 380svh; }
   .form-section { padding-top: var(--space-4); }
   .poster { padding: 28px 23px; height: 420px; }
   .poster-kicker, .poster-title, .poster-description, .poster-cta { font-size: 13px; }
@@ -336,20 +350,27 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   *, *:before, *:after { transition: none !important; animation: none !important; }
   .js-enabled .scroll-scene { height: auto; }
   .scene-sticky { position: relative; }
-  .js-enabled .attention-insight, .js-enabled .attention-next,
   .js-enabled .scene>.scene-heading, .js-enabled .scene>.hierarchy-lab, .js-enabled .scene>.sound-lab,
   .js-enabled .conclusion>h2, .js-enabled .hero-title, .js-enabled .hero-statement,
   .js-enabled .feeling-second, .js-enabled .feeling-story, .js-enabled .soft-shape { opacity: 1; transform: none; visibility: visible; }
   .js-enabled .feeling-first { opacity: 0; }
-  .dot-field i.is-different { background: var(--accent); }
+  .js-enabled .attention-stage { position: relative; height: auto; padding: var(--space-5) var(--gutter); }
+  .js-enabled .story-canvas { display: none; }
+  .js-enabled .story-frames { position: static; width: 100%; height: auto; margin: 0 auto; overflow: visible; clip: auto; }
+  .js-enabled .story-copy { position: static; width: 100%; pointer-events: auto; }
+  .js-enabled .story-copy>* { opacity: 1; }
   .disappearance { height: 100vh; height: 100svh; }
   .ending-pattern, .ending-content { display: none; }
   .ending-last { display: flex; background: var(--paper); }
 }
 @media (max-height: 600px) {
   .js-enabled .attention-scene, .js-enabled .feeling-section { height: auto; }
-  .attention-stage, .feeling-stage { position: relative; height: auto; min-height: 100svh; }
-  .attention-stage { padding-top: 80px; padding-bottom: 110px; }
+  .feeling-stage { position: relative; height: auto; min-height: 100svh; }
+  .js-enabled .attention-stage { position: relative; height: auto; padding: var(--space-4) var(--gutter); }
+  .js-enabled .story-canvas { display: none; }
+  .js-enabled .story-frames { position: static; width: 100%; height: auto; margin: 0 auto; overflow: visible; clip: auto; }
+  .js-enabled .story-copy { position: static; width: 100%; pointer-events: auto; }
+  .js-enabled .story-copy>* { opacity: 1; }
   .feeling-stage { padding-top: 45px; padding-bottom: 45px; }
 }
 

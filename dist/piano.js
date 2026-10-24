@@ -1,8 +1,8 @@
-import { computerKeys, describeChord, noteName } from './notes.js?v=contrast-triton-10';
-import { createListeningState, finishMelody, skipListening } from './listening.js?v=contrast-triton-10';
-import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=contrast-triton-10';
-import { mountSpectrum } from './spectrum.js?v=contrast-triton-10';
-import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=contrast-triton-10';
+import { computerKeys, describeChord, noteName } from './notes.js?v=contrast-triton-11';
+import { createListeningState, finishMelody, skipListening } from './listening.js?v=contrast-triton-11';
+import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=contrast-triton-11';
+import { mountSpectrum } from './spectrum.js?v=contrast-triton-11';
+import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=contrast-triton-11';
 
 export function mountPianoExperience({ reducedMotion }) {
   const piano = document.querySelector('#piano');
