@@ -253,7 +253,6 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 #sound-explanation.is-arriving { animation: sound-arrive 1.1s var(--ease) 1s both; }
 @keyframes sound-arrive { from { opacity: 0; transform: translateY(48px); } }
 .listening-actions { flex: none; height: 52px; display: flex; align-items: center; justify-content: center; gap: var(--space-3); }
-.sound-lab[data-step="reading"][data-playing="none"] .listening-actions { display: none; }
 .audio-error:empty { display: none; }
 .audio-error:not(:empty) { position: absolute; bottom: 82px; left: var(--inline); right: var(--inline); padding: 12px; background: var(--ink); text-align: center; color: var(--muted-on-ink); }
 

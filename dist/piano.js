@@ -1,9 +1,9 @@
-import { computerKeys, describeChord, noteName } from './notes.js?v=ball-2';
-import { createListeningState, finishMelody, skipListening } from './listening.js?v=ball-2';
-import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=ball-2';
-import { mountSpectrum } from './spectrum.js?v=ball-2';
-import { mountBall } from './ball.js?v=ball-2';
-import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=ball-2';
+import { computerKeys, describeChord, noteName } from './notes.js?v=ball-3';
+import { createListeningState, finishMelody, skipListening } from './listening.js?v=ball-3';
+import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=ball-3';
+import { mountSpectrum } from './spectrum.js?v=ball-3';
+import { mountBall } from './ball.js?v=ball-3';
+import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=ball-3';
 
 export function mountPianoExperience({ reducedMotion }) {
   const piano = document.querySelector('#piano');
@@ -102,8 +102,10 @@ export function mountPianoExperience({ reducedMotion }) {
     }
     finalStepVisible = explaining && finalStep.getBoundingClientRect().top <= innerHeight * .15;
     lab.dataset.step = !explaining ? 'intro' : finalStepVisible ? 'final' : 'reading';
-    replayFirst.hidden = !finalStepVisible || Boolean(active) || busy || finale.completed;
-    button.hidden = finale.completed || (explaining && !finalStepVisible && !active && !busy);
+    // Both buttons stay in place through the explanation, so the deck never jumps.
+    replayFirst.hidden = !explaining || finale.completed;
+    replayFirst.style.visibility = active || busy ? 'hidden' : '';
+    button.hidden = finale.completed;
     outro.hidden = !finale.completed;
     button.disabled = busy;
     button.setAttribute('aria-pressed', String(Boolean(active)));
@@ -296,6 +298,8 @@ export function mountPianoExperience({ reducedMotion }) {
     const snapshot = spectrum.update(elapsed, active.version, finalAt, !active.snapshot);
     if (!active.snapshot && snapshot) active.snapshot = snapshot;
     ball.render(elapsed, active);
+    // The final pair stays pressed while it fades, so the keys never blink before the held frame.
+    if (active.finalSeen) finalNotes(active.version).forEach((note) => notes.add(note));
     lightKeys(notes, active.finalSeen ? finalNotes(active.version)[1] : undefined);
     if (elapsed >= active.duration) { stop(true); return; }
     frame = requestAnimationFrame(animateKeys);
@@ -318,7 +322,11 @@ export function mountPianoExperience({ reducedMotion }) {
   async function play(requestedVersion) {
     if (busy) return;
     if (active) { stop(); return; }
-    if (state.phase === 'explanation' && !finalStepVisible) return;
+    // The new ending is explained by the last paragraph: bring it up first.
+    if (state.phase === 'explanation' && !finalStepVisible && requestedVersion !== 'mistake') {
+      lab.scrollTop = finalStep.offsetTop;
+      updateUI();
+    }
     releaseAll();
     const token = ++generation;
     finale.reset();
