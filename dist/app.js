@@ -1,6 +1,6 @@
-import { mountPianoExperience } from './piano.js?v=ball-3';
-import { mountGeometryStory } from './geometry-story.js?v=ball-3';
-import { mountSoundScreen } from './sound-screen.js?v=ball-3';
+import { mountPianoExperience } from './piano.js?v=essay-1';
+import { mountGeometryStory } from './geometry-story.js?v=essay-1';
+import { mountSoundScreen } from './sound-screen.js?v=essay-1';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -24,13 +24,6 @@ if ('IntersectionObserver' in window) {
   $$('.scene').forEach((scene) => scene.classList.add('is-entered'));
 }
 
-$('#hierarchy-toggle').addEventListener('click', () => {
-  const ordered = $('#poster').classList.toggle('is-ordered');
-  $('#hierarchy-toggle').setAttribute('aria-pressed', String(ordered));
-  $('#hierarchy-toggle').innerHTML = ordered ? 'Убрать иерархию <span aria-hidden="true">↙</span>' : 'Добавить иерархию <span aria-hidden="true">↗</span>';
-  $('#hierarchy-description').textContent = ordered ? 'Слова остались прежними. Размер, вес и интервалы задали порядок чтения.' : 'Слова те же. Без иерархии начало приходится искать заново.';
-});
-
 const soundExperience = mountPianoExperience({ reducedMotion });
 const soundScreen = mountSoundScreen({
   lab: $('#sound-lab'),
@@ -42,7 +35,6 @@ const lowWindow = matchMedia('(max-height: 600px)');
 // Dots fill the whole screen; one of them becomes the orange circle of the story.
 const geometryStory = mountGeometryStory($('#principle'), { isStatic: () => reducedMotion.matches || lowWindow.matches });
 
-const feeling = $('#feeling');
 const ending = $('#disappearance');
 const veil = $('.restart-veil');
 let scrollTicking = false;
@@ -56,14 +48,7 @@ function updateScroll() {
   soundScreen.check();
   soundExperience.updateScroll();
   const reduced = reducedMotion.matches;
-  const staticScenes = reduced || lowWindow.matches;
   geometryStory.check();
-  const feelingProgress = localProgress(feeling);
-  const soft = staticScenes || feelingProgress > .23;
-  feeling.classList.toggle('has-softness', soft);
-  feeling.classList.toggle('has-story', staticScenes || feelingProgress > .45);
-  $('.feeling-first').setAttribute('aria-hidden', String(soft));
-  $('.feeling-second').setAttribute('aria-hidden', String(!soft));
   const total = root.scrollHeight - innerHeight;
   $('.reading-progress span').style.transform = `scaleX(${clamp(scrollY / Math.max(1, total))})`;
   const progress = localProgress(ending);
@@ -82,10 +67,6 @@ function queueScrollUpdate() {
   requestAnimationFrame(updateScroll);
 }
 function resetExperiments() {
-  $('#poster').classList.remove('is-ordered');
-  $('#hierarchy-toggle').setAttribute('aria-pressed', 'false');
-  $('#hierarchy-toggle').innerHTML = 'Добавить иерархию <span aria-hidden="true">↗</span>';
-  $('#hierarchy-description').textContent = '';
   geometryStory.reset();
   soundExperience.reset();
   soundScreen.reset();
