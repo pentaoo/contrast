@@ -235,8 +235,6 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .audio-error:empty { display: none; }
 .audio-error:not(:empty) { position: absolute; bottom: 82px; left: var(--inline); right: var(--inline); padding: 12px; background: var(--ink); text-align: center; color: var(--muted-on-ink); }
 .sound-section .chapter-bridge { margin: 0; padding-top: var(--space-4); }
-.confetti-layer { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 70; }
-.confetti-layer i { position: absolute; display: block; width: 5px; height: 9px; }
 
 /* 04 Ожидание */
 .feeling-section { background: var(--paper-deep); }
@@ -278,6 +276,7 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .ending-content { position: absolute; inset: 0; display: grid; place-items: center; color: white; mix-blend-mode: difference; opacity: var(--end-opacity); }
 .ending-content h2 { font-size: clamp(48px, 10vw, 150px); }
 .ending-last { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); color: var(--muted); text-align: center; padding: var(--space-3); }
+.ending-last:not([hidden]) { display: flex; }
 .restart-veil { position: fixed; inset: 0; z-index: 90; background: white; opacity: 0; pointer-events: none; transition: opacity .8s; }
 .restart-veil.active { opacity: 1; transition: opacity .25s; }
 html.ending-blank { scrollbar-width: none; }
@@ -375,3 +374,45 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .js-enabled .story-copy>* { opacity: 1; }
   .feeling-stage { padding-top: 45px; padding-bottom: 45px; }
 }
+
+/* Рисованный тритон и распадающаяся клавиатура */
+.piano-stage { position: relative; isolation: isolate; }
+.sound-section { overflow: clip; }
+.listening-actions { height: auto; min-height: 52px; flex-wrap: wrap; }
+.triton-sprite { position: absolute; left: 53%; top: 12px; width: clamp(280px, 42vw, 500px); aspect-ratio: 1; z-index: 3; pointer-events: none; }
+.triton-sprite img { position: absolute; left: 0; top: 0; height: auto; max-width: none; }
+.sound-outro { position: relative; z-index: 6; flex: none; min-height: 52px; display: flex; justify-content: center; align-items: center; }
+.sound-outro a { display: inline-flex; gap: 18px; align-items: center; min-height: 48px; font-size: 15px; }
+.piano-case { display: none; position: absolute; top: -8px; height: calc(100% + 22px); background: #10120e; border-top: 3px solid #646958; z-index: 0; }
+.piano-case-left { left: -4px; width: 48%; clip-path: polygon(0 0, 100% 0, 88% 22%, 99% 43%, 81% 57%, 93% 76%, 85% 100%, 0 100%); transform: translate(-6px, calc(10px + var(--wreck-drop, 0px))) rotate(calc(-5deg - var(--wreck-spin, 0deg))); transform-origin: left center; }
+.piano-case-right { right: -4px; width: 46%; clip-path: polygon(9% 0, 100% 0, 100% 100%, 0 100%, 12% 78%, 1% 59%, 19% 40%, 3% 20%); transform: translate(7px, calc(17px + var(--wreck-drop, 0px))) rotate(calc(7deg + var(--wreck-spin, 0deg))); transform-origin: right center; }
+.piano-strings { display: none; position: absolute; left: 34%; top: 6px; width: 37%; height: 90%; background: repeating-linear-gradient(94deg, transparent 0 15px, #a09b75 16px 17px, transparent 18px 24px); transform: translateY(var(--wreck-drop, 0px)) skewY(8deg); opacity: .6; }
+.piano-wreckage { position: absolute; inset: 0; z-index: 4; pointer-events: none; visibility: hidden; }
+.piano-wreckage i { position: absolute; left: 49%; top: 30%; width: 6%; height: 55%; background: #575f49; clip-path: polygon(0 0, 100% 9%, 75% 40%, 100% 100%, 40% 87%, 20% 45%); transform: translate(0, 0) rotate(0); }
+.piano-wreckage i:nth-child(1) { --shard-x: -170px; --shard-y: -56px; --shard-angle: -62deg; }
+.piano-wreckage i:nth-child(2) { --shard-x: 140px; --shard-y: -24px; --shard-angle: 78deg; width: 3%; background: #b7b9aa; }
+.piano-wreckage i:nth-child(3) { --shard-x: -100px; --shard-y: 74px; --shard-angle: -31deg; width: 9%; background: #0b0d09; }
+.piano-wreckage i:nth-child(4) { --shard-x: 76px; --shard-y: 85px; --shard-angle: 40deg; width: 11%; background: #30362a; }
+.piano-wreckage i:nth-child(5) { --shard-x: -45px; --shard-y: 40px; --shard-angle: 18deg; width: 4%; background: #d3d3c7; }
+.piano-wreckage i:nth-child(6) { --shard-x: 185px; --shard-y: 58px; --shard-angle: 112deg; width: 3%; }
+.piano-stage[data-broken="true"] { background: transparent; }
+.piano-stage[data-broken="true"] .piano-case, .piano-stage[data-broken="true"] .piano-strings { display: block; }
+.piano-stage[data-broken="true"] .piano-key { transform: translate(var(--break-x), calc(var(--break-y) + var(--wreck-drop, 0px))) rotate(calc(var(--break-angle) + var(--wreck-spin, 0deg))); transition: none; }
+.piano-stage[data-broken="true"] .piano-wreckage { visibility: visible; }
+.piano-stage[data-broken="true"] .piano-wreckage i { transform: translate(var(--shard-x), calc(var(--shard-y) + var(--wreck-drop, 0px))) rotate(calc(var(--shard-angle) + var(--wreck-spin, 0deg))); }
+.piano-stage[data-gone="true"] { visibility: hidden; }
+.sound-lab:is([data-finale="playing"], [data-finale="done"]) .spectrum-stage { visibility: hidden; }
+.sound-lab[data-finale="playing"] .listening-actions { position: relative; z-index: 6; }
+.sound-lab[data-finale="done"] .listening-actions { display: none; }
+.sound-lab:is([data-finale="playing"], [data-finale="done"]) #sound-final-step .sound-copy { opacity: 0; }
+@media (max-width: 600px) {
+  .triton-sprite { left: 50%; width: min(82vw, 340px); }
+  .piano-wreckage i:nth-child(1) { --shard-x: -95px; }
+  .piano-wreckage i:nth-child(2) { --shard-x: 85px; }
+  .piano-wreckage i:nth-child(6) { --shard-x: 105px; }
+}
+@media (max-height: 500px) {
+  .triton-sprite { width: min(240px, 60svh); }
+}
+
+.sound-lab:is([data-finale="playing"], [data-finale="done"]) .piano-hint { visibility: hidden; }

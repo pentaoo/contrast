@@ -1,0 +1,31 @@
+{
+  "status": "integrated-automatic-finale-after-octave",
+  "width": 1254,
+  "height": 1254,
+  "frames": {
+    "triton-fall-a": {
+      "file": "triton-fall-a.png",
+      "source": "7f3e6ebf-abe0-4a4b-8f3f-b5a8f1dc9d58 1.png"
+    },
+    "triton-fall-b": {
+      "file": "triton-fall-b.png",
+      "source": "7f8cf4a5-4c20-4c0e-820e-861b682b2746 1.png"
+    },
+    "triton-impact-a": {
+      "file": "triton-impact-a.png",
+      "source": "739a1098-3cac-41e7-88aa-e6c02f5cf171 1.png"
+    },
+    "triton-impact-b": {
+      "file": "triton-impact-b.png",
+      "source": "215b02f7-86ec-4145-a7e3-7a566442ad87 1.png"
+    },
+    "triton-rest-a": {
+      "file": "triton-rest-a.png",
+      "source": "2eac6c9e-9bf0-44cf-bd62-e42e3c0c0f7b 1.png"
+    },
+    "triton-rest-b": {
+      "file": "triton-rest-b.png",
+      "source": "d1e942a3-50a5-4c30-9014-23bd8f63b8b1 1.png"
+    }
+  }
+}

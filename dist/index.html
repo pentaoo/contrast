@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f1f0eb">
-  <meta name="description" content="Заметить, понять, почувствовать. Интерактивное эссе о контрасте в восприятии, дизайне, музыке и историях.">
+  <meta name="description" content="Когда различие помогает понять, а когда — заставляет задержаться? Интерактивное эссе о контрасте в музыке, графике и историях.">
   <title>КОНТРАСТ — разница имеет значение</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="./assets/oswald-600.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/manrope-400.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="./assets/fonts.css">
-  <link rel="stylesheet" href="./styles.css?v=story-2">
-  <script type="module" src="./app.js?v=story-2"></script>
+  <link rel="stylesheet" href="./styles.css?v=contrast-triton-12">
+  <script type="module" src="./app.js?v=contrast-triton-12"></script>
 </head>
 <body>
   <a class="skip-link" href="#principle">К содержанию</a>
@@ -20,7 +20,7 @@
     <section class="hero" id="top" aria-labelledby="hero-title">
       <div class="hero-title"><h1 id="hero-title">КОНТРАСТ</h1><a href="#principle" class="read-button">читать</a></div>
       <div class="hero-subline">
-        <p class="hero-statement">Чтобы что-то заметить,<br>нужно заметить <em>разницу.</em></p>
+        <p class="hero-statement">Когда разница помогает понять,<br>а когда — <em>задержаться?</em></p>
       </div>
     </section>
 
@@ -36,66 +36,72 @@
         <div class="story-copy">
           <h2 class="h2" id="principle-title">В какой момент эти фигуры стали <span class="serif">персонажами?</span></h2>
           <p class="body-copy">Цвет и размер помогли различить фигуры. В их движениях можно прочитать преследование и помощь.</p>
-          <p class="voice story-bridge">Различия помогают следить за действием. А на странице — находить порядок чтения.</p>
+          <p class="voice story-bridge">Различия помогают следить за действием. Их можно не только увидеть, но и услышать.</p>
         </div>
       </div>
-    </section>
-
-    <section class="form-section scene section-pad container" id="form" aria-labelledby="form-title">
-      <div class="scene-heading"><h2 id="form-title">Что читать<br><span class="serif">первым?</span></h2></div>
-      <div class="hierarchy-lab">
-        <div class="poster" id="poster"><span class="poster-kicker">ВСТРЕЧА / 24 ОКТЯБРЯ</span><div class="poster-title">Искусство<br>замечать.</div><p class="poster-description">Вечер о том, как видеть привычное<br>по-новому. Просто посмотрите внимательнее.</p><span class="poster-cta">Быть внимательнее <span aria-hidden="true">↗</span></span><div class="poster-mark" aria-hidden="true"><span></span><span></span></div></div>
-        <div class="hierarchy-controls">
-          <button id="hierarchy-toggle" class="button button--primary" aria-pressed="false">Добавить иерархию <span aria-hidden="true">↗</span></button>
-          <p id="hierarchy-description" class="body-copy hierarchy-insight" aria-live="polite"></p>
-        </div>
-      </div>
-      <p class="voice chapter-bridge">В объявлении мы ищем начало. В мелодии — ждём продолжения.</p>
     </section>
 
     <section class="sound-section on-ink" id="sound" aria-labelledby="sound-title">
       <div class="sound-lab" id="sound-lab">
         <div class="sound-story">
           <div class="sound-step container" id="sound-opening">
-            <div class="sound-copy"><h2 id="sound-title">А теперь —<br>на слух.</h2><p class="body-copy" id="listening-prompt">Небольшая мелодия. Просто послушайте.</p></div>
+            <div class="sound-copy"><h2 id="sound-title">Чего вы ждёте<br>от последней ноты?</h2><p class="body-copy" id="listening-prompt">Послушайте короткую мелодию до конца.</p></div>
           </div>
           <div id="sound-explanation" hidden>
-            <div class="sound-step container"><p class="sound-copy" id="listening-lead" tabindex="-1">Кажется, музыкант сбился. В финале остались две соседние ноты — до и ре-бемоль.</p></div>
-            <div class="sound-step container"><p class="sound-copy" id="sound-tones-copy">У каждой ноты есть основной тон и обертоны. Для сравнения рассмотрим только основные тона.</p></div>
-            <div class="sound-step container"><p class="sound-copy">Близкие частотные составляющие могут создавать биения. Так появляется шероховатость звучания.</p></div>
-            <div class="sound-step container" id="sound-final-step"><p class="sound-copy">У двух до в октаву часть гармоник совпадает точно. Теперь завершим мелодию этой парой.</p></div>
+            <div class="sound-step container"><p class="sound-copy" id="listening-lead" tabindex="-1">Кажется, музыкант сбился. В финале остались две соседние ноты — до и ре-бемоль. Между ними всего полутон.</p></div>
+            <div class="sound-step container"><p class="sound-copy" id="sound-tones-copy">У каждого звука есть основной тон и обертоны — более высокие составляющие. Приблизим основные тона: у этих двух нот они совсем рядом.</p></div>
+            <div class="sound-step container"><p class="sound-copy">Близкие частотные составляющие могут создавать биения и шероховатость. Но ощущение завершённости зависит и от музыкального контекста, и от привычки слушать определённую музыку.</p></div>
+            <div class="sound-step container" id="sound-final-step"><p class="sound-copy">А если завершить фразу двумя до в октаву? Послушаем ту же мелодию с другим финалом.</p></div>
           </div>
         </div>
         <div class="sound-instrument container">
           <div class="spectrum-stage"><canvas id="spectrum-canvas" role="img" aria-label="Измеренный спектр звучащей мелодии, от 200 до 4000 герц."></canvas><p class="label" id="spectrum-caption">Частоты звучащих нот</p></div>
-          <div class="piano-stage" id="piano-stage"><div class="piano" id="piano" role="group" aria-label="Клавиатура пианино. Во время мелодии подсвечиваются звучащие клавиши. Можно играть самим: мышью, касанием или клавишами от A до K на клавиатуре компьютера."></div></div>
+          <div class="piano-stage" id="piano-stage" data-broken="false">
+            <div class="piano-case piano-case-left" aria-hidden="true"></div><div class="piano-case piano-case-right" aria-hidden="true"></div>
+            <div class="piano-strings" aria-hidden="true"></div>
+            <div class="piano" id="piano" role="group" aria-label="Клавиатура пианино. Во время мелодии подсвечиваются звучащие клавиши. Можно играть мышью, касанием или клавишами от A до K на клавиатуре компьютера."></div>
+            <div class="piano-wreckage" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
           <p class="label piano-hint" aria-hidden="true"><span class="for-mouse">Играйте мышью или клавишами <kbd>A</kbd>…<kbd>K</kbd></span><span class="for-touch">Нажимайте на клавиши</span></p>
           <div class="listening-actions">
             <button class="button button--primary" id="play-sound" aria-pressed="false"><span class="button-icon play-icon" aria-hidden="true">▶</span><span class="play-label">Послушать</span></button>
+            <button class="link-button" id="replay-first" hidden>Первый вариант <span aria-hidden="true">↺</span></button>
             <button class="link-button skip-audio" id="skip-audio">Без звука <span aria-hidden="true">↘</span></button>
           </div>
+          <p class="sr-only" id="triton-caption" hidden>Тритон проломил клавиатуру. В момент удара — до и фа-диез, интервал тритон.</p>
+          <div class="sound-outro" id="sound-outro" hidden><a href="#form">Дальше <span aria-hidden="true">↓</span></a></div>
           <p id="audio-error" class="label audio-error" role="status"></p>
         </div>
       </div>
-      <noscript><style>.sound-lab { display: none; }</style><p class="body-copy">Для прослушивания включите JavaScript. Первое исполнение заканчивается двумя нотами: до и ре-бемоль, малой секундой. Близкие частотные составляющие могут создавать биения и шероховатость. Исправленный финал — два до в октаву, тоника.</p></noscript>
-      <p class="voice chapter-bridge container">Неожиданным бывает не только звук. Иногда меняется само происходящее.</p>
+      <noscript><style>.sound-lab { display: none; }</style><p class="body-copy">Два исполнения одной мелодии различаются одной нотой в финале: до и ре-бемоль в первом, два до в октаву во втором. Близкие частотные составляющие могут создавать шероховатость; ощущение завершённости связано также с музыкальным контекстом и опытом слушателя. Для прослушивания включите JavaScript.</p></noscript>
+      <p class="voice chapter-bridge container">В мелодии различие возникает во времени. На странице — между тем, что мы видим одновременно.</p>
+    </section>
+
+    <section class="form-section scene section-pad container" id="form" aria-labelledby="form-title">
+      <div class="scene-heading"><h2 id="form-title">Что читать<br><span class="serif">первым?</span></h2></div>
+      <div class="hierarchy-lab">
+        <div class="poster" id="poster"><span class="poster-kicker">ВСТРЕЧА / 24 ОКТЯБРЯ</span><div class="poster-title">Искусство<br>замечать.</div><p class="poster-description">Вечер о том, как видеть привычное<br>по-новому. Просто посмотрите внимательнее.</p><span class="poster-cta">Быть внимательнее <span aria-hidden="true">↗</span></span><div class="poster-mark" aria-hidden="true"><span></span><span></span></div></div>
+        <div class="hierarchy-controls"><button id="hierarchy-toggle" class="button button--primary" aria-pressed="false">Добавить иерархию <span aria-hidden="true">↗</span></button>
+        <p id="hierarchy-description" class="body-copy hierarchy-insight" aria-live="polite"></p></div>
+      </div>
+      <p class="voice chapter-bridge container">В объявлении различия помогают быстрее понять. Но всегда ли стоит торопиться?</p>
     </section>
 
     <section class="feeling-section scroll-scene" id="feeling" aria-labelledby="feeling-title">
-      <div class="scene-sticky feeling-stage container">
+      <div class="scene-sticky feeling-stage">
         <div class="feeling-art" aria-hidden="true"><div class="hard-shape"><svg viewBox="0 0 400 400"><path d="M200 5 231 106 300 42 286 137 388 120 315 200 395 249 286 267 308 363 223 308 173 399 145 289 47 341 99 242 4 211 104 168 49 81 152 111Z"/></svg></div><div class="soft-shape"></div></div>
-        <div class="feeling-copy"><h2 id="feeling-title"><span class="feeling-first">Кажется<br><span class="serif">резким.</span></span><span class="feeling-second">Оказывается<br><span class="serif">нежным.</span></span></h2><div class="body-copy feeling-story"><p>Человек с колючим взглядом и тяжёлыми ботинками бережно несёт домой замёрзшего котёнка.</p><p>Нас трогает зазор между первым впечатлением и тем, что открывается потом.</p><p class="voice story-connection">Как шутка посреди драмы.<br>Как поступок вопреки ожиданиям.</p></div></div>
+        <div class="feeling-copy"><h2 id="feeling-title"><span class="feeling-first">Кажется<br><span class="serif">резким.</span></span><span class="feeling-second">Оказывается<br><span class="serif">нежным.</span></span></h2><div class="body-copy feeling-story"><p>Человек с колючим взглядом и тяжёлыми ботинками бережно несёт домой замёрзшего котёнка.</p><p>Первое впечатление задало ожидание. Поступок его изменил — и заставил присмотреться.</p><p class="voice story-connection">Как неожиданный финал мелодии:<br>задержка становится частью истории.</p></div></div>
       </div>
     </section>
 
     <section class="conclusion scene section-pad container" id="conclusion" aria-labelledby="conclusion-title">
-      <h2 id="conclusion-title">Контраст помогает<br>заметить, понять<br><span class="serif">и почувствовать.</span></h2>
-      <details class="sources" id="sources"><summary><span>Исследования и источники</span><span class="sources-plus" aria-hidden="true">+</span></summary><div class="source-list"><p class="body-copy">Это визуальное эссе, а не единая научная теория контраста. Связи между звуком, дизайном и историями здесь — авторская рамка. Научные опоры примеров:</p><a href="https://mcdermottlab.mit.edu/papers/McDermott_etal_2016_consonance.pdf" target="_blank" rel="noopener noreferrer"><span>01</span><div>McDermott et al., 2016<small>Indifference to dissonance in native Amazonians reveals cultural variation in music perception. Nature.</small></div><span>↗</span></a><a href="https://www.nature.com/articles/s41467-020-16448-6" target="_blank" rel="noopener noreferrer"><span>02</span><div>McPherson et al., 2020<small>Perceptual fusion of musical notes by native Amazonians suggests universal representations of musical intervals. Nature Communications.</small></div><span>↗</span></a><a href="https://doi.org/10.1016/j.cub.2019.09.067" target="_blank" rel="noopener noreferrer"><span>03</span><div>Cheung et al., 2019<small>Uncertainty and Surprise Jointly Predict Musical Pleasure and Amygdala, Hippocampus, and Auditory Cortex Activity. Current Biology.</small></div><span>↗</span></a><a href="https://cs.uky.edu/~sgware/reading/papers/heider1944experimental.pdf" target="_blank" rel="noopener noreferrer"><span>04</span><div>Heider &amp; Simmel, 1944<small>An Experimental Study of Apparent Behavior. The American Journal of Psychology. Референс для сцены с геометрическими фигурами. В оригинале — треугольники и круг; наша сцена с квадратами — авторская адаптация.</small></div><span>↗</span></a></div></details>
+      <h2 id="conclusion-title">Где-то — понять быстрее.<br>Где-то —<br><span class="serif">задержаться.</span></h2>
+      <details class="sources" id="sources"><summary><span>Исследования и источники</span><span class="sources-plus" aria-hidden="true">+</span></summary><div class="source-list"><p>В объявлении иерархия помогает найти начало. В мелодии и истории отклонение может задержать внимание. Это авторское сопоставление разных случаев. Образ «зависшего перехода» описывает впечатление; спектр показывает частоты и сам по себе не объясняет музыкальное напряжение. Исследования различают акустическую шероховатость, строение созвучий и усвоенные ожидания:</p><a href="https://mcdermottlab.mit.edu/papers/McDermott_etal_2016_consonance.pdf" target="_blank" rel="noopener noreferrer"><span>01</span><div>McDermott et al., 2016<small>Indifference to dissonance in native Amazonians reveals cultural variation in music perception. Nature.</small></div><span>↗</span></a><a href="https://www.nature.com/articles/s41467-020-16448-6" target="_blank" rel="noopener noreferrer"><span>02</span><div>McPherson et al., 2020<small>Perceptual fusion of musical notes by native Amazonians suggests universal representations of musical intervals. Nature Communications.</small></div><span>↗</span></a><a href="https://doi.org/10.1016/j.cub.2019.09.067" target="_blank" rel="noopener noreferrer"><span>03</span><div>Cheung et al., 2019<small>Uncertainty and Surprise Jointly Predict Musical Pleasure and Amygdala, Hippocampus, and Auditory Cortex Activity. Current Biology.</small></div><span>↗</span></a><a href="https://cs.uky.edu/~sgware/reading/papers/heider1944experimental.pdf" target="_blank" rel="noopener noreferrer"><span>04</span><div>Heider &amp; Simmel, 1944<small>An Experimental Study of Apparent Behavior. The American Journal of Psychology. Референс для сцены с геометрическими фигурами. В оригинале — треугольники и круг; наша сцена с квадратами — авторская адаптация.</small></div><span>↗</span></a></div></details>
       <a href="#disappearance" class="voice ending-link">А если убрать все различия? <span aria-hidden="true">↓</span></a>
     </section>
 
     <section class="disappearance" id="disappearance" aria-label="Финал: исчезновение контраста">
-      <div class="ending-sticky"><div class="ending-pattern" aria-hidden="true"><div></div><div></div></div><div class="ending-content"><h2>Без разницы.</h2></div><div class="ending-last"><p class="voice">И всё начинается заново.</p><button id="restart" class="link-button">Вернуться к началу <span aria-hidden="true">↗</span></button></div></div>
+      <div class="ending-sticky"><div class="ending-pattern" aria-hidden="true"><div></div><div></div></div><div class="ending-content"><h2>Без разницы.</h2></div><div class="ending-last" hidden><button id="restart" class="button button--outline">Вернуть различия <span aria-hidden="true">↗</span></button></div></div>
     </section>
   </main>
   <div class="restart-veil" aria-hidden="true"></div>
