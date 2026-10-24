@@ -1,4 +1,5 @@
-import { mountPianoExperience } from './piano.js?v=dots-1';
+import { mountPianoExperience } from './piano.js?v=story-1';
+import { mountGeometryStory } from './geometry-story.js?v=story-1';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -22,27 +23,6 @@ if ('IntersectionObserver' in window) {
   $$('.scene').forEach((scene) => scene.classList.add('is-entered'));
 }
 
-// Dots fill the whole screen; one of them, above and right of the headline, differs.
-const dotField = $('#dot-field');
-let dotSize = '';
-function layoutDots() {
-  const width = dotField.clientWidth;
-  const height = dotField.clientHeight;
-  const step = width < 600 ? 36 : 60;
-  const cols = Math.max(1, Math.floor(width / step));
-  const rows = Math.max(1, Math.floor(height / step));
-  if (dotSize === `${cols}x${rows}`) return;
-  dotSize = `${cols}x${rows}`;
-  dotField.style.setProperty('--dot-step', `${step}px`);
-  dotField.style.setProperty('--dot-cols', cols);
-  const different = Math.min(rows - 1, Math.floor(rows * .3)) * cols + Math.min(cols - 1, Math.floor(cols * .58));
-  dotField.replaceChildren(...Array.from({ length: cols * rows }, (_, index) => {
-    const dot = document.createElement('i');
-    if (index === different) dot.className = 'is-different';
-    return dot;
-  }));
-}
-layoutDots();
 $('#hierarchy-toggle').addEventListener('click', () => {
   const ordered = $('#poster').classList.toggle('is-ordered');
   $('#hierarchy-toggle').setAttribute('aria-pressed', String(ordered));
@@ -51,6 +31,9 @@ $('#hierarchy-toggle').addEventListener('click', () => {
 });
 
 const soundExperience = mountPianoExperience({ reducedMotion });
+const lowWindow = matchMedia('(max-height: 600px)');
+// Dots fill the whole screen; one of them becomes the yellow circle of the story.
+const geometryStory = mountGeometryStory($('#principle'));
 
 const attention = $('#principle');
 const feeling = $('#feeling');
@@ -72,11 +55,8 @@ function updateScroll() {
   scrollTicking = false;
   soundExperience.updateScroll();
   const reduced = reducedMotion.matches;
-  const staticScenes = reduced || matchMedia('(max-height: 600px)').matches;
-  const attentionProgress = localProgress(attention);
-  attention.classList.toggle('has-difference', staticScenes || attentionProgress > .10);
-  attention.classList.toggle('has-insight', staticScenes || attentionProgress > .32);
-  attention.classList.toggle('has-next', staticScenes || attentionProgress > .70);
+  const staticScenes = reduced || lowWindow.matches;
+  if (!staticScenes) geometryStory.update(localProgress(attention));
   const feelingProgress = localProgress(feeling);
   const soft = staticScenes || feelingProgress > .23;
   feeling.classList.toggle('has-softness', soft);
@@ -108,6 +88,7 @@ function resetExperiments() {
   $('#hierarchy-toggle').setAttribute('aria-pressed', 'false');
   $('#hierarchy-toggle').innerHTML = 'Добавить иерархию <span aria-hidden="true">↗</span>';
   $('#hierarchy-description').textContent = '';
+  geometryStory.reset();
   soundExperience.reset();
   $('#sources').open = false;
 }
@@ -137,7 +118,12 @@ function restartEssay() {
 }
 $('#restart').addEventListener('click', restartEssay);
 addEventListener('scroll', queueScrollUpdate, { passive: true });
-addEventListener('resize', () => { layoutDots(); queueScrollUpdate(); }, { passive: true });
+function relayout() {
+  geometryStory.layout();
+  queueScrollUpdate();
+}
+addEventListener('resize', relayout, { passive: true });
+lowWindow.addEventListener('change', relayout);
 addEventListener('load', queueScrollUpdate);
 addEventListener('pagehide', () => soundExperience.stop());
 document.addEventListener('visibilitychange', () => {
@@ -146,9 +132,10 @@ document.addEventListener('visibilitychange', () => {
 });
 reducedMotion.addEventListener('change', () => {
   soundExperience.motionChanged();
-  queueScrollUpdate();
+  relayout();
 });
 if ('ResizeObserver' in window) {
   new ResizeObserver(queueScrollUpdate).observe($('main'));
+  new ResizeObserver(relayout).observe($('#story-canvas'));
 }
 updateScroll();
