@@ -6,7 +6,7 @@
   "description": "An interactive Russian visual essay on contrast",
   "scripts": {
     "dev": "python3 -m http.server 4173 --directory dist",
-    "check": "node --check dist/app.js && node --check dist/geometry-story.js && node --check dist/sound-screen.js && node --check dist/listening.js && node --check dist/melody.js && node --check dist/piano.js && node --check dist/spectrum.js && node --check dist/triton.js && node --check dist/ball.js && node --check dist/notes.js",
+    "check": "node --check dist/app.js && node --check dist/geometry-story.js && node --check dist/sound-screen.js && node --check dist/listening.js && node --check dist/melody.js && node --check dist/piano.js && node --check dist/spectrum.js && node --check dist/triton.js && node --check dist/ball.js && node --check dist/stranger.js && node --check dist/notes.js",
     "test": "node --test tests/*.test.js"
   }
 }
