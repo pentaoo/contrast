@@ -1,8 +1,8 @@
-import { computerKeys, describeChord, noteName } from './notes.js?v=contrast-triton-13';
-import { createListeningState, finishMelody, skipListening } from './listening.js?v=contrast-triton-13';
-import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=contrast-triton-13';
-import { mountSpectrum } from './spectrum.js?v=contrast-triton-13';
-import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=contrast-triton-13';
+import { computerKeys, describeChord, noteName } from './notes.js?v=contrast-triton-14';
+import { createListeningState, finishMelody, skipListening } from './listening.js?v=contrast-triton-14';
+import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=contrast-triton-14';
+import { mountSpectrum } from './spectrum.js?v=contrast-triton-14';
+import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=contrast-triton-14';
 
 export function mountPianoExperience({ reducedMotion }) {
   const piano = document.querySelector('#piano');
@@ -13,7 +13,6 @@ export function mountPianoExperience({ reducedMotion }) {
   const finalStep = document.querySelector('#sound-final-step');
   const tonesCopy = document.querySelector('#sound-tones-copy');
   const instrument = document.querySelector('.sound-instrument');
-  const skip = document.querySelector('#skip-audio');
   const replayFirst = document.querySelector('#replay-first');
   const outro = document.querySelector('#sound-outro');
   const title = document.querySelector('#sound-title');
@@ -74,7 +73,7 @@ export function mountPianoExperience({ reducedMotion }) {
     const explaining = state.phase === 'explanation';
     const openingExplanation = explanation.hidden && explaining;
     const readingPosition = openingExplanation ? { top: window.scrollY, left: window.scrollX } : null;
-    const focusExplanation = openingExplanation && [button, skip].includes(document.activeElement);
+    const focusExplanation = openingExplanation && document.activeElement === button;
     if (focusExplanation) document.activeElement.blur();
     lab.dataset.phase = state.phase;
     lab.dataset.playing = active ? active.version : busy ? 'loading' : 'none';
@@ -91,7 +90,6 @@ export function mountPianoExperience({ reducedMotion }) {
     }
     finalStepVisible = explaining && finalStep.getBoundingClientRect().top <= innerHeight * .15;
     lab.dataset.step = !explaining ? 'intro' : finalStepVisible ? 'final' : 'reading';
-    skip.hidden = explaining;
     replayFirst.hidden = !finalStepVisible || Boolean(active) || busy || finale.completed;
     button.hidden = finale.completed || (explaining && !finalStepVisible && !active && !busy);
     outro.hidden = !finale.completed;
@@ -334,7 +332,10 @@ export function mountPianoExperience({ reducedMotion }) {
     } catch {
       if (token !== generation) return;
       stop();
-      error.textContent = 'Не удалось включить звук. Попробуйте ещё раз или продолжайте чтение.';
+      // Without sound the reader still gets the explanation instead of a closed screen.
+      state = skipListening(state);
+      updateUI();
+      error.textContent = 'Не удалось включить звук. Объяснение можно прочитать и без него.';
     }
   }
 
@@ -373,13 +374,6 @@ export function mountPianoExperience({ reducedMotion }) {
 
   button.addEventListener('click', () => play());
   replayFirst.addEventListener('click', () => play('mistake'));
-  skip.addEventListener('click', () => {
-    stop();
-    error.textContent = '';
-    state = skipListening(state);
-    updateUI();
-    document.querySelector('#listening-lead').focus({ preventScroll: true });
-  });
   finale.reset();
   updateUI();
 

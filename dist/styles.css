@@ -235,10 +235,8 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 #spectrum-caption { text-align: center; color: var(--muted-on-ink); }
 .listening-actions { flex: none; height: 52px; display: flex; align-items: center; justify-content: center; gap: var(--space-3); }
 .sound-lab[data-step="reading"][data-playing="none"] .listening-actions { display: none; }
-.skip-audio { color: var(--muted-on-ink); }
 .audio-error:empty { display: none; }
 .audio-error:not(:empty) { position: absolute; bottom: 82px; left: var(--inline); right: var(--inline); padding: 12px; background: var(--ink); text-align: center; color: var(--muted-on-ink); }
-.sound-section .chapter-bridge { margin: 0; padding-top: var(--space-4); }
 
 /* 04 Ожидание */
 .feeling-section { background: var(--paper-deep); }
