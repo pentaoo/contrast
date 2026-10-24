@@ -1,4 +1,4 @@
-import { finalNotes, noteFrequency } from './melody.js?v=ball-1';
+import { finalNotes, noteFrequency } from './melody.js?v=ball-3';
 
 // The display uses measured FFT data. Peak proximity/overlap is not a model of
 // roughness, and no noise or artificial broadening is added to either version.
@@ -19,6 +19,7 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
   let lastLive = 0;
   let keyFraction = null;
   let layout = null;
+  let peaks = null;
   const colors = ['#ee492c', '#a8af99'];
 
   function connect(context, normalOutput) {
@@ -46,12 +47,10 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
   }
 
   // Horizontal axis. With the piano's key layout each peak stands over its own
-  // key; zooming blends towards a plain log scale of 240–560 Hz.
-  function axis(focused) {
+  // key, also while the fundamentals are singled out.
+  function axis() {
     const midi = (frequency) => 69 + 12 * Math.log2(frequency / 440);
-    const full = keyFraction ? (frequency) => keyFraction(midi(frequency)) : (frequency) => Math.log(frequency / 200) / Math.log(20);
-    const zoom = (frequency) => Math.log(frequency / 240) / Math.log(560 / 240);
-    const toFrac = focused > 0 ? (frequency) => full(frequency) * (1 - focused) + zoom(frequency) * focused : full;
+    const toFrac = keyFraction ? (frequency) => keyFraction(midi(frequency)) : (frequency) => Math.log(frequency / 200) / Math.log(20);
     const toFreq = (fraction) => {
       let low = Math.log(30);
       let high = Math.log(16000);
@@ -69,7 +68,7 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
     if (!ctx || !width || !height) return;
     ctx.clearRect(0, 0, width, height);
     const focused = shown?.length === 2 ? focus : 0;
-    const { toFrac, toFreq } = axis(focused);
+    const { toFrac, toFreq } = axis();
     const minimum = toFreq(0);
     const maximum = toFreq(1);
     const xAt = (frequency) => toFrac(frequency) * width;
@@ -109,13 +108,14 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
           if (data[bin] > db) { db = data[bin]; peakFrequency = bin * hzPerBin; }
         }
         const fundamental = shown.length === 2 && Math.abs(peakFrequency - fundamentals[channel]) <= Math.max(8, hzPerBin * 3);
-        const level = Math.max(0, Math.min(1, (db + 90) / 46 * (fundamental ? 1 + focused * .8 : 1)));
+        // Singling out the fundamentals: they grow in place, the rest shrinks in place.
+        const level = Math.max(0, Math.min(1, (db + 100) / 40 * .85 * (fundamental ? 1 + focused * .5 : 1 - focused * .8)));
         layout.levels[bar] = Math.max(layout.levels[bar], level);
         if (level <= .015) continue;
         const x = bar * barWidth;
         const top = baseline - level * plotHeight;
         const barSize = Math.max(1, barWidth - 1);
-        ctx.globalAlpha = shown.length === 1 ? .78 : .85 * (fundamental ? 1 : 1 - focused);
+        ctx.globalAlpha = shown.length === 1 ? .78 : .85 * (fundamental ? 1 : 1 - focused * .5);
         ctx.fillStyle = fill;
         ctx.fillRect(x, top, barSize, level * plotHeight);
         ctx.fillStyle = color;
@@ -137,7 +137,7 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
         ctx.globalAlpha = 1;
       };
       callout('Основные тона', (xAt(fundamentals[0]) + xAt(fundamentals[1])) / 2);
-      if (focused < .9) callout('Обертоны', xAt(1000), 1 - focused);
+      callout('Обертоны', xAt(1000), 1 - focused * .5);
     }
   }
 
@@ -149,7 +149,7 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
     canvas.dataset.focus = focus >= .99 ? 'fundamentals' : focus > 0 ? 'zooming' : 'full';
     canvas.dataset.annotations = String(annotations);
     canvas.setAttribute('aria-label', version && focus >= .99
-      ? `Увеличенные основные тона двух нот: ${version === 'mistake' ? 'до и ре-бемоль' : 'два до в октаву'}. Обертоны скрыты. Шкала от 240 до 560 герц.`
+      ? `Выделены основные тона двух нот: ${version === 'mistake' ? 'до и ре-бемоль' : 'два до в октаву'}. Обертоны уменьшены и остались на своих местах.`
       : version === 'mistake'
       ? 'Спектры двух нот: до и ре-бемоль. Близкие пики основных тонов и обертонов.'
       : version === 'correct' ? 'Спектры двух до в октаву. Некоторые гармоники совпадают по частоте.'
@@ -206,23 +206,33 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
       version = null;
       draw();
     },
-    begin() { shown = null; lastFrame = -Infinity; label(null); draw(); },
+    begin() { shown = null; peaks = null; lastFrame = -Infinity; label(null); draw(); },
     update(elapsed, version, finalAt, capture = true) {
       if (!master || elapsed < 0) return null;
       const final = elapsed >= finalAt;
       // With reduced motion, show one static measured frame of the final pair.
       if (reducedMotion.matches && (!final || elapsed < finalAt + .45 || lastFrame >= finalAt)) return null;
       if (!reducedMotion.matches && elapsed - lastFrame < 1 / 30) return null;
-      if (final) pair.forEach((node, index) => node.getFloatFrequencyData(buffers[index + 1]));
-      else master.getFloatFrequencyData(buffers[0]);
-      shown = final ? buffers.slice(1) : [buffers[0]];
+      let settled = false;
+      if (final) {
+        // Once the analysis window holds only the final pair, its bars stop
+        // following the fade: the sound dies away, the measured peaks stay.
+        pair.forEach((node, index) => node.getFloatFrequencyData(buffers[index + 1]));
+        settled = elapsed >= finalAt + .4;
+        if (settled) {
+          peaks ||= pair.map((node) => new Float32Array(node.frequencyBinCount).fill(-Infinity));
+          peaks.forEach((peak, index) => buffers[index + 1].forEach((db, bin) => { if (db > peak[bin]) peak[bin] = db; }));
+        }
+      } else master.getFloatFrequencyData(buffers[0]);
+      shown = !final ? [buffers[0]] : settled ? peaks : buffers.slice(1);
       label(final ? version : null);
       draw();
       lastFrame = elapsed;
       return capture && final && elapsed >= finalAt + .45 ? shown.map((data) => data.slice()) : null;
     },
     finish(snapshot, version) {
-      if (snapshot) held = { data: snapshot, version };
+      if (peaks) held = { data: peaks.map((data) => data.slice()), version };
+      else if (snapshot) held = { data: snapshot, version };
       this.restore();
     },
     restore() { shown = held?.data || null; label(held?.version); draw(); },
