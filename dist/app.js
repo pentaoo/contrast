@@ -1,4 +1,4 @@
-import { mountPianoExperience } from './piano.js?v=read-button-1';
+import { mountPianoExperience } from './piano.js?v=dots-1';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -22,7 +22,27 @@ if ('IntersectionObserver' in window) {
   $$('.scene').forEach((scene) => scene.classList.add('is-entered'));
 }
 
-for (let index = 0; index < 72; index++) $('#dot-field').append(document.createElement('i'));
+// Dots fill the whole screen; one of them, above and right of the headline, differs.
+const dotField = $('#dot-field');
+let dotSize = '';
+function layoutDots() {
+  const width = dotField.clientWidth;
+  const height = dotField.clientHeight;
+  const step = width < 600 ? 36 : 60;
+  const cols = Math.max(1, Math.floor(width / step));
+  const rows = Math.max(1, Math.floor(height / step));
+  if (dotSize === `${cols}x${rows}`) return;
+  dotSize = `${cols}x${rows}`;
+  dotField.style.setProperty('--dot-step', `${step}px`);
+  dotField.style.setProperty('--dot-cols', cols);
+  const different = Math.min(rows - 1, Math.floor(rows * .3)) * cols + Math.min(cols - 1, Math.floor(cols * .58));
+  dotField.replaceChildren(...Array.from({ length: cols * rows }, (_, index) => {
+    const dot = document.createElement('i');
+    if (index === different) dot.className = 'is-different';
+    return dot;
+  }));
+}
+layoutDots();
 $('#hierarchy-toggle').addEventListener('click', () => {
   const ordered = $('#poster').classList.toggle('is-ordered');
   $('#hierarchy-toggle').setAttribute('aria-pressed', String(ordered));
@@ -117,7 +137,7 @@ function restartEssay() {
 }
 $('#restart').addEventListener('click', restartEssay);
 addEventListener('scroll', queueScrollUpdate, { passive: true });
-addEventListener('resize', queueScrollUpdate, { passive: true });
+addEventListener('resize', () => { layoutDots(); queueScrollUpdate(); }, { passive: true });
 addEventListener('load', queueScrollUpdate);
 addEventListener('pagehide', () => soundExperience.stop());
 document.addEventListener('visibilitychange', () => {

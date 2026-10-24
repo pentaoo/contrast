@@ -1,7 +1,7 @@
-import { createListeningState, finishMelody, skipListening } from './listening.js?v=read-button-1';
-import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=read-button-1';
-import { mountSpectrum } from './spectrum.js?v=read-button-1';
-import { computerKeys, describeChord, noteName } from './notes.js?v=read-button-1';
+import { createListeningState, finishMelody, skipListening } from './listening.js?v=dots-1';
+import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=dots-1';
+import { mountSpectrum } from './spectrum.js?v=dots-1';
+import { computerKeys, describeChord, noteName } from './notes.js?v=dots-1';
 
 export function mountPianoExperience({ reducedMotion }) {
   const piano = document.querySelector('#piano');

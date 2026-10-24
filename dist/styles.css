@@ -168,16 +168,17 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 
 /* Общие sticky-сцены */
 .scene-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; }
-.scene-sticky>.chapter { position: absolute; top: var(--space-4); left: var(--inline); margin: 0; }
 
 /* 01 Точки */
 .js-enabled .attention-scene { height: 180vh; height: 180svh; }
 .attention-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-5); padding: var(--space-5) var(--gutter); }
-.dot-field { width: min(700px, 100%); display: grid; grid-template-columns: repeat(12, 1fr); justify-items: center; gap: clamp(18px, 3.5vh, 34px) 15px; }
-.dot-field i { display: block; width: clamp(9px, 1.2vw, 15px); aspect-ratio: 1; border-radius: 50%; background: var(--dot); transition: background .35s, transform .5s var(--ease); }
-.attention-scene.has-difference .dot-field i:nth-child(43), html:not(.js-enabled) .dot-field i:nth-child(43) { background: var(--accent); transform: scale(1.15); }
+/* Сетка точек на весь экран: шаг задаёт app.js, остаток делится поровну по краям. */
+.dot-field { --dot-step: 60px; position: absolute; inset: 0; display: grid; grid-template-columns: repeat(var(--dot-cols, 12), var(--dot-step)); grid-auto-rows: var(--dot-step); place-content: center; place-items: center; }
+.dot-field i { display: block; width: clamp(9px, .25 * var(--dot-step), 15px); aspect-ratio: 1; border-radius: 50%; background: var(--dot); transition: background .35s, transform .5s var(--ease); }
+.attention-scene.has-difference .dot-field i.is-different { background: var(--accent); transform: scale(1.15); }
+.attention-insight, .attention-next { position: relative; z-index: 1; background: var(--paper); box-shadow: 0 0 0 var(--space-2) var(--paper); }
 .attention-insight { text-align: center; }
-.attention-next { position: absolute; bottom: var(--space-4); left: var(--gutter); right: var(--gutter); text-align: center; }
+.attention-next { position: absolute; z-index: 1; bottom: var(--space-4); left: var(--gutter); right: var(--gutter); text-align: center; }
 .js-enabled .attention-insight, .js-enabled .attention-next { opacity: 0; transform: translateY(12px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
 .has-insight .attention-insight, .has-next .attention-next { opacity: 1; transform: none; }
 
@@ -209,8 +210,6 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .sound-lab { --sound-deck-height: clamp(380px, 46svh, 460px); position: relative; display: grid; overflow-anchor: none; }
 .sound-story, .sound-instrument { grid-area: 1 / 1; }
 .sound-step { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding-top: clamp(20px, 4svh, 48px); padding-bottom: calc(var(--sound-deck-height) + clamp(20px, 4svh, 48px)); }
-#sound-opening { position: relative; }
-#sound-opening>.chapter { position: absolute; top: var(--space-4); }
 .sound-copy { width: 100%; max-width: 1000px; font-size: clamp(28px, min(4.2vw, 6svh), 60px); font-weight: 600; line-height: 1.22; letter-spacing: -.045em; text-wrap: pretty; }
 .sound-copy h2 { font: inherit; letter-spacing: inherit; }
 .sound-copy:focus { outline: none; }
@@ -280,7 +279,6 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
 @media (max-height: 500px) {
   .sound-lab { --sound-deck-height: 220px; }
   .sound-step { padding-top: 12px; padding-bottom: calc(var(--sound-deck-height) + 12px); }
-  #sound-opening>.chapter { display: none; }
   .sound-copy { font-size: clamp(22px, 4.6svh, 30px); }
   .sound-instrument { padding-block: var(--space-1); gap: 6px; }
   .piano { height: 52px; }
@@ -301,9 +299,7 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   :root { --text-ui: 14px; }
   .hero-subline { align-items: flex-start; gap: var(--space-3); }
   .circle-link { width: 44px; height: 44px; font-size: 22px; }
-  .scene-sticky>.chapter { top: var(--space-3); }
   .attention-stage { gap: var(--space-4); }
-  .dot-field { gap: 23px 10px; }
   .attention-insight .h2 { font-size: 8vw; }
   .form-section { padding-top: var(--space-4); }
   .poster { padding: 28px 23px; height: 420px; }
@@ -316,7 +312,6 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .poster.is-ordered .poster-mark { opacity: .5; }
   .hierarchy-controls { flex-direction: column; align-items: stretch; }
   .hierarchy-insight { min-height: 5em; }
-  #sound-opening>.chapter { top: var(--space-3); }
   .listening-actions { gap: var(--space-2); }
   .button { padding-inline: 16px; }
   .piano { height: 84px; }
@@ -333,7 +328,6 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .ending-content h2 { font-size: 14vw; }
 }
 @media (max-height: 700px) and (max-width: 600px) {
-  .scene-sticky>.chapter { display: none; }
   .feeling-art { width: 140px; }
   .feeling-stage { gap: 12px; padding-block: var(--space-3); }
   .feeling-story { font-size: 14px; }
@@ -349,7 +343,7 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .js-enabled .conclusion>h2, .js-enabled .hero-title, .js-enabled .hero-statement,
   .js-enabled .feeling-second, .js-enabled .feeling-story, .js-enabled .soft-shape { opacity: 1; transform: none; visibility: visible; }
   .js-enabled .feeling-first { opacity: 0; }
-  .dot-field i:nth-child(43) { background: var(--accent); }
+  .dot-field i.is-different { background: var(--accent); }
   .disappearance { height: 100vh; height: 100svh; }
   .ending-pattern, .ending-content { display: none; }
   .ending-last { display: flex; background: var(--paper); }
