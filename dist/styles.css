@@ -72,6 +72,7 @@ p, h1, h2, h3 { margin: 0; }
 /* 3. Типографика -------------------------------------------- */
 h2, .h1 { font-size: var(--text-h1); line-height: 1.1; letter-spacing: -.055em; font-weight: 600; text-wrap: balance; }
 .h2 { font-size: var(--text-h2); line-height: 1.14; letter-spacing: -.05em; font-weight: 600; text-wrap: balance; }
+.highlight { padding: 0 .12em; background: var(--accent); color: var(--ink); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .serif { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -.04em; }
 .voice { font-family: var(--serif); font-style: italic; font-size: var(--text-voice); line-height: 1.4; letter-spacing: -.025em; }
 .body-copy { font-size: var(--text-body); line-height: 1.65; color: var(--muted); max-width: var(--measure-text); }

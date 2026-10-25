@@ -1,4 +1,4 @@
-import { finalNotes, noteFrequency } from './melody.js?v=sea-5';
+import { finalNotes, noteFrequency } from './melody.js?v=sea-6';
 
 // The display uses measured FFT data. Peak proximity/overlap is not a model of
 // roughness, and no noise or artificial broadening is added to either version.
