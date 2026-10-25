@@ -123,6 +123,8 @@ h2, .h1 { font-size: var(--text-h1); line-height: 1.1; letter-spacing: -.055em; 
 .sources[open] .sources-plus { transform: rotate(45deg); }
 .source-list { padding-bottom: var(--space-3); }
 .source-list>p { padding-bottom: var(--space-3); }
+.sources + .sources { margin-top: 0; border-top: 0; }
+.credits>p { padding-bottom: var(--space-2); max-width: var(--measure-text); }
 .source-list>a { padding: var(--space-2) 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 28px 1fr 20px; gap: 12px; font-size: var(--text-body); font-weight: 600; transition: color .2s; }
 .source-list>a:hover { color: var(--accent); }
 .source-list>a>span { font-size: var(--text-ui); font-weight: 400; padding-top: .2em; }
