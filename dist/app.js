@@ -1,6 +1,7 @@
-import { mountPianoExperience } from './piano.js?v=essay-1';
-import { mountGeometryStory } from './geometry-story.js?v=essay-1';
-import { mountSoundScreen } from './sound-screen.js?v=essay-1';
+import { mountPianoExperience } from './piano.js?v=sea-4';
+import { mountGeometryStory } from './geometry-story.js?v=sea-4';
+import { mountSoundScreen } from './sound-screen.js?v=sea-4';
+import { mountStranger } from './stranger.js?v=sea-4';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -34,6 +35,8 @@ const soundScreen = mountSoundScreen({
 const lowWindow = matchMedia('(max-height: 600px)');
 // Dots fill the whole screen; one of them becomes the orange circle of the story.
 const geometryStory = mountGeometryStory($('#principle'), { isStatic: () => reducedMotion.matches || lowWindow.matches });
+// The Triton lies on a white screen until his sea floods it.
+const stranger = mountStranger($('#stranger'), { reducedMotion, isStatic: () => lowWindow.matches });
 
 const ending = $('#disappearance');
 const veil = $('.restart-veil');
@@ -49,6 +52,7 @@ function updateScroll() {
   soundExperience.updateScroll();
   const reduced = reducedMotion.matches;
   geometryStory.check();
+  stranger.update();
   const total = root.scrollHeight - innerHeight;
   $('.reading-progress span').style.transform = `scaleX(${clamp(scrollY / Math.max(1, total))})`;
   const progress = localProgress(ending);
