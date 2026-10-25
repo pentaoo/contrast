@@ -167,6 +167,8 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .js-enabled .hero-title, .js-enabled .hero-statement { opacity: 0; transform: translateY(22px); transition: opacity .85s var(--ease), transform .85s var(--ease); }
 .js-enabled.intro-ready .hero-title, .js-enabled.intro-ready .hero-statement { opacity: 1; transform: none; }
 .intro-ready .hero-statement { transition-delay: .25s; }
+.js-enabled .hero.is-leaving :is(.hero-title, .hero-statement) { opacity: 0; transform: translateX(-70vw); transition: transform .65s cubic-bezier(.55, 0, .9, .45), opacity .65s cubic-bezier(.55, 0, .9, .45); transition-delay: 0s; }
+.js-enabled .hero.is-leaving .hero-statement { transition-delay: .06s; }
 
 /* Общие sticky-сцены */
 .scene-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; }
@@ -177,7 +179,8 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .attention-stage { position: relative; height: auto; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: var(--space-5); padding: var(--space-5) var(--gutter); }
 .story-canvas { display: none; }
-.story-canvas g circle, .story-dot circle { fill: var(--dot); }
+.story-canvas pattern circle, .story-canvas g circle, .story-dot circle { fill: var(--dot); }
+.story-canvas .story-hole { fill: var(--paper); }
 .story-canvas rect:not([fill]), .story-square { fill: var(--ink); }
 .story-frame .story-circle, .story-frame .story-square--small { fill: var(--story-accent); }
 /* Без JS и в статичном режиме — четыре кадра подряд, затем вопрос. */

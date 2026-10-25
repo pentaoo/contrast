@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { circleGap, growSquare, squareGap, storyFrame } from '../dist/geometry-story.js';
+import { circleGap, growSquare, introFrame, squareGap, storyFrame, ZOOM_FROM } from '../dist/geometry-story.js';
 
 const views = [
   { halfW: 8.5, halfH: 19, dotR: .2, start: { x: 1.4, y: -6 } }, // телефон
@@ -37,7 +37,10 @@ test('the field is grey at first and only the colour changes on the difference',
   const difference = storyFrame(.14, view);
   assert.equal(field.circle.tint, 0);
   assert.equal(difference.circle.tint, 1);
-  assert.deepEqual([difference.circle.x, difference.circle.y, difference.circle.r], [field.circle.x, field.circle.y, field.circle.r]);
+  // The dot only twitches in place before it runs.
+  assert.equal(difference.circle.r, field.circle.r);
+  assert.ok(Math.hypot(difference.circle.x - view.start.x, difference.circle.y - view.start.y) < .3);
+  assert.ok(Math.hypot(field.circle.x - view.start.x, field.circle.y - view.start.y) < .1);
   assert.equal(difference.dots, 1);
   assert.equal(difference.big.visible || difference.small.visible, false);
 });
@@ -77,5 +80,30 @@ test('after the story the big square grows until it covers the screen', () => {
       assert.ok(size >= previous - 1e-9, 'never shrinks while scrolling down');
       previous = size;
     }
+  }
+});
+
+test('the flight starts far and small and lands exactly on the field', () => {
+  const start = introFrame(0);
+  assert.ok(Math.abs(start.zoom - ZOOM_FROM) < 1e-9);
+  assert.ok(start.pan > 3);
+  assert.deepEqual(introFrame(1), { zoom: 1, pan: 0 });
+  assert.deepEqual(introFrame(5), introFrame(1));
+  let zoom = 0;
+  let pan = Infinity;
+  for (let t = 0; t <= 1; t += .01) {
+    const frame = introFrame(t);
+    assert.ok(frame.zoom >= zoom - 1e-9 && frame.pan <= pan + 1e-9, `t=${t}`);
+    ({ zoom, pan } = frame);
+  }
+});
+
+test('the dot sits still at the start of the story and the run starts smoothly', () => {
+  for (const view of views) {
+    const still = storyFrame(0, view).circle;
+    assert.deepEqual([still.x, still.y], [view.start.x, view.start.y]);
+    const before = storyFrame(.1699, view).circle;
+    const after = storyFrame(.1701, view).circle;
+    assert.ok(Math.hypot(after.x - before.x, after.y - before.y) < .05);
   }
 });
