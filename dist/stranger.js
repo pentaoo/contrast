@@ -1,14 +1,16 @@
-// Тритон лежит на белом экране рядом с кругом и квадратом. При прокрутке
-// рисованные волны его мира заливают экран: теперь чужие — круг и квадрат.
+// Тритон лежит на белом экране рядом с кругом и квадратом, а внизу уже видны
+// гребни волн. При прокрутке читатель спускается к рисованному морю тритона:
+// теперь чужие — круг и квадрат.
 // Контекст влияет на контраст.
 
-export const seaTiming = { rise: [.2, .62], textA: [.14, .28], textB: [.56, .7] };
+// `shore` — how much of the sea shows at the start: only the crests at the bottom.
+export const seaTiming = { shore: .3, rise: [.1, .52], textA: [.1, .24], textB: [.48, .62] };
 
 const ramp = (value, [from, to]) => Math.min(1, Math.max(0, (value - from) / (to - from)));
 
 export function seaAt(progress) {
   return {
-    level: ramp(progress, seaTiming.rise),
+    level: seaTiming.shore + (1 - seaTiming.shore) * ramp(progress, seaTiming.rise),
     first: 1 - ramp(progress, seaTiming.textA),
     second: ramp(progress, seaTiming.textB)
   };
