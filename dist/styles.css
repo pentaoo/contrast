@@ -247,22 +247,23 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .conclusion { padding-bottom: var(--space-5); }
 /* Третий акт: тритон лежит на белом экране, потом приходит его море.
    Контекст влияет на контраст. */
-.stranger { --sea: 0; --text-a: 1; --text-b: 0; --tw: clamp(260px, 40vw, 600px); --floor: clamp(56px, 11svh, 120px); --deck: 37svh; --tr: max(var(--gutter), calc(50% - 620px)); --fig: clamp(64px, 8.5vw, 136px); }
+.stranger { --sea: 0; --text-a: 1; --text-b: 0; --tw: clamp(260px, 40vw, 600px); --floor: clamp(56px, 11svh, 120px); --deck: 31svh; --tr: max(var(--gutter), calc(50% - 620px)); --fig: clamp(64px, 8.5vw, 136px); }
 .stranger-scroll { height: 100vh; height: 100svh; }
 .js-enabled .stranger-scroll { height: 340vh; height: 340svh; }
 .stranger-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--paper); }
 .sea { position: absolute; inset: 44% 0 0; transform: translateY(calc((1 - var(--sea)) * 100%)); will-change: transform; }
 /* Рисунок волн 1683×748 повторяется по горизонтали; --tile — ширина одного повтора.
-   Ниже рисунка — глубина цвета его нижнего края с тонкой штриховкой. */
-.sea-layer { position: absolute; inset: var(--top) 0 0; overflow: hidden; --crest: calc(var(--wave) * var(--scale)); --tile: calc(var(--crest) * 1683 / 748); }
-.sea-drift { position: absolute; inset: 0 auto 0 0; width: calc(100% + var(--tile)); display: flex; flex-direction: column; animation: sea-drift var(--drift) linear infinite; }
-.sea-waves { flex: none; height: var(--crest); background: url(assets/sea/sea-waves.webp) repeat-x 0 0 / var(--tile) var(--crest); }
-.sea-deep { flex: 1; margin-top: -2px; background: repeating-linear-gradient(180deg, transparent 0 6px, rgb(70 150 135 / .16) 6px 7px), #0a4440; }
-.stranger { --wave: clamp(260px, max(30vw, 42svh), 640px); }
-.sea-layer--far { --top: 0%; --scale: .6; --drift: 120s; filter: saturate(.8) brightness(1.08); }
-.sea-layer--mid { --top: 10%; --scale: .8; --drift: 95s; }
+   Слои стоят от низа моря и заходят друг за друга: просветы между гребнями
+   занимают верхние 61% рисунка, и за ними всегда лежит дальний слой. Поэтому
+   море доходит до низа экрана без сплошной заливки. --wave — высота ближнего слоя. */
+.stranger { --wave: 36vh; --wave: 36svh; }
+.sea-layer { position: absolute; left: 0; right: 0; bottom: calc(var(--wave) * var(--lift)); height: var(--crest); overflow: hidden; --crest: calc(var(--wave) * var(--scale)); --tile: calc(var(--crest) * 1683 / 748); }
+.sea-drift { position: absolute; inset: 0 auto 0 0; width: calc(100% + var(--tile)); animation: sea-drift var(--drift) linear infinite; }
+.sea-waves { height: 100%; background: url(assets/sea/sea-waves.webp) repeat-x 0 0 / var(--tile) var(--crest); }
+.sea-layer--far { --lift: .62; --scale: .6; --drift: 120s; filter: saturate(.8) brightness(1.08); }
+.sea-layer--mid { --lift: .36; --scale: .8; --drift: 95s; }
 .sea-layer--mid .sea-drift { animation-direction: reverse; }
-.sea-layer--near { --top: 24%; --scale: 1; --drift: 70s; }
+.sea-layer--near { --lift: 0; --scale: 1; --drift: 70s; }
 @keyframes sea-drift { to { transform: translateX(calc(-1 * var(--tile))); } }
 .stranger-cast { position: absolute; left: 0; right: 0; bottom: var(--floor); height: 0; }
 .stranger-triton { position: absolute; right: var(--tr); bottom: calc(var(--deck) - var(--floor)); width: var(--tw); aspect-ratio: 1; }
@@ -286,6 +287,7 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .stranger.is-still .stranger-copy { order: -1; position: relative; top: auto; display: block; padding-block: var(--space-6) var(--space-5); }
 .stranger.is-still .stranger-text + .stranger-text { margin-top: var(--space-5); }
 .stranger.is-still .sea { inset: auto 0 0; height: 62svh; }
+.stranger.is-still { --wave: 40vh; --wave: 40svh; }
 .stranger.is-still .stranger-cast { position: relative; bottom: auto; height: 62svh; }
 .stranger.is-still .stranger-triton { bottom: 14svh; }
 .stranger.is-still .cast-circle, .stranger.is-still .cast-square { bottom: 14svh; }
@@ -332,7 +334,7 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .section-pad { padding-block: var(--space-5); }
 }
 @media (max-width: 600px) {
-  .stranger { --tw: 64vw; --tr: 0px; --fig: 44px; --deck: 33svh; }
+  .stranger { --tw: 64vw; --tr: 0px; --fig: 44px; --deck: 29svh; }
   :root { --text-ui: 14px; }
   .hero-subline { align-items: flex-start; gap: var(--space-3); }
   .circle-link { width: 44px; height: 44px; font-size: 22px; }
