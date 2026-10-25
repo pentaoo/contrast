@@ -72,6 +72,7 @@ p, h1, h2, h3 { margin: 0; }
 /* 3. Типографика -------------------------------------------- */
 h2, .h1 { font-size: var(--text-h1); line-height: 1.1; letter-spacing: -.055em; font-weight: 600; text-wrap: balance; }
 .h2 { font-size: var(--text-h2); line-height: 1.14; letter-spacing: -.05em; font-weight: 600; text-wrap: balance; }
+.highlight { padding: 0 .12em; background: var(--accent); color: var(--ink); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .serif { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -.04em; }
 .voice { font-family: var(--serif); font-style: italic; font-size: var(--text-voice); line-height: 1.4; letter-spacing: -.025em; }
 .body-copy { font-size: var(--text-body); line-height: 1.65; color: var(--muted); max-width: var(--measure-text); }
@@ -246,7 +247,7 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .conclusion { padding-bottom: var(--space-5); }
 /* Третий акт: тритон лежит на белом экране, потом приходит его море.
    Контекст влияет на контраст. */
-.stranger { --sea: 0; --text-a: 1; --text-b: 0; --tw: clamp(280px, 44vw, 640px); --tr: max(var(--gutter), calc(50% - 620px)); --fig: clamp(64px, 8.5vw, 136px); }
+.stranger { --sea: 0; --text-a: 1; --text-b: 0; --tw: clamp(260px, 40vw, 600px); --floor: clamp(56px, 11svh, 120px); --deck: 37svh; --tr: max(var(--gutter), calc(50% - 620px)); --fig: clamp(64px, 8.5vw, 136px); }
 .stranger-scroll { height: 100vh; height: 100svh; }
 .js-enabled .stranger-scroll { height: 340vh; height: 340svh; }
 .stranger-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--paper); }
@@ -257,21 +258,23 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .sea-drift { position: absolute; inset: 0 auto 0 0; width: calc(100% + var(--tile)); display: flex; flex-direction: column; animation: sea-drift var(--drift) linear infinite; }
 .sea-waves { flex: none; height: var(--crest); background: url(assets/sea/sea-waves.webp) repeat-x 0 0 / var(--tile) var(--crest); }
 .sea-deep { flex: 1; margin-top: -2px; background: repeating-linear-gradient(180deg, transparent 0 6px, rgb(70 150 135 / .16) 6px 7px), #0a4440; }
-.stranger { --wave: clamp(260px, max(30vw, 42svh), 460px); }
+.stranger { --wave: clamp(260px, max(30vw, 42svh), 640px); }
 .sea-layer--far { --top: 0%; --scale: .6; --drift: 120s; filter: saturate(.8) brightness(1.08); }
 .sea-layer--mid { --top: 10%; --scale: .8; --drift: 95s; }
 .sea-layer--mid .sea-drift { animation-direction: reverse; }
 .sea-layer--near { --top: 24%; --scale: 1; --drift: 70s; }
 @keyframes sea-drift { to { transform: translateX(calc(-1 * var(--tile))); } }
-.stranger-cast { position: absolute; left: 0; right: 0; bottom: clamp(56px, 11svh, 120px); height: 0; }
-.stranger-triton { position: absolute; right: var(--tr); bottom: 0; width: var(--tw); aspect-ratio: 1; }
+.stranger-cast { position: absolute; left: 0; right: 0; bottom: var(--floor); height: 0; }
+.stranger-triton { position: absolute; right: var(--tr); bottom: calc(var(--deck) - var(--floor)); width: var(--tw); aspect-ratio: 1; }
+/* Тритон лежит на волнах с самого начала и поднимается вместе с морем:
+   море сдвинуто на (1 - --sea) своей высоты, а она равна 56% экрана. */
+.js-enabled .stranger:not(.is-still) .stranger-triton { transform: translateY(calc((1 - var(--sea)) * 56vh)); transform: translateY(calc((1 - var(--sea)) * 56svh)); animation: cast-bob 5.2s -2s ease-in-out infinite; }
 .stranger-triton img { display: block; width: 100%; height: 100%; translate: 0 7%; }
 .cast-circle, .cast-square { position: absolute; bottom: 0; display: block; background: var(--accent); }
 .cast-square { right: calc(var(--tr) + var(--tw) * .98); width: calc(var(--fig) * 1.6); aspect-ratio: 1; rotate: -8deg; transform-origin: 0 100%; }
 .cast-circle { right: calc(var(--tr) + var(--tw) * .98 + var(--fig) * 1.6 + 14px); width: var(--fig); aspect-ratio: 1; border-radius: 50%; }
 .is-sea .cast-circle { animation: cast-bob 3.4s ease-in-out infinite; }
 .is-sea .cast-square { animation: cast-bob 4.1s -1.2s ease-in-out infinite; }
-.is-sea .stranger-triton { animation: cast-bob 5.2s -2s ease-in-out infinite; }
 @keyframes cast-bob { 50% { translate: 0 -7px; } }
 .stranger-copy { position: absolute; top: clamp(72px, 13svh, 150px); left: 0; right: 0; display: grid; }
 .stranger-text { grid-area: 1 / 1; max-width: 760px; }
@@ -329,7 +332,7 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .section-pad { padding-block: var(--space-5); }
 }
 @media (max-width: 600px) {
-  .stranger { --tw: 64vw; --tr: 0px; --fig: 44px; }
+  .stranger { --tw: 64vw; --tr: 0px; --fig: 44px; --deck: 33svh; }
   :root { --text-ui: 14px; }
   .hero-subline { align-items: flex-start; gap: var(--space-3); }
   .circle-link { width: 44px; height: 44px; font-size: 22px; }
