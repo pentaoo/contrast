@@ -1,9 +1,14 @@
 // История оранжевой точки: поле точек → круг, большой и маленький квадрат.
+// Сначала пролёт: камера несётся над огромным полем крошечных точек и
+// приближается к одной из них. Потом точка дёргается, становится оранжевой
+// и выбегает за край поля, где её встречают квадраты.
 // Сцена проигрывается сама, по времени; прокрутка на это время заблокирована.
 // Кадр зависит только от прогресса: одинаковый прогресс — одинаковый кадр.
 
 const SVG = 'http://www.w3.org/2000/svg';
 export const DURATION = 18000;
+export const INTRO_DURATION = 4200;
+export const ZOOM_FROM = .18;
 const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ', 'Spacebar']);
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 const ease = (t) => t * t * (3 - 2 * t);
@@ -25,6 +30,17 @@ function track(p, keys) {
   }
   const last = keys[keys.length - 1];
   return { x: last[1], y: last[2] };
+}
+
+// Пролёт над полем: zoom — масштаб поля, pan — сколько ширин экрана камере
+// ещё лететь до точки. В конце пролёта поле стоит как в начале истории.
+export function introFrame(progress) {
+  const t = clamp(Number.isFinite(progress) ? progress : 0);
+  const flight = clamp(t / .85);
+  return {
+    zoom: ZOOM_FROM ** (1 - span(t, .3, 1)),
+    pan: 4 * (1 - flight) ** 3,
+  };
 }
 
 // view: половины ширины и высоты окна, место точки в сетке и радиус обычной точки — всё в единицах сцены.
@@ -84,7 +100,11 @@ export function storyFrame(progress, view) {
     [.92, leftOut - .4, 1.9],
   ];
 
-  const circle = p < .17 ? { x: start.x, y: start.y } : track(p, circleKeys);
+  // Перед побегом точка нервничает: сперва чуть дрожит, потом дёргается сильнее.
+  const nerves = (span(p, .02, .08) * .05 + span(p, .1, .16) * .13) * (1 - span(p, .16, .17));
+  const circle = p < .17
+    ? { x: start.x + nerves * (Math.sin(p * 311) + .5 * Math.sin(p * 977)), y: start.y + nerves * .6 * (Math.sin(p * 421) + .5 * Math.sin(p * 733)) }
+    : track(p, circleKeys);
   const grow = span(p, .19, .27);
   circle.r = dotR + (SIZES.circle / 2 - dotR) * grow;
   circle.tint = span(p, .08, .1);
@@ -140,11 +160,22 @@ function parseColor(value) {
 
 export function mountGeometryStory(section, { isStatic }) {
   const svg = section.querySelector('#story-canvas');
+  // Поле — один прямоугольник с узором из точек: так оно может быть огромным.
+  const defs = create('defs');
+  const pattern = create('pattern', { id: 'story-dots', patternUnits: 'userSpaceOnUse' });
+  const patternDot = create('circle');
+  pattern.append(patternDot);
+  defs.append(pattern);
   const dotsLayer = create('g');
+  const field = create('rect', { fill: 'url(#story-dots)' });
+  // Во время пролёта поле бесконечно и справа; край появится только в истории.
+  const beyond = create('rect', { fill: 'url(#story-dots)' });
+  const hole = create('circle', { class: 'story-hole' });
+  dotsLayer.append(field, beyond, hole);
   const big = create('rect');
   const small = create('rect');
   const circle = create('circle');
-  svg.replaceChildren(dotsLayer, big, small, circle);
+  svg.replaceChildren(defs, dotsLayer, big, small, circle);
 
   let layout = null;
   let gridKey = '';
@@ -171,14 +202,26 @@ export function mountGeometryStory(section, { isStatic }) {
     const key = `${width}x${height}`;
     if (key !== gridKey) {
       gridKey = key;
-      const dots = [];
-      for (let row = 0; row < rows; row += 1) {
-        for (let col = 0; col < cols; col += 1) {
-          if (row === heroRow && col === heroCol) continue;
-          dots.push(create('circle', { cx: left + col * step, cy: top + row * step, r: dotR }));
-        }
-      }
-      dotsLayer.replaceChildren(...dots);
+      const heroX = left + heroCol * step;
+      const heroY = top + heroRow * step;
+      pattern.setAttribute('x', left - step / 2);
+      pattern.setAttribute('y', top - step / 2);
+      pattern.setAttribute('width', step);
+      pattern.setAttribute('height', step);
+      Object.entries({ cx: step / 2, cy: step / 2, r: dotR }).forEach(([name, value]) => patternDot.setAttribute(name, value));
+      // Поле тянется далеко влево, вверх и вниз, а справа кончается сразу за экраном.
+      const right = left + cols * step + step / 2;
+      const reach = 6 / ZOOM_FROM;
+      field.setAttribute('x', right - width * reach);
+      field.setAttribute('y', heroY - height * reach / 2);
+      field.setAttribute('width', width * reach);
+      field.setAttribute('height', height * reach);
+      beyond.setAttribute('x', right);
+      beyond.setAttribute('y', heroY - height * reach / 2);
+      beyond.setAttribute('width', width * reach);
+      beyond.setAttribute('height', height * reach);
+      // На месте героини в узоре — пустое место, её рисует отдельный круг.
+      Object.entries({ cx: heroX, cy: heroY, r: dotR + 1 }).forEach(([name, value]) => hole.setAttribute(name, value));
     }
 
     layout = {
@@ -186,6 +229,9 @@ export function mountGeometryStory(section, { isStatic }) {
       unit,
       originX,
       originY,
+      width,
+      exit: width + 2 * step,
+      hero: { x: left + heroCol * step, y: top + heroRow * step },
       grey: parseColor(style.getPropertyValue('--dot') || '#c0c2b6'),
       accent: parseColor(style.getPropertyValue('--story-accent') || '#ee492c'),
       view: {
@@ -209,25 +255,33 @@ export function mountGeometryStory(section, { isStatic }) {
     node.setAttribute('visibility', shape.visible ? 'visible' : 'hidden');
   }
 
-  function render(progress, grow = 0) {
+  function render(progress, grow = 0, intro = 1) {
     if (!layout) measure();
     if (!layout) return;
-    const key = `${layout.key}:${progress.toFixed(4)}:${grow.toFixed(4)}`;
+    const key = `${layout.key}:${progress.toFixed(4)}:${grow.toFixed(4)}:${intro.toFixed(4)}`;
     if (key === lastKey) return;
     lastKey = key;
     const frame = storyFrame(progress, layout.view);
     if (grow > 0) frame.big = growSquare(frame.big, grow, layout.view);
     const textLeft = 1 - clamp(grow / .3);
     const { unit, originX, originY, grey, accent } = layout;
-    dotsLayer.setAttribute('opacity', frame.dots.toFixed(3));
+    // Камера: масштаб вокруг героини и пролёт; в истории поле уезжает влево,
+    // и точка выбегает за его край.
+    const camera = introFrame(intro);
+    const { hero, width } = layout;
+    const pan = camera.pan * width;
+    const shift = (1 - frame.dots) * layout.exit;
+    dotsLayer.setAttribute('transform', `translate(${hero.x.toFixed(2)} ${hero.y.toFixed(2)}) scale(${camera.zoom.toFixed(4)}) translate(${(pan - shift - hero.x).toFixed(2)} ${(-hero.y).toFixed(2)})`);
     dotsLayer.setAttribute('visibility', frame.dots > 0 ? 'visible' : 'hidden');
+    beyond.setAttribute('visibility', intro < 1 ? 'visible' : 'hidden');
     placeSquare(big, frame.big);
     placeSquare(small, frame.small);
     const tint = frame.circle.tint;
     const [r, g, b] = grey.map((value, index) => Math.round(value + (accent[index] - value) * tint));
-    circle.setAttribute('cx', (originX + frame.circle.x * unit).toFixed(2));
+    // Пока идёт пролёт, героиня — одна из точек поля и летит вместе с ним.
+    circle.setAttribute('cx', (originX + frame.circle.x * unit + pan * camera.zoom).toFixed(2));
     circle.setAttribute('cy', (originY + frame.circle.y * unit).toFixed(2));
-    circle.setAttribute('r', (frame.circle.r * unit).toFixed(2));
+    circle.setAttribute('r', (frame.circle.r * unit * camera.zoom).toFixed(2));
     const fill = `rgb(${r} ${g} ${b})`;
     circle.setAttribute('fill', fill);
     small.setAttribute('fill', fill);
@@ -236,6 +290,7 @@ export function mountGeometryStory(section, { isStatic }) {
 
   const root = document.documentElement;
   let progress = 0;
+  let intro = 0;
   let played = false;
   let playing = false;
   let frameId;
@@ -266,14 +321,17 @@ export function mountGeometryStory(section, { isStatic }) {
   }
   function finish() {
     stop();
+    intro = 1;
     progress = 1;
     render(progress);
   }
   // Пауза вкладки не проматывает сцену: шаг времени ограничен.
   function tick(now) {
-    progress = clamp(progress + Math.min(100, now - lastTime) / DURATION);
+    const step = Math.min(100, now - lastTime);
+    if (intro < 1) intro = clamp(intro + step / INTRO_DURATION);
+    else progress = clamp(progress + step / DURATION);
     lastTime = now;
-    render(progress);
+    render(progress, 0, intro);
     if (progress >= 1) finish();
     else frameId = requestAnimationFrame(tick);
   }
@@ -286,7 +344,7 @@ export function mountGeometryStory(section, { isStatic }) {
     root.style.scrollBehavior = previous;
     lock();
     // Страница не должна застрять, даже если анимация оборвётся.
-    failsafe = setTimeout(finish, DURATION * 2);
+    failsafe = setTimeout(finish, (INTRO_DURATION + DURATION) * 2);
     lastTime = performance.now();
     frameId = requestAnimationFrame(tick);
   }
@@ -308,7 +366,7 @@ export function mountGeometryStory(section, { isStatic }) {
       const { top, bottom } = section.getBoundingClientRect();
       if (top <= 1 && bottom > innerHeight * .25) { play(); return; }
     }
-    render(progress, progress >= 1 ? growProgress() : 0);
+    render(progress, progress >= 1 ? growProgress() : 0, intro);
   }
 
   return {
@@ -318,8 +376,9 @@ export function mountGeometryStory(section, { isStatic }) {
       stop();
       played = false;
       progress = 0;
+      intro = 0;
       lastKey = '';
-      render(progress);
+      render(progress, 0, intro);
     },
   };
 }

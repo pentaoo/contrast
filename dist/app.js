@@ -1,7 +1,7 @@
-import { mountPianoExperience } from './piano.js?v=sea-6';
-import { mountGeometryStory } from './geometry-story.js?v=sea-6';
-import { mountSoundScreen } from './sound-screen.js?v=sea-6';
-import { mountStranger } from './stranger.js?v=sea-6';
+import { mountPianoExperience } from './piano.js?v=intro-1';
+import { mountGeometryStory } from './geometry-story.js?v=intro-1';
+import { mountSoundScreen } from './sound-screen.js?v=intro-1';
+import { mountStranger } from './stranger.js?v=intro-1';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -100,6 +100,22 @@ function restartEssay() {
   }, reducedMotion.matches ? 0 : 300);
 }
 $('#restart').addEventListener('click', restartEssay);
+// «Читать»: надписи обложки уезжают влево, и сразу начинается пролёт над полем точек.
+$('.read-button').addEventListener('click', (event) => {
+  const hero = $('#top');
+  if (reducedMotion.matches || lowWindow.matches || hero.classList.contains('is-leaving')) return;
+  event.preventDefault();
+  hero.classList.add('is-leaving');
+  setTimeout(() => {
+    const previous = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
+    scrollTo({ top: $('#principle').getBoundingClientRect().top + scrollY, behavior: 'instant' });
+    root.style.scrollBehavior = previous;
+    updateScroll();
+    // Обложка снова на месте, если читатель вернётся наверх.
+    setTimeout(() => hero.classList.remove('is-leaving'), 200);
+  }, 650);
+});
 addEventListener('scroll', queueScrollUpdate, { passive: true });
 function relayout() {
   geometryStory.layout();

@@ -4,7 +4,7 @@
 // Контекст влияет на контраст.
 
 // `shore` — how much of the sea shows at the start: only the crests at the bottom.
-export const seaTiming = { shore: .3, rise: [.1, .52], textA: [.1, .24], textB: [.48, .62] };
+export const seaTiming = { shore: .48, rise: [.1, .52], textA: [.1, .24], textB: [.48, .62] };
 
 const ramp = (value, [from, to]) => Math.min(1, Math.max(0, (value - from) / (to - from)));
 
@@ -24,7 +24,7 @@ export function mountStranger(section, { reducedMotion, isStatic }) {
   ['far', 'mid', 'near'].forEach((depth) => {
     const layer = document.createElement('div');
     layer.className = `sea-layer sea-layer--${depth}`;
-    layer.innerHTML = '<div class="sea-drift"><div class="sea-waves"></div><div class="sea-deep"></div></div>';
+    layer.innerHTML = '<div class="sea-drift"><div class="sea-waves"></div></div>';
     sea.append(layer);
   });
 
