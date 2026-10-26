@@ -191,6 +191,9 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .origin-shape[hidden] { display: block !important; visibility: hidden; }
 .origin-layer--many { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Ccircle cx='14' cy='14' r='7' fill='%23191a17'/%3E%3Crect x='44' y='8' width='12' height='12' fill='%23a8af99'/%3E%3Cpath d='M14 44l8 14H6z' fill='%23c0c2b6'/%3E%3Ccircle cx='50' cy='52' r='4' fill='%23a8af99'/%3E%3C/svg%3E") center / 72px 72px; }
 .origin-layer--dots { background: radial-gradient(circle, var(--dot) 0 2.5px, transparent 3px) center / 20px 20px; }
+/* То же поле, что в начале мультфильма (origin.js рисует его SVG-узором). */
+.origin-layer--dots.has-field { background: none; }
+.origin-layer--dots svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: var(--dot); }
 .js-enabled .origin:not(.is-still) .origin-scroll { height: 500vh; height: 500svh; }
 .js-enabled .origin:not(.is-still) .origin-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 .js-enabled .origin:not(.is-still) .origin-field { position: absolute; inset: 0; display: block; height: auto; margin: 0; }
