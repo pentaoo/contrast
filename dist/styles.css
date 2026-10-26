@@ -266,8 +266,17 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .js-enabled .stranger-scroll { height: 480vh; height: 480svh; }
 .stranger-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--paper); }
 .sea { position: absolute; inset: 44% 0 0; transform: translateY(calc((1 - var(--sea)) * 100%)); will-change: transform; }
-/* Толща воды под ближними гребнями: когда море поднимается выше экрана, читатель оказывается под водой. */
-.sea::after { content: ""; position: absolute; left: 0; right: 0; top: calc(100% - 1px); height: 220vh; height: 220svh; background: linear-gradient(#002621, #000f0d 70%); }
+/* Толща воды: под ближними гребнями тот же рисунок волн уходит вглубь примерно на экран
+   и растворяется в темноте — без шва между гравюрой и заливкой. Светлый текст под водой
+   встаёт уже на спокойный тёмный фон. */
+.sea::before { content: ""; position: absolute; left: 0; right: 0; top: calc(100% - var(--wave) * .45); height: 220vh; height: 220svh;
+  background: linear-gradient(rgb(0 22 19 / 0), rgb(0 22 19 / .55) 30svh, rgb(0 16 14 / .9) 70svh, #00100e 95svh),
+    url(assets/sea/sea-waves.webp) repeat-x calc(4 * 37%) calc(var(--wave) * 1.13) / calc(var(--wave) * 1683 / 748) var(--wave),
+    url(assets/sea/sea-waves.webp) repeat-x calc(3 * 37%) calc(var(--wave) * 0.71) / calc(var(--wave) * 1683 / 748) var(--wave),
+    url(assets/sea/sea-waves.webp) repeat-x calc(2 * 37%) calc(var(--wave) * 0.29) / calc(var(--wave) * 1683 / 748) var(--wave),
+    url(assets/sea/sea-waves.webp) repeat-x calc(1 * 37%) calc(var(--wave) * -0.13) / calc(var(--wave) * 1683 / 748) var(--wave),
+    url(assets/sea/sea-waves.webp) repeat-x calc(0 * 37%) calc(var(--wave) * -0.55) / calc(var(--wave) * 1683 / 748) var(--wave),
+    #00201c; }
 /* Рисунок волн 1683×748 повторяется по горизонтали; --tile — ширина одного повтора.
    Слои стоят от низа моря и заходят друг за друга: просветы между гребнями
    занимают верхние 61% рисунка, и за ними всегда лежит дальний слой. Поэтому
@@ -280,6 +289,8 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .sea-layer--mid { --lift: .36; --scale: .8; --drift: 95s; }
 .sea-layer--mid .sea-drift { animation-direction: reverse; }
 .sea-layer--near { --lift: 0; --scale: 1; --drift: 70s; }
+/* Нижний край ближнего слоя тает в волнах толщи. */
+.sea-layer--near .sea-waves { -webkit-mask-image: linear-gradient(#000 88%, transparent); mask-image: linear-gradient(#000 88%, transparent); }
 @keyframes sea-drift { to { transform: translateX(calc(-1 * var(--tile))); } }
 .stranger-cast { position: absolute; left: 0; right: 0; bottom: var(--floor); height: 0; }
 /* Тритон в море, между средним и ближним слоем. Пока он чужой, ближние гребни
