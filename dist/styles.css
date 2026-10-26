@@ -167,7 +167,8 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 /* Обложка */
 .hero { min-height: 100vh; min-height: 100svh; padding-block: var(--space-5); padding-inline: max(var(--gutter), calc((100% - 1470px) / 2)); display: flex; flex-direction: column; justify-content: center; }
 .hero-title { font: 600 clamp(64px, 19.6vw, 340px)/1.12 var(--display); letter-spacing: -.05em; white-space: nowrap; }
-.hero-title h1 { display: inline; font: inherit; letter-spacing: inherit; }
+/* У «К» в Oswald пустое поле слева ≈ .06 кегля: сдвигаем, чтобы штрих стоял на одной грани с фразой под ним. */
+.hero-title h1 { display: inline; margin-left: -.055em; font: inherit; letter-spacing: inherit; }
 /* Точка заголовка — кнопка «читать». Пропорции из макета: высота ≈ 0,2 кегля, нижний край на базовой линии. */
 .read-button { display: inline-block; overflow: hidden; vertical-align: baseline; margin-left: .3em; font-size: max(14px, .058em); line-height: 2.45; letter-spacing: 0; padding: .33em .33em .58em; background: var(--accent); color: #fff; transition: background .2s; }
 .read-button:hover { background: var(--accent-hover); }
