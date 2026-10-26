@@ -1,8 +1,7 @@
-import { mountPianoExperience } from './piano.js?v=origin-she-1';
-import { mountGeometryStory } from './geometry-story.js?v=origin-she-1';
-import { mountSoundScreen } from './sound-screen.js?v=origin-she-1';
-import { mountStranger } from './stranger.js?v=origin-she-1';
-import { mountOrigin } from './origin.js?v=origin-she-1';
+import { mountPianoExperience } from './piano.js?v=scroll-13';
+import { mountGeometryStory } from './geometry-story.js?v=scroll-13';
+import { mountStranger } from './stranger.js?v=scroll-13';
+import { mountOrigin } from './origin.js?v=scroll-13';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -27,12 +26,6 @@ if ('IntersectionObserver' in window) {
 }
 
 const soundExperience = mountPianoExperience({ reducedMotion });
-const soundScreen = mountSoundScreen({
-  lab: $('#sound-lab'),
-  holdsPage: () => soundExperience.holdsPage(),
-  isStatic: () => reducedMotion.matches || matchMedia('(max-height: 600px)').matches,
-  onScroll: () => queueScrollUpdate(),
-});
 const lowWindow = matchMedia('(max-height: 600px)');
 // Dots fill the whole screen; one of them becomes the orange circle of the story.
 const geometryStory = mountGeometryStory($('#principle'), { isStatic: () => reducedMotion.matches || lowWindow.matches });
@@ -51,12 +44,13 @@ function localProgress(element) {
 }
 function updateScroll() {
   scrollTicking = false;
-  soundScreen.check();
   soundExperience.updateScroll();
   const reduced = reducedMotion.matches;
   origin.update();
   geometryStory.check();
   stranger.update();
+  const hero = $('#top');
+  hero.style.setProperty('--hero-leave', reduced ? '0' : clamp(scrollY / Math.max(1, hero.offsetHeight * .7)).toFixed(4));
   const total = root.scrollHeight - innerHeight;
   $('.reading-progress span').style.transform = `scaleX(${clamp(scrollY / Math.max(1, total))})`;
   const progress = localProgress(ending);
@@ -77,7 +71,6 @@ function queueScrollUpdate() {
 function resetExperiments() {
   geometryStory.reset();
   soundExperience.reset();
-  soundScreen.reset();
   $('#sources').open = false;
 }
 function restartEssay() {
@@ -104,22 +97,8 @@ function restartEssay() {
   }, reducedMotion.matches ? 0 : 300);
 }
 $('#restart').addEventListener('click', restartEssay);
-// «Читать»: надписи обложки уезжают влево, и начинается пролог о том, откуда берётся разница.
-$('.read-button').addEventListener('click', (event) => {
-  const hero = $('#top');
-  if (reducedMotion.matches || lowWindow.matches || hero.classList.contains('is-leaving')) return;
-  event.preventDefault();
-  hero.classList.add('is-leaving');
-  setTimeout(() => {
-    const previous = root.style.scrollBehavior;
-    root.style.scrollBehavior = 'auto';
-    scrollTo({ top: $('#origin').getBoundingClientRect().top + scrollY, behavior: 'instant' });
-    root.style.scrollBehavior = previous;
-    updateScroll();
-    // Обложка снова на месте, если читатель вернётся наверх.
-    setTimeout(() => hero.classList.remove('is-leaving'), 200);
-  }, 650);
-});
+// «Читать» ведёт к прологу обычной прокруткой; это нажатие заодно разрешает звук для бала.
+$('.read-button').addEventListener('click', () => soundExperience.unlockAudio());
 addEventListener('scroll', queueScrollUpdate, { passive: true });
 function relayout() {
   geometryStory.layout();

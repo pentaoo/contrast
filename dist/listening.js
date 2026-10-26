@@ -1,18 +1,21 @@
-// A completed performance advances the story; stopping never does.
-export function createListeningState() {
-  return { phase: 'intro', heardMistake: false, heardCorrect: false };
+// Мелодия идёт от прокрутки. Прокрутка задаёт цель — до какого места дослушать,
+// а «головка» догоняет её в обычном темпе: не быстрее времени и не дальше цели.
+// Перестал крутить — головка остановилась, мелодия замолкла.
+const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
+export const LOOKAHEAD = .12;
+
+export function trackTarget(fraction, duration) {
+  return clamp(Number.isFinite(fraction) ? fraction : 0) * duration;
 }
 
-export function finishMelody(state, version) {
-  if (version === 'mistake' && state.phase === 'intro') {
-    return { ...state, phase: 'explanation', heardMistake: true };
-  }
-  if (version === 'correct' && state.phase === 'explanation' && !state.heardCorrect) {
-    return { ...state, heardCorrect: true };
-  }
-  return state;
+// Назад по прокрутке головка перескакивает молча; вперёд идёт в реальном времени.
+export function advance(playhead, target, dt) {
+  if (target < playhead - .05) return { playhead: target, jumped: true };
+  return { playhead: Math.min(target, playhead + Math.max(0, dt)), jumped: false };
 }
 
-export function skipListening(state) {
-  return state.phase !== 'explanation' ? { ...state, phase: 'explanation' } : state;
+// Ноты, которые пора поставить в очередь: начинаются в [from, to).
+export function dueEvents(events, from, to) {
+  return events.filter((event) => event.at >= from && event.at < to);
 }

@@ -10,8 +10,8 @@
   <link rel="preload" href="./assets/oswald-600.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/manrope-400.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="./assets/fonts.css">
-  <link rel="stylesheet" href="./styles.css?v=origin-she-1">
-  <script type="module" src="./app.js?v=origin-she-1"></script>
+  <link rel="stylesheet" href="./styles.css?v=scroll-13">
+  <script type="module" src="./app.js?v=scroll-13"></script>
 </head>
 <body>
   <a class="skip-link" href="#origin">К содержанию</a>
@@ -65,14 +65,18 @@
     <section class="sound-section on-ink" id="sound" aria-labelledby="sound-title">
       <div class="sound-lab" id="sound-lab">
         <div class="sound-story">
-          <div class="sound-step container" id="sound-opening">
-            <div class="sound-copy"><h2 id="sound-title">Точка спасена.<br>Пора на бал.</h2><p class="body-copy" id="listening-prompt">Включите музыку — точка и квадрат выйдут танцевать.</p></div>
+          <div class="sound-track" data-track="mistake">
+            <div class="sound-step container" id="sound-opening">
+              <div class="sound-copy"><h2 id="sound-title">Точка спасена.<br>Пора на бал.</h2><p class="body-copy" id="listening-prompt">Крутите дальше — точка и квадрат выйдут танцевать. Мелодия звучит, пока вы крутите.</p></div>
+            </div>
           </div>
-          <div id="sound-explanation" hidden>
+          <div id="sound-explanation">
             <div class="sound-step container"><p class="sound-copy" id="listening-lead" tabindex="-1">Танец сорвался на последней ноте. Вместе с до прозвучал ре-бемоль — соседняя нота, всего на полутон выше.</p></div>
             <div class="sound-step container"><p class="sound-copy" id="sound-tones-copy">У каждого звука есть основной тон и обертоны — его эхо: их частоты в 2, 3, 4 и больше раз выше основного тона. Выделим основные тона: точка и квадрат стояли почти вплотную.</p></div>
             <div class="sound-step container"><p class="sound-copy">Ноты стоят так близко, что слух с трудом их разделяет: <mark class="highlight">это уже не два ясных звука, но ещё и не один.</mark> Многим такое созвучие неприятно: то, что легче воспринять, обычно нравится больше. Но ощущение завершённости зависит и от музыкального контекста, и от того, какую музыку человек привык слушать.</p></div>
-            <div class="sound-step container" id="sound-final-step"><p class="sound-copy">А если вместо ре-бемоля взять до октавой выше? Его основной тон совпадёт с первым обертоном нижнего до, и две ноты почти сольются в одну. Сыграем мелодию ещё раз.</p></div>
+          </div>
+          <div class="sound-track" data-track="correct">
+            <div class="sound-step container" id="sound-final-step"><p class="sound-copy">А если вместо ре-бемоля взять до октавой выше? Его основной тон совпадёт с первым обертоном нижнего до, и две ноты почти сольются в одну. Крутите дальше — сыграем мелодию ещё раз.</p></div>
           </div>
         </div>
         <div class="sound-instrument container">
@@ -84,12 +88,8 @@
             <div class="piano-wreckage" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
           </div>
           <p class="label piano-hint" aria-hidden="true"><span class="for-mouse">Играйте мышью или клавишами <kbd>A</kbd>…<kbd>K</kbd></span><span class="for-touch">Нажимайте на клавиши</span></p>
-          <div class="listening-actions">
-            <button class="button button--primary" id="play-sound" aria-pressed="false"><span class="button-icon play-icon" aria-hidden="true">▶</span><span class="play-label">Начать бал</span></button>
-            <button class="link-button" id="replay-first" hidden>Первый вариант <span aria-hidden="true">↺</span></button>
-          </div>
+          <div class="listening-actions"><button class="link-button" id="sound-unlock" hidden>Включить звук</button></div>
           <p class="sr-only" id="triton-caption" hidden>Тритон проломил клавиатуру. При ударе прозвучали до и фа-диез — интервал тритон.</p>
-          <div class="sound-outro" id="sound-outro" hidden><a href="#stranger">Дальше <span aria-hidden="true">↓</span></a></div>
           <p id="audio-error" class="label audio-error" role="status"></p>
         </div>
       </div>
