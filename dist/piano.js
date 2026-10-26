@@ -1,9 +1,9 @@
-import { computerKeys, describeChord, noteName } from './notes.js?v=origin-17';
-import { LOOKAHEAD, advance, dueEvents } from './listening.js?v=origin-17';
-import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=origin-17';
-import { mountSpectrum } from './spectrum.js?v=origin-17';
-import { mountBall } from './ball.js?v=origin-17';
-import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=origin-17';
+import { computerKeys, describeChord, noteName } from './notes.js?v=origin-18';
+import { LOOKAHEAD, advance, dueEvents } from './listening.js?v=origin-18';
+import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=origin-18';
+import { mountSpectrum } from './spectrum.js?v=origin-18';
+import { mountBall } from './ball.js?v=origin-18';
+import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=origin-18';
 
 export function mountPianoExperience({ reducedMotion }) {
   const piano = document.querySelector('#piano');
@@ -251,6 +251,38 @@ export function mountPianoExperience({ reducedMotion }) {
     return tone;
   }
 
+  // The conch: the same C4 and F-sharp4 as the impact, but blown — a slow swell, a soft vibrato, a long fade.
+  function conch() {
+    if (!audible()) return;
+    const at = context.currentTime + .03;
+    tritonNotes.forEach((note, index) => {
+      const oscillator = context.createOscillator();
+      const vibrato = context.createOscillator();
+      const depth = context.createGain();
+      const tone = context.createBiquadFilter();
+      const gain = context.createGain();
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.value = noteFrequency(note);
+      vibrato.frequency.value = 5.2 + index * .4;
+      depth.gain.value = 3;
+      tone.type = 'lowpass';
+      tone.frequency.setValueAtTime(500, at);
+      tone.frequency.linearRampToValueAtTime(1400, at + .45);
+      tone.frequency.linearRampToValueAtTime(700, at + 2.2);
+      gain.gain.setValueAtTime(0, at);
+      gain.gain.linearRampToValueAtTime(.05, at + .35);
+      gain.gain.setValueAtTime(.05, at + 1.5);
+      gain.gain.exponentialRampToValueAtTime(.0001, at + 2.4);
+      vibrato.connect(depth);
+      depth.connect(oscillator.frequency);
+      oscillator.connect(tone);
+      tone.connect(gain);
+      gain.connect(output);
+      [oscillator, vibrato].forEach((node) => { node.start(at); node.stop(at + 2.5); });
+      oscillator.onended = () => [oscillator, vibrato, depth, tone, gain].forEach((node) => node.disconnect());
+    });
+  }
+
   function heldNotes() {
     return [...new Set([...sources.values()].map(({ note }) => note))];
   }
@@ -383,6 +415,7 @@ export function mountPianoExperience({ reducedMotion }) {
 
   return {
     unlockAudio,
+    conch,
     updateScroll() {
       const inside = tracks.find((track) => {
         const rect = track.getBoundingClientRect();
