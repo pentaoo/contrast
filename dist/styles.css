@@ -192,7 +192,9 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 
 /* 01 Точки и фигуры. Сцену проигрывает geometry-story.js; на время показа прокрутка заблокирована. */
 .attention-scene { --story-accent: var(--accent); --story-copy-1: 1; --story-copy-2: 1; --story-copy-3: 1; }
-.js-enabled .attention-scene { height: 1000vh; height: 1000svh; }
+.js-enabled .attention-scene { height: 1150vh; height: 1150svh; }
+/* Усилие: пока точка рвётся из сетки, по краям экрана нарастает оранжевое свечение. */
+.js-enabled .attention-stage::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(90deg, rgb(238 73 44 / .42), rgb(238 73 44 / 0) 16%, rgb(238 73 44 / 0) 84%, rgb(238 73 44 / .42)); opacity: var(--strain, 0); }
 .attention-stage { position: relative; height: auto; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: var(--space-5); padding: var(--space-5) var(--gutter); }
 .story-canvas { display: none; }
 .story-canvas pattern circle, .story-canvas g circle, .story-dot circle { fill: var(--dot); }
