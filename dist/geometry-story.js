@@ -9,6 +9,9 @@ const SVG = 'http://www.w3.org/2000/svg';
 export const ZOOM_FROM = .18;
 // Доли прокрутки закреплённой сцены: пролёт, история, рост большого квадрата.
 export const storyScrollParts = { intro: [0, .12], story: [.12, .82], grow: [.82, 1] };
+// Вырваться из сетки трудно: первые .17 истории (точка дёргается и рвётся наружу)
+// занимают почти треть прокрутки истории — читателю приходится долго листать.
+export const STRAIN = { until: .17, share: .3 };
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 const ease = (t) => t * t * (3 - 2 * t);
 const span = (p, from, to) => ease(clamp((p - from) / (to - from)));
@@ -47,13 +50,19 @@ export function introFrame(progress) {
 export function storyScroll(scroll) {
   const s = clamp(Number.isFinite(scroll) ? scroll : 0);
   const part = ([from, to]) => clamp((s - from) / (to - from));
-  return { intro: part(storyScrollParts.intro), progress: part(storyScrollParts.story), grow: part(storyScrollParts.grow) };
+  const raw = part(storyScrollParts.story);
+  const progress = raw < STRAIN.share
+    ? STRAIN.until * raw / STRAIN.share
+    : STRAIN.until + (1 - STRAIN.until) * (raw - STRAIN.share) / (1 - STRAIN.share);
+  return { intro: part(storyScrollParts.intro), progress, grow: part(storyScrollParts.grow) };
 }
 
 export function storyFrame(progress, view) {
   const p = clamp(Number.isFinite(progress) ? progress : 0);
   const { halfW, halfH, start, dotR } = view;
   const leftOut = -halfW - 3;
+  // Спасённые убегают направо, за край экрана.
+  const rightOut = halfW + 3;
 
   const circleKeys = [
     [.17, start.x, start.y],
@@ -71,8 +80,8 @@ export function storyFrame(progress, view) {
     [.635, 6.2, -.4],
     [.655, 6.8, .6], // за маленьким квадратом
     [.79, 6.8, .6],
-    [.85, 2.4, 2.8], // нижний путь
-    [.91, leftOut + .6, 3.4],
+    [.85, 8.2, 2.8], // нижний путь
+    [.91, rightOut + .6, 3.4],
   ];
   const bigKeys = [
     [.27, leftOut - 1, 0],
@@ -90,7 +99,7 @@ export function storyFrame(progress, view) {
     [.735, 1.85, -.9],
     [.78, 1.65, -3.15], // за маленьким, вверх
     [.885, 1.65, -3.15],
-    [.93, -.35, -1.75], // поздно оборачивается
+    [.93, 2.65, -1.75], // поздно оборачивается вслед
   ];
   const smallKeys = [
     [.55, halfW + 2, -halfH - 2],
@@ -102,14 +111,21 @@ export function storyFrame(progress, view) {
     [.72, 5, -.5],
     [.76, 4.9, -3.4], // уводит большого вверх
     [.8, 4.9, -3.4],
-    [.85, 4.9, 1.2],
-    [.92, leftOut - .4, 1.9],
+    [.85, 6.2, 1.2],
+    [.92, rightOut + .4, 1.9],
   ];
 
   // Перед побегом точка нервничает: сперва чуть дрожит, потом дёргается сильнее.
   const nerves = (span(p, .02, .08) * .05 + span(p, .1, .16) * .13) * (1 - span(p, .16, .17));
+  // Потом она рвётся к выходу: рывок вперёд, и сетка тянет её назад. С каждым рывком сильнее.
+  const strain = span(p, .05, .16) * (1 - span(p, .17, .21));
+  const pull = Math.max(0, Math.sin((p - .05) * 230)) ** 3 * span(p, .05, .16) * (1 - span(p, .158, .17));
+  const toward = Math.atan2(-start.y, .4 - start.x);
   const circle = p < .17
-    ? { x: start.x + nerves * (Math.sin(p * 311) + .5 * Math.sin(p * 977)), y: start.y + nerves * .6 * (Math.sin(p * 421) + .5 * Math.sin(p * 733)) }
+    ? {
+      x: start.x + nerves * (Math.sin(p * 311) + .5 * Math.sin(p * 977)) + pull * .3 * Math.cos(toward),
+      y: start.y + nerves * .6 * (Math.sin(p * 421) + .5 * Math.sin(p * 733)) + pull * .3 * Math.sin(toward),
+    }
     : track(p, circleKeys);
   const grow = span(p, .19, .27);
   circle.r = dotR + (SIZES.circle / 2 - dotR) * grow;
@@ -121,6 +137,8 @@ export function storyFrame(progress, view) {
   return {
     progress: p,
     dots: 1 - span(p, .17, .25),
+    // Усилие: свечение по краям экрана нарастает с рывками и гаснет, когда точка вырвалась.
+    strain: strain * (.55 + .45 * pull),
     circle,
     big,
     small,
@@ -299,6 +317,7 @@ export function mountGeometryStory(section, { isStatic, onField = () => {} }) {
     const fill = `rgb(${r} ${g} ${b})`;
     circle.setAttribute('fill', fill);
     small.setAttribute('fill', fill);
+    section.style.setProperty('--strain', frame.strain.toFixed(3));
     frame.copy.forEach((value, index) => section.style.setProperty(`--story-copy-${index + 1}`, (value * textLeft).toFixed(3)));
   }
 

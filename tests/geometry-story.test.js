@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { circleGap, growSquare, introFrame, squareGap, storyFrame, storyScroll, storyScrollParts, ZOOM_FROM } from '../dist/geometry-story.js';
+import { circleGap, growSquare, introFrame, squareGap, storyFrame, storyScroll, storyScrollParts, STRAIN, ZOOM_FROM } from '../dist/geometry-story.js';
 
 const views = [
   { halfW: 8.5, halfH: 19, dotR: .2, start: { x: 1.4, y: -6 } }, // телефон
@@ -37,9 +37,9 @@ test('the field is grey at first and only the colour changes on the difference',
   const difference = storyFrame(.14, view);
   assert.equal(field.circle.tint, 0);
   assert.equal(difference.circle.tint, 1);
-  // The dot only twitches in place before it runs.
+  // Before it runs the dot only twitches and tugs, staying near its place in the grid.
   assert.equal(difference.circle.r, field.circle.r);
-  assert.ok(Math.hypot(difference.circle.x - view.start.x, difference.circle.y - view.start.y) < .3);
+  assert.ok(Math.hypot(difference.circle.x - view.start.x, difference.circle.y - view.start.y) < .55);
   assert.ok(Math.hypot(field.circle.x - view.start.x, field.circle.y - view.start.y) < .1);
   assert.equal(difference.dots, 1);
   assert.equal(difference.big.visible || difference.small.visible, false);
@@ -60,8 +60,8 @@ test('the question comes after the circle and the small square have left', () =>
   for (const view of views) {
     const firstText = steps.find((p) => storyFrame(p, view).copy[0] > 0);
     const end = storyFrame(firstText, view);
-    assert.ok(end.circle.x + end.circle.r < -view.halfW, 'circle is off screen');
-    assert.ok(end.small.x + end.small.size / 2 < -view.halfW, 'small square is off screen');
+    assert.ok(end.circle.x - end.circle.r > view.halfW, 'circle ran off to the right');
+    assert.ok(end.small.x - end.small.size / 2 > view.halfW, 'small square ran off to the right');
     assert.ok(Math.abs(storyFrame(1, view).big.x) < view.halfW, 'big square stays in view');
   }
 });
@@ -117,4 +117,23 @@ test('the scroll drives the flight, then the story, then the growing square', ()
   assert.ok(story.progress > 0 && story.progress < 1 && story.grow === 0);
   assert.deepEqual(storyScroll(1), { intro: 1, progress: 1, grow: 1 });
   assert.deepEqual(storyScroll(NaN), storyScroll(0));
+});
+
+test('breaking out of the grid takes a long stretch of scrolling, then the story runs on', () => {
+  const [from, to] = storyScrollParts.story;
+  const at = (raw) => storyScroll(from + (to - from) * raw).progress;
+  assert.ok(Math.abs(at(STRAIN.share) - STRAIN.until) < 1e-9);
+  assert.ok(Math.abs(at(STRAIN.share / 2) - STRAIN.until / 2) < 1e-9);
+  let previous = 0;
+  for (let raw = 0; raw <= 1; raw += .01) {
+    assert.ok(at(raw) >= previous - 1e-9);
+    previous = at(raw);
+  }
+});
+
+test('the strain glows while the dot pulls and fades once it is free', () => {
+  const view = views[1];
+  assert.equal(storyFrame(0, view).strain, 0);
+  assert.ok(Math.max(...steps.filter((p) => p > .1 && p < .17).map((p) => storyFrame(p, view).strain)) > .6);
+  assert.equal(storyFrame(.25, view).strain, 0);
 });
