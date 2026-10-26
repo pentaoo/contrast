@@ -1,7 +1,7 @@
-import { mountPianoExperience } from './piano.js?v=intro-1';
-import { mountGeometryStory } from './geometry-story.js?v=intro-1';
-import { mountSoundScreen } from './sound-screen.js?v=intro-1';
-import { mountStranger } from './stranger.js?v=intro-1';
+import { mountPianoExperience } from './piano.js?v=sea-8';
+import { mountGeometryStory } from './geometry-story.js?v=sea-8';
+import { mountSoundScreen } from './sound-screen.js?v=sea-8';
+import { mountStranger } from './stranger.js?v=sea-8';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
