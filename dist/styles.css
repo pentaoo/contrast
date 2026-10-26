@@ -250,7 +250,7 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .conclusion { padding-bottom: var(--space-5); }
 /* Третий акт: тритон лежит на белом экране, потом приходит его море.
    Контекст влияет на контраст. */
-.stranger { --sea: 0; --text-a: 1; --text-b: 0; --tw: clamp(260px, 40vw, 600px); --floor: clamp(56px, 11svh, 120px); --deck: 31svh; --tr: max(var(--gutter), calc(50% - 620px)); --fig: clamp(64px, 8.5vw, 136px); }
+.stranger { --sea: 0; --text-a: 1; --text-b: 0; --tw: clamp(240px, 36vw, 540px); --floor: clamp(56px, 11svh, 120px); --tr: max(var(--gutter), calc(50% - 620px)); --fig: clamp(64px, 8.5vw, 136px); }
 .stranger-scroll { height: 100vh; height: 100svh; }
 .js-enabled .stranger-scroll { height: 340vh; height: 340svh; }
 .stranger-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--paper); }
@@ -259,7 +259,7 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
    Слои стоят от низа моря и заходят друг за друга: просветы между гребнями
    занимают верхние 61% рисунка, и за ними всегда лежит дальний слой. Поэтому
    море доходит до низа экрана без сплошной заливки. --wave — высота ближнего слоя. */
-.stranger { --wave: 36vh; --wave: 36svh; }
+.stranger { --wave: 42vh; --wave: 42svh; }
 .sea-layer { position: absolute; left: 0; right: 0; bottom: calc(var(--wave) * var(--lift)); height: var(--crest); overflow: hidden; --crest: calc(var(--wave) * var(--scale)); --tile: calc(var(--crest) * 1683 / 748); }
 .sea-drift { position: absolute; inset: 0 auto 0 0; width: calc(100% + var(--tile)); animation: sea-drift var(--drift) linear infinite; }
 .sea-waves { height: 100%; background: url(assets/sea/sea-waves.webp) repeat-x 0 0 / var(--tile) var(--crest); }
@@ -269,10 +269,12 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .sea-layer--near { --lift: 0; --scale: 1; --drift: 70s; }
 @keyframes sea-drift { to { transform: translateX(calc(-1 * var(--tile))); } }
 .stranger-cast { position: absolute; left: 0; right: 0; bottom: var(--floor); height: 0; }
-.stranger-triton { position: absolute; right: var(--tr); bottom: calc(var(--deck) - var(--floor)); width: var(--tw); aspect-ratio: 1; }
+/* Тритон лежит в море, между средним и ближним слоем: ближние гребни
+   закрывают хвост и раковину, и он поднимается вместе с водой. */
+.stranger-triton { position: absolute; right: var(--tr); bottom: calc(var(--wave) * .5); width: var(--tw); aspect-ratio: 1; }
 /* Тритон лежит на волнах с самого начала и поднимается вместе с морем:
    море сдвинуто на (1 - --sea) своей высоты, а она равна 56% экрана. */
-.js-enabled .stranger:not(.is-still) .stranger-triton { transform: translateY(calc((1 - var(--sea)) * 56vh)); transform: translateY(calc((1 - var(--sea)) * 56svh)); animation: cast-bob 5.2s -2s ease-in-out infinite; }
+.js-enabled .stranger:not(.is-still) .stranger-triton { animation: cast-bob 5.2s -2s ease-in-out infinite; }
 .stranger-triton img { display: block; width: 100%; height: 100%; translate: 0 7%; }
 .cast-circle, .cast-square { position: absolute; bottom: 0; display: block; background: var(--accent); }
 .cast-square { right: calc(var(--tr) + var(--tw) * .98); width: calc(var(--fig) * 1.6); aspect-ratio: 1; rotate: -8deg; transform-origin: 0 100%; }
@@ -292,7 +294,6 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .stranger.is-still .sea { inset: auto 0 0; height: 62svh; }
 .stranger.is-still { --wave: 40vh; --wave: 40svh; }
 .stranger.is-still .stranger-cast { position: relative; bottom: auto; height: 62svh; }
-.stranger.is-still .stranger-triton { bottom: 14svh; }
 .stranger.is-still .cast-circle, .stranger.is-still .cast-square { bottom: 14svh; }
 .stranger-after { padding-block: var(--space-6) var(--space-5); }
 .stranger-sum { max-width: var(--measure-text); color: var(--ink); }
@@ -342,7 +343,7 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .section-pad { padding-block: var(--space-5); }
 }
 @media (max-width: 600px) {
-  .stranger { --tw: 64vw; --tr: 0px; --fig: 44px; --deck: 29svh; }
+  .stranger { --tw: 64vw; --tr: 0px; --fig: 44px; }
   :root { --text-ui: 14px; }
   .hero-subline { align-items: flex-start; gap: var(--space-3); }
   .circle-link { width: 44px; height: 44px; font-size: 22px; }
