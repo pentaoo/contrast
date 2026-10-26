@@ -1,7 +1,8 @@
-import { mountPianoExperience } from './piano.js?v=text-10';
-import { mountGeometryStory } from './geometry-story.js?v=text-10';
-import { mountSoundScreen } from './sound-screen.js?v=text-10';
-import { mountStranger } from './stranger.js?v=text-10';
+import { mountPianoExperience } from './piano.js?v=origin-1';
+import { mountGeometryStory } from './geometry-story.js?v=origin-1';
+import { mountSoundScreen } from './sound-screen.js?v=origin-1';
+import { mountStranger } from './stranger.js?v=origin-1';
+import { mountOrigin } from './origin.js?v=origin-1';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -35,6 +36,8 @@ const soundScreen = mountSoundScreen({
 const lowWindow = matchMedia('(max-height: 600px)');
 // Dots fill the whole screen; one of them becomes the orange circle of the story.
 const geometryStory = mountGeometryStory($('#principle'), { isStatic: () => reducedMotion.matches || lowWindow.matches });
+// Before the story: one grey field splits into ever finer parts.
+const origin = mountOrigin($('#origin'), { reducedMotion, isStatic: () => lowWindow.matches });
 // The Triton lies on a white screen until his sea floods it.
 const stranger = mountStranger($('#stranger'), { reducedMotion, isStatic: () => lowWindow.matches });
 
@@ -51,6 +54,7 @@ function updateScroll() {
   soundScreen.check();
   soundExperience.updateScroll();
   const reduced = reducedMotion.matches;
+  origin.update();
   geometryStory.check();
   stranger.update();
   const total = root.scrollHeight - innerHeight;
@@ -100,7 +104,7 @@ function restartEssay() {
   }, reducedMotion.matches ? 0 : 300);
 }
 $('#restart').addEventListener('click', restartEssay);
-// «Читать»: надписи обложки уезжают влево, и сразу начинается пролёт над полем точек.
+// «Читать»: надписи обложки уезжают влево, и начинается пролог о том, откуда берётся разница.
 $('.read-button').addEventListener('click', (event) => {
   const hero = $('#top');
   if (reducedMotion.matches || lowWindow.matches || hero.classList.contains('is-leaving')) return;
@@ -109,7 +113,7 @@ $('.read-button').addEventListener('click', (event) => {
   setTimeout(() => {
     const previous = root.style.scrollBehavior;
     root.style.scrollBehavior = 'auto';
-    scrollTo({ top: $('#principle').getBoundingClientRect().top + scrollY, behavior: 'instant' });
+    scrollTo({ top: $('#origin').getBoundingClientRect().top + scrollY, behavior: 'instant' });
     root.style.scrollBehavior = previous;
     updateScroll();
     // Обложка снова на месте, если читатель вернётся наверх.
