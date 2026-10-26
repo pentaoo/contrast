@@ -164,7 +164,7 @@ function parseColor(value) {
   return [0, 2, 4].map((at) => parseInt(full.slice(at, at + 2), 16) || 0);
 }
 
-export function mountGeometryStory(section, { isStatic }) {
+export function mountGeometryStory(section, { isStatic, onField = () => {} }) {
   const svg = section.querySelector('#story-canvas');
   // Поле — один прямоугольник с узором из точек: так оно может быть огромным.
   const defs = create('defs');
@@ -249,6 +249,14 @@ export function mountGeometryStory(section, { isStatic }) {
       },
     };
     lastKey = '';
+    // Каким поле видно в самом первом кадре: шаг, радиус и место точек на экране.
+    // Пролог рисует последний кадр тем же полем, и стык двух сцен не виден.
+    const zoom = introFrame(0).zoom;
+    const period = step * zoom;
+    const pan = introFrame(0).pan * width;
+    const heroX = left + heroCol * step;
+    const heroY = top + heroRow * step;
+    onField({ period, r: dotR * zoom, x: heroX + zoom * (left + pan - heroX), y: heroY + zoom * (top - heroY) });
   }
 
   function placeSquare(node, shape) {

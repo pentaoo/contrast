@@ -1,4 +1,4 @@
-import { noteFrequency, secondsPerBeat } from './melody.js?v=scroll-13';
+import { noteFrequency, secondsPerBeat } from './melody.js?v=field-14';
 
 // Бал: круг и маленький квадрат из первой истории танцуют на графике частот.
 // Круг стоит на ноте мелодии, квадрат — на верхней ноте аккомпанемента.

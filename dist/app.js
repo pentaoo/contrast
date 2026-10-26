@@ -1,7 +1,7 @@
-import { mountPianoExperience } from './piano.js?v=scroll-13';
-import { mountGeometryStory } from './geometry-story.js?v=scroll-13';
-import { mountStranger } from './stranger.js?v=scroll-13';
-import { mountOrigin } from './origin.js?v=scroll-13';
+import { mountPianoExperience } from './piano.js?v=field-14';
+import { mountGeometryStory } from './geometry-story.js?v=field-14';
+import { mountStranger } from './stranger.js?v=field-14';
+import { mountOrigin } from './origin.js?v=field-14';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -28,9 +28,10 @@ if ('IntersectionObserver' in window) {
 const soundExperience = mountPianoExperience({ reducedMotion });
 const lowWindow = matchMedia('(max-height: 600px)');
 // Dots fill the whole screen; one of them becomes the orange circle of the story.
-const geometryStory = mountGeometryStory($('#principle'), { isStatic: () => reducedMotion.matches || lowWindow.matches });
 // Before the story: one grey field splits into ever finer parts.
 const origin = mountOrigin($('#origin'), { reducedMotion, isStatic: () => lowWindow.matches });
+// The prologue ends on the same field the story starts with.
+const geometryStory = mountGeometryStory($('#principle'), { isStatic: () => reducedMotion.matches || lowWindow.matches, onField: origin.setField });
 // The Triton lies on a white screen until his sea floods it.
 const stranger = mountStranger($('#stranger'), { reducedMotion, isStatic: () => lowWindow.matches });
 

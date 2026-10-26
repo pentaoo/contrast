@@ -37,5 +37,21 @@ export function mountOrigin(section, { reducedMotion, isStatic }) {
     texts.forEach((text, index) => text.classList.toggle('is-current', index === frame.step));
   }
 
-  return { update };
+  // Поле точек последнего шага — это начало поля мультфильма, продолженное на экран выше.
+  // Рисуем его тем же SVG-узором, что и мультфильм: CSS-фон с дробным шагом уплывает на пиксели.
+  const dots = section.querySelector('.origin-layer--dots');
+  const SVG = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(SVG, 'svg');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.innerHTML = '<defs><pattern id="origin-dots" patternUnits="userSpaceOnUse"><circle/></pattern></defs><rect width="100%" height="100%" fill="url(#origin-dots)"/>';
+  const pattern = svg.querySelector('pattern');
+  const dot = svg.querySelector('circle');
+  function setField({ period, r, x, y }) {
+    const height = section.querySelector('.origin-stage').offsetHeight;
+    if (!svg.isConnected) { dots.append(svg); dots.classList.add('has-field'); }
+    Object.entries({ x: x - period / 2, y: y + height - period / 2, width: period, height: period }).forEach(([name, value]) => pattern.setAttribute(name, value.toFixed(3)));
+    Object.entries({ cx: period / 2, cy: period / 2, r }).forEach(([name, value]) => dot.setAttribute(name, value.toFixed(3)));
+  }
+
+  return { update, setField };
 }
