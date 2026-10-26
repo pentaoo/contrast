@@ -1,12 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { advance, dueEvents, trackTarget } from '../dist/listening.js';
+import { advance, dueEvents } from '../dist/listening.js';
 import { createMelody, expectedNote, mistakenNote, tonicNote, keyboardRange, noteFrequency } from '../dist/melody.js';
 
-test('the playhead follows the scroll at real tempo and never runs ahead', () => {
-  assert.equal(trackTarget(.5, 8), 4);
-  assert.equal(trackTarget(2, 8), 8);
-  assert.equal(trackTarget(NaN, 8), 0);
+test('the playhead moves at real tempo and never runs past its target', () => {
   assert.deepEqual(advance(0, 4, .016), { playhead: .016, jumped: false });
   assert.deepEqual(advance(3.99, 4, .1), { playhead: 4, jumped: false });
   assert.deepEqual(advance(4, 4, .1), { playhead: 4, jumped: false });
