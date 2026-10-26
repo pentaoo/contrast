@@ -320,7 +320,7 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .is-sea .cast-circle::before, .is-sea .cast-square::before, .is-sea .cast-square::after { animation: bubble 2.8s ease-in infinite; }
 .is-sea .cast-square::before { animation-delay: -1.1s; }
 .is-sea .cast-square::after { animation-delay: -2s; }
-@keyframes bubble { from { translate: 0 0; opacity: calc(var(--sink) * .9); } to { translate: 6px -16svh; opacity: 0; } }
+@keyframes bubble { from { translate: 0 0; opacity: calc(var(--sink) * (1 - var(--dark)) * .9); } to { translate: 6px -16svh; opacity: 0; } }
 .cast-square { right: calc(var(--tr) + var(--tw) * .98); width: calc(var(--fig) * 1.6); aspect-ratio: 1; rotate: -8deg; transform-origin: 0 100%; }
 .cast-circle { right: calc(var(--tr) + var(--tw) * .98 + var(--fig) * 1.6 + 14px); width: var(--fig); aspect-ratio: 1; border-radius: 50%; }
 .is-sea .cast-circle { animation: cast-bob 3.4s ease-in-out infinite; }
