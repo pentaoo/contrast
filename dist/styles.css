@@ -268,9 +268,9 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 /* Третий акт: тритон выглядывает из воды и трубит в раковину, на зов поднимается
    его море и накрывает экран. Под водой чужие — точка и квадрат.
    Контекст влияет на контраст. */
-.stranger { --sea: 0; --lift: 0; --sink: 0; --text-a: 1; --text-b: 0; --text-c: 0; --tw: clamp(240px, 36vw, 540px); --floor: clamp(56px, 11svh, 120px); --tr: max(var(--gutter), calc(50% - 620px)); --fig: clamp(64px, 8.5vw, 136px); }
+.stranger { --sea: 0; --lift: 0; --sink: 0; --text-a: 1; --text-b: 0; --text-c: 0; --dive: 0; --dark: 0; --tw: clamp(240px, 36vw, 540px); --floor: clamp(56px, 11svh, 120px); --tr: max(var(--gutter), calc(50% - 620px)); --fig: clamp(64px, 8.5vw, 136px); }
 .stranger-scroll { height: 100vh; height: 100svh; }
-.js-enabled .stranger-scroll { height: 480vh; height: 480svh; }
+.js-enabled .stranger-scroll { height: 600vh; height: 600svh; }
 .stranger-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--paper); }
 .sea { position: absolute; inset: 44% 0 0; transform: translateY(calc((1 - var(--sea)) * 100%)); will-change: transform; }
 /* Толща воды: нижний край ближних гребней тает, и вода плавно темнеет от цвета волн
@@ -310,7 +310,10 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .is-calling .triton-call i:nth-child(2) { animation-delay: .3s; }
 .is-calling .triton-call i:nth-child(3) { animation-delay: .6s; }
 @keyframes call-ring { from { scale: .3; opacity: .8; } to { scale: 4.2; opacity: 0; } }
-.cast-circle, .cast-square { position: absolute; bottom: 0; display: block; background: var(--accent); transform: translateY(calc(var(--sink) * -16svh)) rotate(calc(var(--sink) * 28deg)); }
+.cast-circle, .cast-square { position: absolute; bottom: 0; display: block; background: var(--accent); transform: translateY(calc(var(--sink) * -16svh + var(--dive) * 10svh)) rotate(calc(var(--sink) * 28deg + var(--dive) * 40deg)); }
+/* On the way down the water turns black over everything but the figures: they keep their colour. */
+.stranger-dark { position: absolute; inset: 0; background: #000; opacity: var(--dark); pointer-events: none; }
+.stranger.is-still .stranger-dark { display: none; }
 /* Под водой фигуры всплывают в толщу, от них поднимаются пузыри. */
 .cast-circle::before, .cast-square::before, .cast-square::after { content: ""; position: absolute; left: 30%; top: -14px; width: 9px; aspect-ratio: 1; border: 1.5px solid var(--paper); border-radius: 50%; opacity: 0; }
 .cast-square::after { left: 70%; width: 6px; }

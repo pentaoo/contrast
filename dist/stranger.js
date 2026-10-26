@@ -3,13 +3,17 @@
 // его интервал. На зов поднимается море и накрывает экран: под водой остаются
 // точка и квадрат, теперь чужие они.
 // Контекст влияет на контраст.
+// Дальше фигуры уходят на дно: вода темнеет до полной черноты,
+// и видны остаются только они — яркие, как были.
 
 // `shore` — how much of the sea shows at the start; `deep` — the sea has risen over the whole screen.
 // `call` — where the Triton blows his conch: the scroll starts the call, the call plays out by itself.
+// `dive` — the figures go down to the bottom; `dark` — the water around them turns black, the text goes with it.
 export const seaTiming = {
-  shore: .71, deep: 2.86, call: .34,
-  textA: [.08, .18], textB: [.18, .28], lift: [.2, .32],
-  flood: [.42, .8], textBOut: [.44, .54], textC: [.74, .86], sink: [.5, 1]
+  shore: .71, deep: 2.86, call: .27,
+  textA: [.064, .144], textB: [.144, .224], lift: [.16, .256],
+  flood: [.336, .64], textBOut: [.352, .432], textC: [.592, .688], sink: [.4, .8],
+  dive: [.74, 1], dark: [.74, .96], textCOut: [.74, .84]
 };
 
 const ramp = (value, [from, to]) => Math.min(1, Math.max(0, (value - from) / (to - from)));
@@ -21,7 +25,9 @@ export function seaAt(progress) {
     sink: ramp(progress, seaTiming.sink),
     first: 1 - ramp(progress, seaTiming.textA),
     second: ramp(progress, seaTiming.textB) * (1 - ramp(progress, seaTiming.textBOut)),
-    third: ramp(progress, seaTiming.textC)
+    third: ramp(progress, seaTiming.textC) * (1 - ramp(progress, seaTiming.textCOut)),
+    dive: ramp(progress, seaTiming.dive),
+    dark: ramp(progress, seaTiming.dark)
   };
 }
 
@@ -77,7 +83,7 @@ export function mountStranger(section, { reducedMotion, isStatic, onCall = () =>
     const still = reducedMotion.matches || isStatic();
     const progress = Math.min(1, Math.max(0, -rect.top / Math.max(1, rect.height - innerHeight)));
     // Without motion the three texts stand in a column and the sea stays at the bottom of the scene.
-    const state = still ? { level: 1, lift: 1, sink: 0, first: 1, second: 1, third: 1 } : seaAt(progress);
+    const state = still ? { level: 1, lift: 1, sink: 0, first: 1, second: 1, third: 1, dive: 0, dark: 0 } : seaAt(progress);
     section.classList.toggle('is-still', still);
     section.style.setProperty('--sea', state.level.toFixed(4));
     section.style.setProperty('--text-a', state.first.toFixed(3));
@@ -85,6 +91,8 @@ export function mountStranger(section, { reducedMotion, isStatic, onCall = () =>
     section.style.setProperty('--text-c', state.third.toFixed(3));
     section.style.setProperty('--lift', state.lift.toFixed(4));
     section.style.setProperty('--sink', state.sink.toFixed(4));
+    section.style.setProperty('--dive', state.dive.toFixed(4));
+    section.style.setProperty('--dark', state.dark.toFixed(4));
     section.classList.toggle('is-sea', !still && state.level > .5);
     // Landing far below the call (a reload, a jump to the sources) does not blow the conch.
     if (!still && progress >= seaTiming.call) {

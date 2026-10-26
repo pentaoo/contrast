@@ -16,6 +16,15 @@ test('the Triton peeks out of the shore, calls, and his sea covers the screen', 
   const end = seaAt(1);
   assert.equal(end.level, seaTiming.deep);
   assert.equal(end.second, 0);
-  assert.equal(end.third, 1);
   assert.equal(end.sink, 1);
+});
+
+test('the figures go down into full darkness and only they stay visible', () => {
+  const read = seaAt(seaTiming.textC[1]);
+  assert.equal(read.third, 1);
+  assert.equal(read.dark, 0);
+  const end = seaAt(1);
+  assert.equal(end.third, 0);
+  assert.equal(end.dark, 1);
+  assert.equal(end.dive, 1);
 });
