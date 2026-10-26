@@ -1,23 +1,45 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { originFrame, ORIGIN_LAYERS, ORIGIN_SHAPES } from '../dist/origin.js';
+import { originFrame, morphPath, OUTLINES, ORIGIN_TEXTS } from '../dist/origin.js';
 
-test('the prologue step follows the scroll and stays in range', () => {
-  assert.equal(originFrame(0).step, 0);
-  assert.equal(originFrame(-1).step, 0);
-  assert.equal(originFrame(NaN).step, 0);
-  assert.equal(originFrame(.21).step, 1);
-  assert.equal(originFrame(.99).step, ORIGIN_LAYERS.length - 1);
-  assert.equal(originFrame(7).step, ORIGIN_LAYERS.length - 1);
+test('the prologue opens on an empty screen, then «Родилась она» rises from below', () => {
+  const empty = originFrame(0);
+  assert.ok(empty.texts.every((text) => text.opacity === 0));
+  assert.equal(empty.square, 0);
+  assert.equal(empty.pattern, 0);
+  const title = originFrame(ORIGIN_TEXTS[0][1]);
+  assert.equal(title.texts[0].opacity, 1);
+  assert.equal(title.texts[0].y, 0);
+  assert.ok(originFrame((ORIGIN_TEXTS[0][0] + ORIGIN_TEXTS[0][1]) / 2).texts[0].y > 0);
 });
 
-test('shapes appear one by one within their step', () => {
-  const counts = [.4, .45, .5, .55, .59].map((p) => originFrame(p).shapes);
-  assert.equal(counts[0], 1);
-  counts.slice(1).forEach((count, index) => assert.ok(count >= counts[index]));
-  assert.equal(counts.at(-1), ORIGIN_SHAPES);
+test('each line rises, holds and flies up; only one line is fully shown at a time', () => {
+  ORIGIN_TEXTS.slice(0, -1).forEach(([, hold, leave], index) => {
+    const after = originFrame(leave + .05).texts[index];
+    assert.equal(after.opacity, 0);
+    assert.ok(after.y < 0);
+    assert.equal(originFrame(hold).texts[index].opacity, 1);
+  });
+  for (let p = 0; p <= 1; p += .005) {
+    assert.ok(originFrame(p).texts.filter((text) => text.opacity > .99).length <= 1, `p=${p}`);
+  }
 });
 
-test('the field only splits further and ends as the field of dots', () => {
-  ORIGIN_LAYERS.slice(1).forEach((layer, index) => assert.ok(layer > ORIGIN_LAYERS[index]));
+test('square → forms → flight → pattern → dots, in that order, and ends on the field', () => {
+  const end = originFrame(1);
+  assert.deepEqual([end.square, end.split, end.fly, end.pattern, end.dots], [1, 1, 1, 1, 1]);
+  assert.equal(end.texts.at(-1).opacity, 1);
+  let previous = originFrame(0);
+  for (let p = 0; p <= 1; p += .01) {
+    const frame = originFrame(p);
+    ['square', 'split', 'fly', 'pattern', 'dots'].forEach((key) => assert.ok(frame[key] >= previous[key]));
+    previous = frame;
+  }
+  assert.deepEqual(originFrame(NaN), originFrame(0));
+});
+
+test('all outlines have the same number of points, so shapes morph smoothly', () => {
+  const counts = Object.values(OUTLINES).map((points) => points.length);
+  assert.ok(counts.every((count) => count === counts[0]));
+  assert.match(morphPath('square', 'circle', .5, 10, 10, 20), /^M[\d.\- L]+Z$/);
 });
