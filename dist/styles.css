@@ -310,7 +310,7 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .is-calling .triton-call i:nth-child(2) { animation-delay: .3s; }
 .is-calling .triton-call i:nth-child(3) { animation-delay: .6s; }
 @keyframes call-ring { from { scale: .3; opacity: .8; } to { scale: 4.2; opacity: 0; } }
-.cast-circle, .cast-square { position: absolute; bottom: 0; display: block; background: var(--accent); transform: translateY(calc(var(--sink) * -16svh + var(--dive) * 10svh)) rotate(calc(var(--sink) * 28deg + var(--dive) * 40deg)); }
+.cast-circle, .cast-square { position: absolute; bottom: 0; display: block; background: var(--accent); transform: translateY(calc(var(--sink) * -16svh + var(--dive) * 4svh)) rotate(calc(var(--sink) * 28deg + var(--dive) * 17deg)); }
 /* On the way down the water turns black over everything but the figures: they keep their colour. */
 .stranger-dark { position: absolute; inset: 0; background: #000; opacity: var(--dark); pointer-events: none; }
 .stranger.is-still .stranger-dark { display: none; }
