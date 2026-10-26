@@ -10,8 +10,8 @@
   <link rel="preload" href="./assets/oswald-600.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/manrope-400.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="./assets/fonts.css">
-  <link rel="stylesheet" href="./styles.css?v=credits-1">
-  <script type="module" src="./app.js?v=credits-1"></script>
+  <link rel="stylesheet" href="./styles.css?v=credits-2">
+  <script type="module" src="./app.js?v=credits-2"></script>
 </head>
 <body>
   <a class="skip-link" href="#principle">К содержанию</a>
@@ -21,6 +21,7 @@
       <div class="hero-title"><h1 id="hero-title">КОНТРАСТ</h1><a href="#principle" class="read-button">читать</a></div>
       <div class="hero-subline">
         <p class="hero-statement">Мы понимаем мир,<br>отделяя одно от <em>другого.</em></p>
+        <p class="hero-author label">Андрей Гудков</p>
       </div>
     </section>
 
@@ -107,6 +108,31 @@
       <div class="ending-sticky"><div class="ending-pattern" aria-hidden="true"><div></div><div></div></div><div class="ending-content"><h2>Без разницы.</h2></div><div class="ending-last" hidden><button id="restart" class="button button--outline">Вернуть различия <span aria-hidden="true">↗</span></button></div></div>
     </section>
   </main>
+  <div class="webring-zone container">
+    <!-- Веб-ринг курса: фрагмент J из таблицы, вставлен без правок. -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+    <style>
+    .course-webring { margin-top:64px; padding:24px 0; border-top:1px solid currentColor; font-family:Inter,sans-serif; font-size:16px; line-height:1.5; }
+    .course-webring h2 { margin:0 0 16px; font-family:Inter,sans-serif; font-size:20px; font-weight:600; line-height:1.3; }
+    .course-webring__nav { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); gap:12px 24px; align-items:start; }
+    .course-webring__nav a { display:flex; align-items:center; min-height:44px; padding:10px 0; box-sizing:border-box; color:inherit; text-decoration:underline; text-underline-offset:3px; overflow-wrap:anywhere; }
+    .course-webring__nav a:last-child { justify-content:flex-end; text-align:right; }
+    .course-webring__nav a:focus-visible { outline:2px solid currentColor; outline-offset:4px; }
+    .course-webring--entry .course-webring__nav { grid-template-columns:1fr 1fr; }
+    @media (max-width:720px) {
+      .course-webring__nav, .course-webring--entry .course-webring__nav { grid-template-columns:1fr; }
+      .course-webring__nav a:last-child { justify-content:flex-start; text-align:left; }
+    }
+    </style>
+    <footer class="course-webring">
+      <h2>Веб-ринг</h2>
+      <nav class="course-webring__nav" aria-label="Веб-ринг проектов">
+        <a target="_top" href="https://main-session-site.tilda.ws/butterflyef" rel="prev">← Странная жизнь — Валерия Антонихина</a>
+        <a target="_top" href="https://docs.google.com/spreadsheets/d/1moFgJsWmO2xyTYsfRRvhG63S1ru9MhJKDSAw2pOUqyw/htmlview?gid=93859566&amp;range=A1:E35">Все проекты</a>
+        <a target="_top" href="https://ksenia-moskalenko.github.io/Bus/" rel="next">Автобус — Ксения Москаленко →</a>
+      </nav>
+    </footer>
+  </div>
   <div class="restart-veil" aria-hidden="true"></div>
   <div class="sr-only" id="sound-status" role="status"></div>
 </body>

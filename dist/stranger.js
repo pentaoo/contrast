@@ -3,8 +3,8 @@
 // теперь чужие — круг и квадрат.
 // Контекст влияет на контраст.
 
-// `shore` — how much of the sea shows at the start: only the crests at the bottom.
-export const seaTiming = { shore: .48, rise: [.1, .52], textA: [.1, .24], textB: [.48, .62] };
+// `shore` — how much of the sea shows at the start: the crests already hold the Triton.
+export const seaTiming = { shore: .71, rise: [.1, .52], textA: [.1, .24], textB: [.48, .62] };
 
 const ramp = (value, [from, to]) => Math.min(1, Math.max(0, (value - from) / (to - from)));
 
@@ -27,6 +27,8 @@ export function mountStranger(section, { reducedMotion, isStatic }) {
     layer.innerHTML = '<div class="sea-drift"><div class="sea-waves"></div></div>';
     sea.append(layer);
   });
+  // The Triton swims between the middle and the near waves.
+  sea.insertBefore(section.querySelector('.stranger-triton'), sea.querySelector('.sea-layer--near'));
 
   // Two drawings swap with a hard cut, like the paper cut-out in the fall.
   let frame = 0;

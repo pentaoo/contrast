@@ -166,11 +166,13 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .hero-subline { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); margin-top: var(--space-3); }
 .hero-statement { font-size: var(--text-voice); line-height: 1.4; letter-spacing: -.04em; font-weight: 600; }
 .hero-statement em { font-family: var(--serif); font-size: 1.08em; font-weight: 400; letter-spacing: -.02em; }
-.js-enabled .hero-title, .js-enabled .hero-statement { opacity: 0; transform: translateY(22px); transition: opacity .85s var(--ease), transform .85s var(--ease); }
-.js-enabled.intro-ready .hero-title, .js-enabled.intro-ready .hero-statement { opacity: 1; transform: none; }
+.js-enabled .hero-title, .js-enabled :is(.hero-statement, .hero-author) { opacity: 0; transform: translateY(22px); transition: opacity .85s var(--ease), transform .85s var(--ease); }
+.js-enabled.intro-ready .hero-title, .js-enabled.intro-ready :is(.hero-statement, .hero-author) { opacity: 1; transform: none; }
 .intro-ready .hero-statement { transition-delay: .25s; }
-.js-enabled .hero.is-leaving :is(.hero-title, .hero-statement) { opacity: 0; transform: translateX(-70vw); transition: transform .65s cubic-bezier(.55, 0, .9, .45), opacity .65s cubic-bezier(.55, 0, .9, .45); transition-delay: 0s; }
-.js-enabled .hero.is-leaving .hero-statement { transition-delay: .06s; }
+.intro-ready .hero-author { transition-delay: .4s; }
+.hero-author { align-self: flex-end; color: var(--muted); }
+.js-enabled .hero.is-leaving :is(.hero-title, .hero-statement, .hero-author) { opacity: 0; transform: translateX(-70vw); transition: transform .65s cubic-bezier(.55, 0, .9, .45), opacity .65s cubic-bezier(.55, 0, .9, .45); transition-delay: 0s; }
+.js-enabled .hero.is-leaving :is(.hero-statement, .hero-author) { transition-delay: .06s; }
 
 /* Общие sticky-сцены */
 .scene-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; }
@@ -252,7 +254,7 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .conclusion { padding-bottom: var(--space-5); }
 /* Третий акт: тритон лежит на белом экране, потом приходит его море.
    Контекст влияет на контраст. */
-.stranger { --sea: 0; --text-a: 1; --text-b: 0; --tw: clamp(260px, 40vw, 600px); --floor: clamp(56px, 11svh, 120px); --deck: 31svh; --tr: max(var(--gutter), calc(50% - 620px)); --fig: clamp(64px, 8.5vw, 136px); }
+.stranger { --sea: 0; --text-a: 1; --text-b: 0; --tw: clamp(240px, 36vw, 540px); --floor: clamp(56px, 11svh, 120px); --tr: max(var(--gutter), calc(50% - 620px)); --fig: clamp(64px, 8.5vw, 136px); }
 .stranger-scroll { height: 100vh; height: 100svh; }
 .js-enabled .stranger-scroll { height: 340vh; height: 340svh; }
 .stranger-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--paper); }
@@ -261,7 +263,7 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
    Слои стоят от низа моря и заходят друг за друга: просветы между гребнями
    занимают верхние 61% рисунка, и за ними всегда лежит дальний слой. Поэтому
    море доходит до низа экрана без сплошной заливки. --wave — высота ближнего слоя. */
-.stranger { --wave: 36vh; --wave: 36svh; }
+.stranger { --wave: 42vh; --wave: 42svh; }
 .sea-layer { position: absolute; left: 0; right: 0; bottom: calc(var(--wave) * var(--lift)); height: var(--crest); overflow: hidden; --crest: calc(var(--wave) * var(--scale)); --tile: calc(var(--crest) * 1683 / 748); }
 .sea-drift { position: absolute; inset: 0 auto 0 0; width: calc(100% + var(--tile)); animation: sea-drift var(--drift) linear infinite; }
 .sea-waves { height: 100%; background: url(assets/sea/sea-waves.webp) repeat-x 0 0 / var(--tile) var(--crest); }
@@ -271,10 +273,12 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .sea-layer--near { --lift: 0; --scale: 1; --drift: 70s; }
 @keyframes sea-drift { to { transform: translateX(calc(-1 * var(--tile))); } }
 .stranger-cast { position: absolute; left: 0; right: 0; bottom: var(--floor); height: 0; }
-.stranger-triton { position: absolute; right: var(--tr); bottom: calc(var(--deck) - var(--floor)); width: var(--tw); aspect-ratio: 1; }
+/* Тритон лежит в море, между средним и ближним слоем: ближние гребни
+   закрывают хвост и раковину, и он поднимается вместе с водой. */
+.stranger-triton { position: absolute; right: var(--tr); bottom: calc(var(--wave) * .5); width: var(--tw); aspect-ratio: 1; }
 /* Тритон лежит на волнах с самого начала и поднимается вместе с морем:
    море сдвинуто на (1 - --sea) своей высоты, а она равна 56% экрана. */
-.js-enabled .stranger:not(.is-still) .stranger-triton { transform: translateY(calc((1 - var(--sea)) * 56vh)); transform: translateY(calc((1 - var(--sea)) * 56svh)); animation: cast-bob 5.2s -2s ease-in-out infinite; }
+.js-enabled .stranger:not(.is-still) .stranger-triton { animation: cast-bob 5.2s -2s ease-in-out infinite; }
 .stranger-triton img { display: block; width: 100%; height: 100%; translate: 0 7%; }
 .cast-circle, .cast-square { position: absolute; bottom: 0; display: block; background: var(--accent); }
 .cast-square { right: calc(var(--tr) + var(--tw) * .98); width: calc(var(--fig) * 1.6); aspect-ratio: 1; rotate: -8deg; transform-origin: 0 100%; }
@@ -294,7 +298,6 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .stranger.is-still .sea { inset: auto 0 0; height: 62svh; }
 .stranger.is-still { --wave: 40vh; --wave: 40svh; }
 .stranger.is-still .stranger-cast { position: relative; bottom: auto; height: 62svh; }
-.stranger.is-still .stranger-triton { bottom: 14svh; }
 .stranger.is-still .cast-circle, .stranger.is-still .cast-square { bottom: 14svh; }
 .stranger-after { padding-block: var(--space-6) var(--space-5); }
 .stranger-sum { max-width: var(--measure-text); color: var(--ink); }
@@ -315,6 +318,11 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .ending-last:not([hidden]) { display: flex; }
 .restart-veil { position: fixed; inset: 0; z-index: 90; background: white; opacity: 0; pointer-events: none; transition: opacity .8s; }
 .restart-veil.active { opacity: 1; transition: opacity .25s; }
+/* Подвал с веб-рингом продолжает белый финал. */
+.webring-zone { display: flow-root; background: #fff; color: var(--ink); padding-bottom: var(--space-5); }
+.webring-zone .course-webring { max-width: var(--measure); margin-inline: auto; }
+.webring-zone .course-webring h2 { letter-spacing: 0; text-wrap: wrap; }
+.webring-zone .course-webring__nav a:hover { color: var(--muted); }
 html.ending-blank { scrollbar-width: none; }
 html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
@@ -339,9 +347,10 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .section-pad { padding-block: var(--space-5); }
 }
 @media (max-width: 600px) {
-  .stranger { --tw: 64vw; --tr: 0px; --fig: 44px; --deck: 29svh; }
+  .stranger { --tw: 64vw; --tr: 0px; --fig: 44px; }
   :root { --text-ui: 14px; }
-  .hero-subline { align-items: flex-start; gap: var(--space-3); }
+  .hero-subline { flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+  .hero-author { align-self: flex-start; }
   .circle-link { width: 44px; height: 44px; font-size: 22px; }
   .attention-stage { gap: var(--space-4); }
   .story-copy .h2 { font-size: 8vw; }
@@ -365,7 +374,7 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .js-enabled .scroll-scene { height: auto; }
   .scene-sticky { position: relative; }
   .js-enabled .scene>.scene-heading, .js-enabled .scene>.sound-lab,
-  .js-enabled .conclusion>h2, .js-enabled .hero-title, .js-enabled .hero-statement { opacity: 1; transform: none; visibility: visible; }
+  .js-enabled .conclusion>h2, .js-enabled .hero-title, .js-enabled .hero-statement, .js-enabled .hero-author { opacity: 1; transform: none; visibility: visible; }
   .js-enabled .attention-stage { position: relative; height: auto; padding: var(--space-5) var(--gutter); }
   .js-enabled .story-canvas { display: none; }
   .js-enabled .story-frames { position: static; width: 100%; height: auto; margin: 0 auto; overflow: visible; clip: auto; }
