@@ -313,6 +313,11 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .ending-last:not([hidden]) { display: flex; }
 .restart-veil { position: fixed; inset: 0; z-index: 90; background: white; opacity: 0; pointer-events: none; transition: opacity .8s; }
 .restart-veil.active { opacity: 1; transition: opacity .25s; }
+/* Подвал с веб-рингом продолжает белый финал. */
+.webring-zone { display: flow-root; background: #fff; color: var(--ink); padding-bottom: var(--space-5); }
+.webring-zone .course-webring { max-width: var(--measure); margin-inline: auto; }
+.webring-zone .course-webring h2 { letter-spacing: 0; text-wrap: wrap; }
+.webring-zone .course-webring__nav a:hover { color: var(--muted); }
 html.ending-blank { scrollbar-width: none; }
 html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
