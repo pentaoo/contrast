@@ -1,9 +1,9 @@
-import { computerKeys, describeChord, noteName } from './notes.js?v=origin-16';
-import { LOOKAHEAD, advance, dueEvents } from './listening.js?v=origin-16';
-import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=origin-16';
-import { mountSpectrum } from './spectrum.js?v=origin-16';
-import { mountBall } from './ball.js?v=origin-16';
-import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=origin-16';
+import { computerKeys, describeChord, noteName } from './notes.js?v=origin-17';
+import { LOOKAHEAD, advance, dueEvents } from './listening.js?v=origin-17';
+import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=origin-17';
+import { mountSpectrum } from './spectrum.js?v=origin-17';
+import { mountBall } from './ball.js?v=origin-17';
+import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=origin-17';
 
 export function mountPianoExperience({ reducedMotion }) {
   const piano = document.querySelector('#piano');
