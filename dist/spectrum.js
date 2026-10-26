@@ -1,4 +1,4 @@
-import { finalNotes, noteFrequency } from './melody.js?v=origin-22';
+import { finalNotes, noteFrequency } from './melody.js?v=type-1';
 
 // The display uses measured FFT data. Peak proximity/overlap is not a model of
 // roughness, and no noise or artificial broadening is added to either version.
@@ -84,7 +84,7 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
     ctx.lineTo(width, baseline + .5);
     ctx.stroke();
     ctx.fillStyle = '#c8cdbf';
-    ctx.font = '15px Manrope, sans-serif';
+    ctx.font = '14px Manrope, sans-serif';
     ctx.textBaseline = 'bottom';
     ctx.textAlign = 'left';
     ctx.fillText(`${Math.round(minimum)} Гц`, 0, height);

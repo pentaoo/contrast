@@ -29,10 +29,10 @@
   --display: 'Oswald', 'Arial Narrow', sans-serif;
   --serif: Georgia, 'Times New Roman', serif;
 
-  /* Шкала: пять ролей текста. */
-  --text-h1: clamp(38px, 5.6vw, 84px);
-  --text-h2: clamp(32px, 4.2vw, 60px);
-  --text-voice: clamp(21px, 2.3vw, 32px);
+  /* Шкала: четыре размера текста на весь лонгрид (обложка — отдельно, в .hero-title).
+     Крупный размер зависит и от высоты окна: абзац над графиком бала не должен под него уходить. */
+  --text-title: clamp(38px, 5.6vw, 84px);
+  --text-lead: clamp(22px, min(2.8vw, 4.4svh), 40px);
   --text-body: clamp(16px, 1.15vw, 18px);
   --text-ui: 14px;
 
@@ -49,6 +49,7 @@
   --gutter: clamp(20px, 6vw, 96px);
   --measure: 1240px;
   --measure-text: 640px;
+  --measure-lead: 1080px;
   --inline: max(var(--gutter), calc((100% - var(--measure)) / 2));
 
   --ease: cubic-bezier(.22, 1, .36, 1);
@@ -70,13 +71,23 @@ p, h1, h2, h3 { margin: 0; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
 /* 3. Типографика -------------------------------------------- */
-h2, .h1 { font-size: var(--text-h1); line-height: 1; letter-spacing: -.055em; font-weight: 600; text-wrap: balance; }
-.h2 { font-size: var(--text-h2); line-height: 1.04; letter-spacing: -.05em; font-weight: 600; text-wrap: balance; }
-.highlight { padding: 0 .12em; background: var(--accent); color: var(--ink); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+/* Шесть ролей. Каждая задаёт начертание целиком, ничего не наследует от сцены:
+   сцены отвечают только за место текста, а не за его вид.
+   Обложка    .hero-title  Oswald 600, только «КОНТРАСТ»
+   Заголовок  h2, .title   Manrope 600, 38–84 px, интерлиньяж 1
+   Лид        .lead        Manrope 600, 22–40 px, 1.25 — крупный текст сцен
+   Голос      .voice       Georgia курсив, размер лида — авторская реплика
+   Основной   .body-copy   Manrope 400, 16–18 px, 1.65, приглушённый
+   Подпись    .label       Manrope 400, 14 px — подписи, источники, служебное
+   Кнопка     .button …    Manrope 600, 14 px — всё, на что нажимают
+   Внутри строки: .serif — слово-акцент курсивом, .highlight — выделение мысли. */
+h2, .title { font-family: var(--sans); font-size: var(--text-title); font-weight: 600; line-height: 1; letter-spacing: -.055em; text-wrap: balance; }
+.lead { max-width: var(--measure-lead); font-family: var(--sans); font-size: var(--text-lead); font-weight: 600; line-height: 1.25; letter-spacing: -.04em; text-wrap: pretty; }
+.voice { max-width: var(--measure-lead); font-family: var(--serif); font-style: italic; font-size: var(--text-lead); font-weight: 400; line-height: 1.25; letter-spacing: -.025em; text-wrap: pretty; }
+.body-copy { max-width: var(--measure-text); font-family: var(--sans); font-size: var(--text-body); font-weight: 400; line-height: 1.65; letter-spacing: 0; color: var(--muted); }
+.label { font-family: var(--sans); font-size: var(--text-ui); font-weight: 400; line-height: 1.5; letter-spacing: 0; color: var(--muted); }
 .serif { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -.04em; }
-.voice { font-family: var(--serif); font-style: italic; font-size: var(--text-voice); line-height: 1.4; letter-spacing: -.025em; }
-.body-copy { font-size: var(--text-body); line-height: 1.65; color: var(--muted); max-width: var(--measure-text); }
-.label { font-size: var(--text-ui); line-height: 1.5; font-weight: 400; letter-spacing: 0; color: var(--muted); }
+.highlight { padding: 0 .12em; background: var(--accent); color: var(--ink); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 
 /* 4. Раскладка ---------------------------------------------- */
 .container { padding-inline: var(--inline); }
@@ -84,7 +95,7 @@ h2, .h1 { font-size: var(--text-h1); line-height: 1; letter-spacing: -.055em; fo
 .scene-heading { margin-bottom: var(--space-4); }
 .chapter { display: flex; gap: var(--space-1); margin-bottom: var(--space-3); }
 .chapter b { font-weight: 600; color: var(--accent); }
-.on-ink .label, .on-ink .chapter { color: var(--muted-on-ink); }
+.on-ink :is(.label, .chapter, .body-copy) { color: var(--muted-on-ink); }
 
 /* 5. Компоненты --------------------------------------------- */
 
@@ -97,7 +108,7 @@ h2, .h1 { font-size: var(--text-h1); line-height: 1; letter-spacing: -.055em; fo
 .on-ink .button--outline:hover { background: var(--paper); border-color: var(--paper); color: var(--ink); }
 .button:disabled { opacity: .7; cursor: wait; }
 .button-icon { font-size: 11px; width: 12px; }
-.link-button { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; padding: 10px 0; background: transparent; border-bottom: 1px solid currentColor; font-size: var(--text-ui); white-space: nowrap; transition: color .2s; }
+.link-button { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; padding: 10px 0; background: transparent; border-bottom: 1px solid currentColor; font-size: var(--text-ui); font-weight: 600; line-height: 1.2; white-space: nowrap; transition: color .2s; }
 .link-button:hover { color: var(--accent); }
 .circle-link { width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; flex-shrink: 0; font-size: 24px; transition: background .2s, color .2s; }
 .circle-link:hover { background: var(--ink); color: var(--paper); }
@@ -105,7 +116,7 @@ h2, .h1 { font-size: var(--text-h1); line-height: 1; letter-spacing: -.055em; fo
 .circle-link:hover span { transform: translateY(3px); }
 
 /* Служебное */
-.skip-link { position: fixed; left: var(--space-3); top: var(--space-3); z-index: 100; padding: 14px 20px; background: var(--accent); color: var(--ink); font-size: var(--text-ui); font-weight: 600; transform: translateY(-160%); }
+.skip-link { position: fixed; left: var(--space-3); top: var(--space-3); z-index: 100; padding: 14px 20px; background: var(--accent); color: var(--ink); font-size: var(--text-ui); font-weight: 600; line-height: 1.2; transform: translateY(-160%); }
 .skip-link:focus { transform: none; }
 .reading-progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 50; pointer-events: none; }
 .reading-progress span { display: block; height: 100%; background: var(--accent); transform: scaleX(0); transform-origin: left; }
@@ -116,7 +127,7 @@ h2, .h1 { font-size: var(--text-h1); line-height: 1; letter-spacing: -.055em; fo
 
 /* Раскрывающийся список источников */
 .sources { margin-top: var(--space-5); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.sources summary { min-height: 64px; padding: var(--space-2) 0; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); list-style: none; font-size: var(--text-ui); font-weight: 600; }
+.sources summary { min-height: 64px; padding: var(--space-2) 0; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); list-style: none; font-size: var(--text-ui); font-weight: 600; line-height: 1.2; }
 .sources summary::-webkit-details-marker { display: none; }
 .sources summary:hover { color: var(--accent); }
 .sources-plus { font-size: 22px; font-weight: 400; transition: transform .2s; }
@@ -125,8 +136,8 @@ h2, .h1 { font-size: var(--text-h1); line-height: 1; letter-spacing: -.055em; fo
 .source-list>p { padding-bottom: var(--space-3); }
 .source-list>a { padding: var(--space-2) 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 28px 1fr 20px; gap: 12px; font-size: var(--text-body); font-weight: 600; transition: color .2s; }
 .source-list>a:hover { color: var(--accent); }
-.source-list>a>span { font-size: var(--text-ui); font-weight: 400; padding-top: .2em; }
-.source-list small { display: block; margin-top: 4px; max-width: var(--measure-text); font-size: var(--text-ui); font-weight: 400; line-height: 1.6; color: var(--muted); }
+.source-list>a>span { padding-top: .2em; }
+.source-list small { display: block; margin-top: 4px; max-width: var(--measure-text); }
 
 /* Пианино */
 /* Клавиши и график частот — во всю ширину экрана, с одинаковыми полями: пик стоит над своей клавишей. */
@@ -162,8 +173,6 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .read-button:hover { background: var(--accent-hover); }
 .read-button:focus-visible { outline-offset: 4px; }
 .hero-subline { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); margin-top: var(--space-3); }
-.hero-statement { font-size: var(--text-voice); line-height: 1.4; letter-spacing: -.04em; font-weight: 600; }
-.hero-statement em { font-family: var(--serif); font-size: 1.08em; font-weight: 400; letter-spacing: -.02em; }
 .js-enabled .hero-title, .js-enabled .hero-statement { opacity: 0; transform: translateY(22px); transition: opacity .85s var(--ease), transform .85s var(--ease); }
 .js-enabled.intro-ready .hero-title, .js-enabled.intro-ready .hero-statement { opacity: 1; transform: none; }
 .intro-ready .hero-statement { transition-delay: .25s; }
@@ -179,8 +188,6 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .origin-stage { display: flex; flex-direction: column; }
 .origin-canvas { display: none; }
 .origin-copy { display: grid; gap: var(--space-4); padding-block: var(--space-6); }
-.origin-text { max-width: 760px; }
-.origin-line { font-size: var(--text-voice); line-height: 1.4; letter-spacing: -.03em; font-weight: 600; text-wrap: pretty; }
 .origin-form { fill: var(--ink); }
 .js-enabled .origin:not(.is-still) .origin-scroll { height: 800vh; height: 800svh; }
 .js-enabled .origin:not(.is-still) .origin-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
@@ -232,10 +239,9 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .js-enabled .sound-track>.sound-step { position: sticky; top: 0; }
 .sound-step { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding-top: clamp(20px, 4svh, 48px); padding-bottom: calc(var(--sound-deck-height) + clamp(20px, 4svh, 48px)); }
 /* Абзац целиком помещается над графиком: размер зависит и от ширины, и от высоты окна. */
-.sound-copy { width: 100%; max-width: 1080px; font-size: clamp(24px, min(3.6vw, 4.4svh), 54px); font-weight: 600; line-height: 1.22; letter-spacing: -.045em; text-wrap: pretty; }
-.sound-copy h2 { font: inherit; line-height: 1.08; letter-spacing: inherit; }
+.sound-copy { width: 100%; }
 .sound-copy:focus { outline: none; }
-.sound-copy .body-copy { margin-top: var(--space-3); color: var(--muted-on-ink); font-weight: 400; letter-spacing: 0; line-height: 1.65; }
+.sound-copy .body-copy { margin-top: var(--space-3); }
 .sound-instrument { position: sticky; top: calc(100svh - var(--sound-deck-height)); height: var(--sound-deck-height); align-self: start; z-index: 2; background: var(--ink); padding-block: var(--space-2); display: flex; flex-direction: column; gap: 12px; }
 /* Текст уходит под график через мягкое затемнение, а не по резкой линии. */
 .sound-instrument::before { content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: clamp(32px, 6svh, 64px); background: linear-gradient(to bottom, transparent, var(--ink)); pointer-events: none; }
@@ -319,7 +325,7 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .is-sea .cast-square { animation: cast-bob 4.1s -1.2s ease-in-out infinite; }
 @keyframes cast-bob { 50% { translate: 0 -7px; } }
 .stranger-copy { position: absolute; top: clamp(72px, 13svh, 150px); left: 0; right: 0; display: grid; }
-.stranger-text { grid-area: 1 / 1; max-width: 760px; }
+.stranger-text { grid-area: 1 / 1; max-width: var(--measure-lead); }
 .stranger-text .body-copy { margin-top: var(--space-3); }
 .js-enabled .stranger-text--a { opacity: var(--text-a); }
 .js-enabled .stranger-text--b { opacity: var(--text-b); }
@@ -335,10 +341,9 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .stranger.is-still .stranger-cast { position: relative; bottom: auto; height: 62svh; }
 .stranger.is-still .cast-circle, .stranger.is-still .cast-square { bottom: 14svh; }
 .stranger-after { padding-block: var(--space-6) var(--space-5); }
-.stranger-sum { max-width: var(--measure-text); color: var(--ink); }
 .ending-link { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-5); transition: color .2s; }
 .ending-link:hover { color: var(--accent); }
-.ending-link>span { font: 32px var(--sans); }
+.ending-link>span { font-family: var(--sans); font-style: normal; }
 
 /* Исчезновение */
 .disappearance { height: 240vh; height: 240svh; position: relative; --end-p: 0; --end-w: 0; --end-opacity: 1; }
@@ -348,7 +353,6 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .ending-pattern>div+div { background: #20211e; }
 .ending-pattern>div:before { content: ''; display: block; width: min(35vw, 56vh); aspect-ratio: 1; border-radius: 50%; background: #858580; }
 .ending-content { position: absolute; inset: 0; display: grid; place-items: center; color: white; mix-blend-mode: difference; opacity: var(--end-opacity); }
-.ending-content h2 { font-size: clamp(48px, 10vw, 150px); }
 .ending-last { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); color: var(--muted); text-align: center; padding: var(--space-3); }
 .ending-last:not([hidden]) { display: flex; }
 .restart-veil { position: fixed; inset: 0; z-index: 90; background: white; opacity: 0; pointer-events: none; transition: opacity .8s; }
@@ -368,7 +372,6 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
 @media (max-height: 500px) {
   .sound-lab { --sound-deck-height: 220px; }
   .sound-step { padding-top: 12px; padding-bottom: calc(var(--sound-deck-height) + 12px); }
-  .sound-copy { font-size: clamp(22px, 4.6svh, 30px); }
   .sound-instrument { padding-block: var(--space-1); gap: 6px; }
   .piano { height: 52px; }
   .piano-stage { padding: 4px 4px 6px; }
@@ -383,21 +386,17 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
 }
 @media (max-width: 600px) {
   .stranger { --tw: 64vw; --tr: 0px; --fig: 44px; }
-  :root { --text-ui: 14px; }
   .hero-subline { align-items: flex-start; gap: var(--space-3); }
   .circle-link { width: 44px; height: 44px; font-size: 22px; }
   .attention-stage { gap: var(--space-4); }
-  .story-copy .h2 { font-size: 8vw; }
   .story-copy .body-copy { margin-top: var(--space-2); }
-  .story-bridge { margin-top: var(--space-3); font-size: 19px; }
+  .story-bridge { margin-top: var(--space-3); }
   .js-enabled .story-copy { bottom: var(--space-4); }
   .listening-actions { gap: var(--space-2); }
   .button { padding-inline: 16px; }
   .piano { height: clamp(84px, 14svh, 120px); }
   .piano-key[data-label]::after { display: none; }
   .source-list>a { gap: 8px; grid-template-columns: 22px 1fr 16px; }
-  .ending-link>span { font-size: 26px; }
-  .ending-content h2 { font-size: 14vw; }
 }
 @media (max-height: 700px) and (max-width: 600px) {
 }
