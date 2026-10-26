@@ -1,7 +1,7 @@
-import { mountPianoExperience } from './piano.js?v=origin-17';
-import { mountGeometryStory } from './geometry-story.js?v=origin-17';
-import { mountStranger } from './stranger.js?v=origin-17';
-import { mountOrigin } from './origin.js?v=origin-17';
+import { mountPianoExperience } from './piano.js?v=origin-18';
+import { mountGeometryStory } from './geometry-story.js?v=origin-18';
+import { mountStranger } from './stranger.js?v=origin-18';
+import { mountOrigin } from './origin.js?v=origin-18';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -32,8 +32,8 @@ const lowWindow = matchMedia('(max-height: 600px)');
 const origin = mountOrigin($('#origin'), { reducedMotion, isStatic: () => lowWindow.matches });
 // The prologue ends on the same field the story starts with.
 const geometryStory = mountGeometryStory($('#principle'), { isStatic: () => reducedMotion.matches || lowWindow.matches, onField: origin.setField });
-// The Triton lies on a white screen until his sea floods it.
-const stranger = mountStranger($('#stranger'), { reducedMotion, isStatic: () => lowWindow.matches });
+// The Triton peeks out of the water, blows his conch, and his sea floods the screen.
+const stranger = mountStranger($('#stranger'), { reducedMotion, isStatic: () => lowWindow.matches, onCall: soundExperience.conch });
 
 const ending = $('#disappearance');
 const veil = $('.restart-veil');
