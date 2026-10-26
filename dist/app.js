@@ -1,7 +1,7 @@
-import { mountPianoExperience } from './piano.js?v=type-2';
-import { mountGeometryStory } from './geometry-story.js?v=type-2';
-import { mountStranger } from './stranger.js?v=type-2';
-import { mountOrigin } from './origin.js?v=type-2';
+import { mountPianoExperience } from './piano.js?v=type-3';
+import { mountGeometryStory } from './geometry-story.js?v=type-3';
+import { mountStranger } from './stranger.js?v=type-3';
+import { mountOrigin } from './origin.js?v=type-3';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -34,6 +34,17 @@ const origin = mountOrigin($('#origin'), { reducedMotion, isStatic: () => lowWin
 const geometryStory = mountGeometryStory($('#principle'), { isStatic: () => reducedMotion.matches || lowWindow.matches, onField: origin.setField });
 // The Triton peeks out of the water, blows his conch, and his sea floods the screen.
 const stranger = mountStranger($('#stranger'), { reducedMotion, isStatic: () => lowWindow.matches, onCall: soundExperience.conch });
+
+// Тяжёлые рисунки грузятся в фоне с начала статьи, когда первый экран уже готов:
+// сначала тритон над пианино, потом тритон в море и его волны.
+function preloadArt() {
+  soundExperience.preload()
+    .then(() => stranger.preload())
+    .then(() => { new Image().src = new URL('./assets/sea/sea-waves.webp', import.meta.url).href; });
+}
+const whenIdle = window.requestIdleCallback || ((callback) => setTimeout(callback, 600));
+if (document.readyState === 'complete') whenIdle(preloadArt);
+else window.addEventListener('load', () => whenIdle(preloadArt), { once: true });
 
 const ending = $('#disappearance');
 const veil = $('.restart-veil');

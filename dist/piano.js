@@ -1,9 +1,9 @@
-import { computerKeys, describeChord, noteName } from './notes.js?v=type-2';
-import { LOOKAHEAD, advance, dueEvents } from './listening.js?v=type-2';
-import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=type-2';
-import { mountSpectrum } from './spectrum.js?v=type-2';
-import { mountBall } from './ball.js?v=type-2';
-import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=type-2';
+import { computerKeys, describeChord, noteName } from './notes.js?v=type-3';
+import { LOOKAHEAD, advance, dueEvents } from './listening.js?v=type-3';
+import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=type-3';
+import { mountSpectrum } from './spectrum.js?v=type-3';
+import { mountBall } from './ball.js?v=type-3';
+import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=type-3';
 
 export function mountPianoExperience({ reducedMotion }) {
   const piano = document.querySelector('#piano');
@@ -416,6 +416,8 @@ export function mountPianoExperience({ reducedMotion }) {
   return {
     unlockAudio,
     conch,
+    // Кадры падения тритона на пианино — заранее, в фоне.
+    preload: () => finale.prepare().catch(() => {}),
     updateScroll() {
       const inside = tracks.find((track) => {
         const rect = track.getBoundingClientRect();

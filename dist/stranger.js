@@ -94,5 +94,14 @@ export function mountStranger(section, { reducedMotion, isStatic, onCall = () =>
     animate(!still && rect.bottom > 0 && rect.top < innerHeight);
   }
 
-  return { update };
+  // Кадры тритона грузятся заранее, в фоне: иначе скрытая поза с раковиной
+  // начинает загружаться только в момент зова и появляется с задержкой.
+  function preload() {
+    return Promise.all(poses.flat().map((image) => {
+      image.loading = 'eager';
+      return image.decode().catch(() => {});
+    }));
+  }
+
+  return { update, preload };
 }
