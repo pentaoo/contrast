@@ -1,9 +1,9 @@
-import { computerKeys, describeChord, noteName } from './notes.js?v=ball-9';
-import { createListeningState, finishMelody, skipListening } from './listening.js?v=ball-9';
-import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=ball-9';
-import { mountSpectrum } from './spectrum.js?v=ball-9';
-import { mountBall } from './ball.js?v=ball-9';
-import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=ball-9';
+import { computerKeys, describeChord, noteName } from './notes.js?v=text-10';
+import { createListeningState, finishMelody, skipListening } from './listening.js?v=text-10';
+import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=text-10';
+import { mountSpectrum } from './spectrum.js?v=text-10';
+import { mountBall } from './ball.js?v=text-10';
+import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=text-10';
 
 export function mountPianoExperience({ reducedMotion }) {
   const piano = document.querySelector('#piano');
@@ -163,11 +163,11 @@ export function mountPianoExperience({ reducedMotion }) {
     } else spectrum.restore();
     updateUI();
     if (focusOutro) outro.querySelector('a').focus({ preventScroll: true });
-    if (!completed && performance) status.textContent = 'Воспроизведение остановлено. Можно послушать вариант заново.';
+    if (!completed && performance) status.textContent = 'Мелодия остановлена. Её можно послушать заново.';
     if (completed && performance?.version === 'mistake') {
       status.textContent = 'В финале прозвучали до и ре-бемоль. Круг и квадрат сбились и разбежались. Дальше — объяснение и другой финал.';
     } else if (completed && performance?.version === 'correct') {
-      status.textContent = 'На двух до в октаву круг и квадрат сошлись в одну фигуру. Затем тритон проломил клавиатуру, и фигуры упали вместе с ней. В момент удара прозвучали до и фа-диез.';
+      status.textContent = 'На двух до в октаву круг и квадрат сошлись в одну фигуру. Затем тритон проломил клавиатуру, и фигуры упали вместе с ней. При ударе прозвучали до и фа-диез.';
     }
   }
 
@@ -235,7 +235,7 @@ export function mountPianoExperience({ reducedMotion }) {
     try {
       await ensureAudio();
     } catch {
-      error.textContent = 'Не удалось включить звук. Попробуйте ещё раз или продолжайте чтение.';
+      error.textContent = 'Не удалось включить звук. Попробуйте ещё раз или читайте дальше.';
       return;
     }
     // The key may already be up, or a melody may have started meanwhile.

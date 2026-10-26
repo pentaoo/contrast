@@ -1,4 +1,4 @@
-import { finalNotes, noteFrequency } from './melody.js?v=ball-9';
+import { finalNotes, noteFrequency } from './melody.js?v=text-10';
 
 // The display uses measured FFT data. Peak proximity/overlap is not a model of
 // roughness, and no noise or artificial broadening is added to either version.
@@ -151,8 +151,8 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
     canvas.setAttribute('aria-label', version && focus >= .99
       ? `Выделены основные тона двух нот: ${version === 'mistake' ? 'до и ре-бемоль' : 'два до в октаву'}. Обертоны уменьшены и остались на своих местах.`
       : version === 'mistake'
-      ? 'Спектры двух нот: до и ре-бемоль. Близкие пики основных тонов и обертонов.'
-      : version === 'correct' ? 'Спектры двух до в октаву. Некоторые гармоники совпадают по частоте.'
+      ? 'Спектры двух нот: до и ре-бемоль. Пики основных тонов и обертонов стоят рядом.'
+      : version === 'correct' ? 'Спектры двух до в октаву. Некоторые обертоны совпадают по частоте.'
       : 'Измеренный спектр звучащей мелодии. Пики стоят над своими клавишами.');
   }
 
