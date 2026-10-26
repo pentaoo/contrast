@@ -1,44 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createListeningState, finishMelody, skipListening } from '../dist/listening.js';
+import { advance, dueEvents, trackTarget } from '../dist/listening.js';
 import { createMelody, expectedNote, mistakenNote, tonicNote, keyboardRange, noteFrequency } from '../dist/melody.js';
 
-test('the first performance opens the explanation; the octave follows the reading', () => {
-  const state = createListeningState();
-  assert.equal(finishMelody(state, 'correct'), state);
-  const explained = finishMelody(state, 'mistake');
-  assert.equal(explained.phase, 'explanation');
-  assert.equal(explained.heardCorrect, false);
-  const completed = finishMelody(explained, 'correct');
-  assert.equal(completed.phase, 'explanation');
-  assert.equal(completed.heardCorrect, true);
+test('the playhead follows the scroll at real tempo and never runs ahead', () => {
+  assert.equal(trackTarget(.5, 8), 4);
+  assert.equal(trackTarget(2, 8), 8);
+  assert.equal(trackTarget(NaN, 8), 0);
+  assert.deepEqual(advance(0, 4, .016), { playhead: .016, jumped: false });
+  assert.deepEqual(advance(3.99, 4, .1), { playhead: 4, jumped: false });
+  assert.deepEqual(advance(4, 4, .1), { playhead: 4, jumped: false });
+  assert.deepEqual(advance(4, 1, .1), { playhead: 1, jumped: true });
 });
 
-test('reading without audio opens the explanation without inventing a listen', () => {
-  const skipped = skipListening(createListeningState());
-  assert.equal(skipped.phase, 'explanation');
-  assert.equal(skipped.heardMistake, false);
-  assert.equal(skipped.heardCorrect, false);
-  const skippedComparison = skipListening(finishMelody(createListeningState(), 'mistake'));
-  assert.equal(skippedComparison.phase, 'explanation');
-  assert.equal(skippedComparison.heardMistake, true);
-  assert.equal(skippedComparison.heardCorrect, false);
-});
-
-test('replays and stale completion events cannot rewind or complete a different stage', () => {
-  let state = finishMelody(createListeningState(), 'mistake');
-  assert.equal(finishMelody(state, 'mistake'), state);
-  state = finishMelody(state, 'correct');
-  assert.equal(finishMelody(state, 'correct'), state);
-  assert.equal(finishMelody(state, 'mistake'), state);
-  assert.equal(skipListening(state), state);
-  assert.equal(finishMelody(state, 'unknown'), state);
-});
-
-test('restarting removes both completed performances', () => {
-  const completed = finishMelody(finishMelody(createListeningState(), 'mistake'), 'correct');
-  assert.equal(completed.phase, 'explanation');
-  assert.deepEqual(createListeningState(), { phase: 'intro', heardMistake: false, heardCorrect: false });
+test('every note is queued exactly once as the playhead moves on', () => {
+  const melody = createMelody('mistake');
+  let queued = 0;
+  for (let from = 0; from < melody.duration; from += .07) queued += dueEvents(melody.events, from, from + .07).length;
+  assert.equal(queued, melody.events.length);
 });
 
 test('both performances share the same phrase until exactly one final note changes', () => {

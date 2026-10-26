@@ -2,14 +2,13 @@
 // Сначала пролёт: камера несётся над огромным полем крошечных точек и
 // приближается к одной из них. Потом точка дёргается, становится оранжевой
 // и выбегает за край поля, где её встречают квадраты.
-// Сцена проигрывается сама, по времени; прокрутка на это время заблокирована.
+// Сцена идёт от прокрутки: экран закреплён, и каждый кадр — это место на странице.
 // Кадр зависит только от прогресса: одинаковый прогресс — одинаковый кадр.
 
 const SVG = 'http://www.w3.org/2000/svg';
-export const DURATION = 18000;
-export const INTRO_DURATION = 4200;
 export const ZOOM_FROM = .18;
-const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ', 'Spacebar']);
+// Доли прокрутки закреплённой сцены: пролёт, история, рост большого квадрата.
+export const storyScrollParts = { intro: [0, .12], story: [.12, .82], grow: [.82, 1] };
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 const ease = (t) => t * t * (3 - 2 * t);
 const span = (p, from, to) => ease(clamp((p - from) / (to - from)));
@@ -44,6 +43,13 @@ export function introFrame(progress) {
 }
 
 // view: половины ширины и высоты окна, место точки в сетке и радиус обычной точки — всё в единицах сцены.
+// Прокрутка сцены (0…1) → пролёт, история и рост квадрата.
+export function storyScroll(scroll) {
+  const s = clamp(Number.isFinite(scroll) ? scroll : 0);
+  const part = ([from, to]) => clamp((s - from) / (to - from));
+  return { intro: part(storyScrollParts.intro), progress: part(storyScrollParts.story), grow: part(storyScrollParts.grow) };
+}
+
 export function storyFrame(progress, view) {
   const p = clamp(Number.isFinite(progress) ? progress : 0);
   const { halfW, halfH, start, dotR } = view;
@@ -288,97 +294,25 @@ export function mountGeometryStory(section, { isStatic }) {
     frame.copy.forEach((value, index) => section.style.setProperty(`--story-copy-${index + 1}`, (value * textLeft).toFixed(3)));
   }
 
-  const root = document.documentElement;
-  let progress = 0;
-  let intro = 0;
-  let played = false;
-  let playing = false;
-  let frameId;
-  let failsafe;
-  let lastTime = 0;
-  const block = (event) => event.preventDefault();
-  function blockKeys(event) {
-    if (event.key === 'Escape') finish();
-    else if (SCROLL_KEYS.has(event.key)) event.preventDefault();
-  }
-  function lock() {
-    root.classList.add('story-locked');
-    addEventListener('wheel', block, { passive: false });
-    addEventListener('touchmove', block, { passive: false });
-    addEventListener('keydown', blockKeys);
-  }
-  function unlock() {
-    root.classList.remove('story-locked');
-    removeEventListener('wheel', block);
-    removeEventListener('touchmove', block);
-    removeEventListener('keydown', blockKeys);
-  }
-  function stop() {
-    cancelAnimationFrame(frameId);
-    clearTimeout(failsafe);
-    playing = false;
-    unlock();
-  }
-  function finish() {
-    stop();
-    intro = 1;
-    progress = 1;
-    render(progress);
-  }
-  // Пауза вкладки не проматывает сцену: шаг времени ограничен.
-  function tick(now) {
-    const step = Math.min(100, now - lastTime);
-    if (intro < 1) intro = clamp(intro + step / INTRO_DURATION);
-    else progress = clamp(progress + step / DURATION);
-    lastTime = now;
-    render(progress, 0, intro);
-    if (progress >= 1) finish();
-    else frameId = requestAnimationFrame(tick);
-  }
-  function play() {
-    played = true;
-    playing = true;
-    const previous = root.style.scrollBehavior;
-    root.style.scrollBehavior = 'auto';
-    scrollTo({ top: section.getBoundingClientRect().top + scrollY, behavior: 'instant' });
-    root.style.scrollBehavior = previous;
-    lock();
-    // Страница не должна застрять, даже если анимация оборвётся.
-    failsafe = setTimeout(finish, (INTRO_DURATION + DURATION) * 2);
-    lastTime = performance.now();
-    frameId = requestAnimationFrame(tick);
-  }
-
-  // Доля прокрутки секции после первого экрана: на ней квадрат растёт.
-  function growProgress() {
+  // Доля прокрутки секции после первого экрана.
+  function scrollProgress() {
     const { top } = section.getBoundingClientRect();
     return clamp(-top / Math.max(1, section.offsetHeight - innerHeight));
   }
 
-  // Вызывается при прокрутке и смене размеров: запускает сцену, когда она заняла экран.
+  // Вызывается при прокрутке и смене размеров. Без движения сцена стоит в последнем кадре истории.
   function check() {
-    if (isStatic()) {
-      if (playing) finish();
-      return;
-    }
-    if (playing) return;
-    if (!played) {
-      const { top, bottom } = section.getBoundingClientRect();
-      if (top <= 1 && bottom > innerHeight * .25) { play(); return; }
-    }
-    render(progress, progress >= 1 ? growProgress() : 0, intro);
+    if (isStatic()) { render(1, 0, 1); return; }
+    const { intro, progress, grow } = storyScroll(scrollProgress());
+    render(progress, grow, intro);
   }
 
   return {
     layout() { measure(); },
     check,
     reset() {
-      stop();
-      played = false;
-      progress = 0;
-      intro = 0;
       lastKey = '';
-      render(progress, 0, intro);
+      check();
     },
   };
 }

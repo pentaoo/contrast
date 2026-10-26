@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { circleGap, growSquare, introFrame, squareGap, storyFrame, ZOOM_FROM } from '../dist/geometry-story.js';
+import { circleGap, growSquare, introFrame, squareGap, storyFrame, storyScroll, storyScrollParts, ZOOM_FROM } from '../dist/geometry-story.js';
 
 const views = [
   { halfW: 8.5, halfH: 19, dotR: .2, start: { x: 1.4, y: -6 } }, // телефон
@@ -106,4 +106,15 @@ test('the dot sits still at the start of the story and the run starts smoothly',
     const after = storyFrame(.1701, view).circle;
     assert.ok(Math.hypot(after.x - before.x, after.y - before.y) < .05);
   }
+});
+
+test('the scroll drives the flight, then the story, then the growing square', () => {
+  assert.deepEqual(storyScroll(0), { intro: 0, progress: 0, grow: 0 });
+  const flying = storyScroll(storyScrollParts.intro[1] / 2);
+  assert.ok(flying.intro > 0 && flying.intro < 1 && flying.progress === 0);
+  const story = storyScroll((storyScrollParts.story[0] + storyScrollParts.story[1]) / 2);
+  assert.equal(story.intro, 1);
+  assert.ok(story.progress > 0 && story.progress < 1 && story.grow === 0);
+  assert.deepEqual(storyScroll(1), { intro: 1, progress: 1, grow: 1 });
+  assert.deepEqual(storyScroll(NaN), storyScroll(0));
 });
