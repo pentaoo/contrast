@@ -1,7 +1,7 @@
-import { mountPianoExperience } from './piano.js?v=dance-15';
-import { mountGeometryStory } from './geometry-story.js?v=dance-15';
-import { mountStranger } from './stranger.js?v=dance-15';
-import { mountOrigin } from './origin.js?v=dance-15';
+import { mountPianoExperience } from './piano.js?v=origin-16';
+import { mountGeometryStory } from './geometry-story.js?v=origin-16';
+import { mountStranger } from './stranger.js?v=origin-16';
+import { mountOrigin } from './origin.js?v=origin-16';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -98,8 +98,39 @@ function restartEssay() {
   }, reducedMotion.matches ? 0 : 300);
 }
 $('#restart').addEventListener('click', restartEssay);
-// «Читать» ведёт к прологу обычной прокруткой; это нажатие заодно разрешает звук для бала.
-$('.read-button').addEventListener('click', () => soundExperience.unlockAudio());
+// «Читать»: обложка медленно гаснет, секунду-другую стоит пустой светлый экран,
+// потом страница сама доезжает до «Родилась она», и надпись поднимается снизу.
+// Это нажатие заодно разрешает звук для бала.
+function glideTo(target, duration) {
+  const start = scrollY;
+  const began = performance.now();
+  const previous = root.style.scrollBehavior;
+  root.style.scrollBehavior = 'auto';
+  const step = (now) => {
+    const t = clamp((now - began) / duration);
+    const eased = t < .5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
+    scrollTo({ top: start + (target - start) * eased, behavior: 'instant' });
+    if (t < 1) requestAnimationFrame(step);
+    else root.style.scrollBehavior = previous;
+  };
+  requestAnimationFrame(step);
+}
+$('.read-button').addEventListener('click', (event) => {
+  soundExperience.unlockAudio();
+  const hero = $('#top');
+  if (lowWindow.matches || hero.classList.contains('is-leaving')) return;
+  event.preventDefault();
+  if (reducedMotion.matches) { scrollTo({ top: origin.titleScroll(), behavior: 'instant' }); return; }
+  hero.classList.add('is-leaving');
+  setTimeout(() => {
+    const previous = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
+    scrollTo({ top: $('#origin').getBoundingClientRect().top + scrollY, behavior: 'instant' });
+    root.style.scrollBehavior = previous;
+    hero.classList.remove('is-leaving');
+    setTimeout(() => glideTo(origin.titleScroll(), 1800), 500);
+  }, 1200);
+});
 addEventListener('scroll', queueScrollUpdate, { passive: true });
 function relayout() {
   geometryStory.layout();
