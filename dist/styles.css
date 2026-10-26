@@ -319,6 +319,8 @@ html.story-locked { overflow: hidden; overscroll-behavior: none; }
 .webring-zone .course-webring { max-width: var(--measure); margin-inline: auto; }
 .webring-zone .course-webring h2 { letter-spacing: 0; text-wrap: wrap; }
 .webring-zone .course-webring__nav a:hover { color: var(--muted); }
+.webring-zone .webring-why { max-width: 34em; margin: 4px 0 0 auto; color: var(--muted); text-align: right; text-wrap: pretty; }
+@media (max-width: 720px) { .webring-zone .webring-why { margin-left: 0; text-align: left; } }
 html.ending-blank { scrollbar-width: none; }
 html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
