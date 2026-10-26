@@ -1,8 +1,11 @@
-import { noteFrequency, secondsPerBeat } from './melody.js?v=intro-1';
+import { noteFrequency, secondsPerBeat } from './melody.js?v=ball-9';
 
 // Бал: круг и маленький квадрат из первой истории танцуют на графике частот.
 // Круг стоит на ноте мелодии, квадрат — на верхней ноте аккомпанемента.
-// В финале с ре-бемолем они оказываются вплотную, дрожат и разбегаются;
+// Мелодия всё время выше аккомпанемента, поэтому круг всегда правее квадрата
+// и до финала они не наступают друг на друга.
+// В финале с ре-бемолем круг берёт ре-бемоль, квадрат — до: они оказываются
+// вплотную, дрожат и разбегаются;
 // в финале с октавой квадрат стоит на верхнем до, а круг приходит к нему:
 // основной тон верхнего до совпадает с первым обертоном нижнего.
 export const danceTiming = { enter: .8, crowd: 1.3, flee: .7, merge: .6, confetti: .5 };
@@ -14,8 +17,8 @@ export function danceAt(elapsed, melody) {
     const time = elapsed - final.at;
     if (melody.version === 'mistake') {
       return time < danceTiming.crowd
-        ? { mode: 'crowd', circle: low, square: high, progress: time / danceTiming.crowd }
-        : { mode: 'flee', circle: low, square: high, progress: Math.min(1, (time - danceTiming.crowd) / danceTiming.flee) };
+        ? { mode: 'crowd', circle: high, square: low, progress: time / danceTiming.crowd }
+        : { mode: 'flee', circle: high, square: low, progress: Math.min(1, (time - danceTiming.crowd) / danceTiming.flee) };
     }
     // The meeting point is the shared frequency: C5, the second harmonic of C4.
     return { mode: 'merge', circle: high, square: high, progress: Math.min(1, time / danceTiming.merge) };
@@ -28,6 +31,13 @@ export function danceAt(elapsed, melody) {
     else square = Math.max(...event.notes);
   }
   return { mode: elapsed < danceTiming.enter ? 'enter' : 'dance', circle, square, progress: Math.min(1, elapsed / danceTiming.enter) };
+}
+
+// The circle stays to the right of the square, at least `gap` apart.
+export function keepApart(circleX, squareX, gap) {
+  if (circleX - squareX >= gap) return [circleX, squareX];
+  const middle = (circleX + squareX) / 2;
+  return [middle + gap / 2, middle - gap / 2];
 }
 
 export function mountBall({ floor, spectrum, reducedMotion }) {
@@ -102,8 +112,8 @@ export function mountBall({ floor, spectrum, reducedMotion }) {
       lastTime = 0;
       const width = floor.getBoundingClientRect().width;
       const floorY = spectrum.point(440)?.floor ?? floor.getBoundingClientRect().height;
-      place(circle, -40, floorY);
-      place(square, width + 40, floorY);
+      place(circle, width + 40, floorY);
+      place(square, -40, floorY);
       floor.dataset.state = 'dancing';
     },
     // `wreck` comes from the Triton finale: the dancers fall with the keys.
@@ -116,10 +126,10 @@ export function mountBall({ floor, spectrum, reducedMotion }) {
       floor.dataset.state = pose.mode === 'flee' && (reduced || pose.progress >= 1) ? 'hidden' : 'dancing';
       const ease = (dancer, target, rate) => reduced ? target : dancer + (target - dancer) * Math.min(1, dt * rate);
       const hop = reduced || pose.mode === 'crowd' || pose.mode === 'merge' ? 0 : Math.abs(Math.sin(Math.PI * elapsed / secondsPerBeat));
-      [[circle, pose.circle, -1, 0], [square, pose.square, 1, .5]].forEach(([dancer, note, side, offbeat]) => {
-        if (note === null) return;
+      const moves = [[circle, pose.circle, 1, 0], [square, pose.square, -1, .5]].map(([dancer, note, side, offbeat]) => {
+        if (note === null) return null;
         const point = spectrum.point(noteFrequency(note));
-        if (!point) return;
+        if (!point) return null;
         const lift = size(dancer) * .1;
         let x = point.x;
         let y = Math.min(point.floor, point.y) - lift;
@@ -149,11 +159,18 @@ export function mountBall({ floor, spectrum, reducedMotion }) {
           if (dancer === circle) y -= (size(square) - size(circle)) / 2;
         }
         if (wreck?.broken) {
-          place(dancer, dancer.x, Math.max(dancer.y, point.floor - lift + 30 + wreck.drop), side * wreck.spin * 2);
-          return;
+          return { dancer, x: dancer.x, y: Math.max(dancer.y, point.floor - lift + 30 + wreck.drop), angle: side * wreck.spin * 2 };
         }
-        place(dancer, ease(dancer.x, x, rate), ease(dancer.y, y, rate * 1.6), angle);
+        return { dancer, x: ease(dancer.x, x, rate), y: ease(dancer.y, y, rate * 1.6), angle };
       });
+      const [circleMove, squareMove] = moves;
+      if (circleMove && squareMove && pose.mode !== 'merge' && !wreck?.broken) {
+        // Only the right ending lets them meet; until then they never overlap.
+        const touch = (size(circle) + size(square)) / 2;
+        const gap = pose.mode === 'crowd' ? touch : touch + size(circle) * .4;
+        [circleMove.x, squareMove.x] = keepApart(circleMove.x, squareMove.x, gap);
+      }
+      moves.forEach((move) => move && place(move.dancer, move.x, move.y, move.angle));
       if (pose.mode === 'merge' && pose.progress >= danceTiming.confetti / danceTiming.merge && !celebrated) {
         celebrated = true;
         celebrate();
