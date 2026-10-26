@@ -28,7 +28,8 @@ export function seaAt(progress) {
 export function mountStranger(section, { reducedMotion, isStatic, onCall = () => {} }) {
   const scroll = section.querySelector('.stranger-scroll');
   const sea = section.querySelector('.sea');
-  const frames = [...section.querySelectorAll('.stranger-triton img')];
+  // Two poses, each in two drawings: the Triton hiding in the waves, and the Triton blowing his conch.
+  const poses = [...section.querySelectorAll('.triton-pose')].map((pose) => [...pose.querySelectorAll('img')]);
   // Three layers of the same drawn sea, each with its own size and drift speed.
   ['far', 'mid', 'near'].forEach((depth) => {
     const layer = document.createElement('div');
@@ -45,10 +46,10 @@ export function mountStranger(section, { reducedMotion, isStatic, onCall = () =>
   let frame = 0;
   let timer;
   function animate(on) {
-    if (on && !timer && frames.length > 1) {
+    if (on && !timer) {
       timer = setInterval(() => {
-        frame = (frame + 1) % frames.length;
-        frames.forEach((image, index) => { image.hidden = index !== frame; });
+        frame = (frame + 1) % 2;
+        poses.forEach((images) => images.forEach((image, index) => { image.hidden = index !== frame; }));
       }, 420);
     } else if (!on && timer) {
       clearInterval(timer);
@@ -56,13 +57,15 @@ export function mountStranger(section, { reducedMotion, isStatic, onCall = () =>
     }
   }
 
-  // The call: the conch sounds once, the rings spread; scrolling back above it lets it sound again.
+  // The call: the Triton lifts his conch, it sounds once, the rings spread; scrolling back above it lets it sound again.
   let called = false;
   let callTimer;
   function call(on) {
     if (on === called) return;
     called = on;
     clearTimeout(callTimer);
+    // Once he has called, he keeps blowing while his sea rises.
+    section.classList.toggle('is-blowing', on);
     section.classList.toggle('is-calling', on);
     if (!on) return;
     onCall();
@@ -86,7 +89,7 @@ export function mountStranger(section, { reducedMotion, isStatic, onCall = () =>
     // Landing far below the call (a reload, a jump to the sources) does not blow the conch.
     if (!still && progress >= seaTiming.call) {
       if (progress < seaTiming.flood[0] + .1 && rect.bottom > 0) call(true);
-      else called = true;
+      else if (!called) { called = true; section.classList.add('is-blowing'); }
     } else if (progress < seaTiming.call - .06) call(false);
     animate(!still && rect.bottom > 0 && rect.top < innerHeight);
   }
