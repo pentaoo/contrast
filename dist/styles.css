@@ -173,25 +173,38 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 /* Общие sticky-сцены */
 .scene-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; }
 
-/* 00 Откуда берётся разница. Серое поле делится жёсткими шагами (origin.js): целое → «плохо» и «хорошо» → мама, соска, плед → поле точек. */
+/* 00 Родилась она. Поле меняется жёсткими кадрами (origin.js): пусто → свет и тьма → формы → много мелких форм → поле точек. */
 .origin-stage { display: flex; flex-direction: column; }
-.origin-copy { order: -1; }
-.origin-field { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-1); height: clamp(120px, 24svh, 220px); margin: 0 var(--inline) var(--space-6); }
-.origin-layer--whole { background: var(--dot); }
-.origin-layer--two { background: linear-gradient(90deg, var(--ink) 0 50%, var(--dot) 50% 100%); }
-.origin-layer--three { background: linear-gradient(90deg, var(--ink) 0 50%, var(--dot) 50% 66.667%, var(--sage) 66.667% 83.333%, var(--paper-deep) 83.333% 100%); }
-.origin-layer--dots { background: radial-gradient(circle, var(--dot) 0 2.5px, transparent 3px) center / 20px 20px; }
-.origin-copy { display: grid; gap: var(--space-4); padding-block: var(--space-6) var(--space-5); }
+.origin-copy { order: -1; display: grid; gap: var(--space-4); padding-block: var(--space-6) var(--space-5); }
 .origin-text { max-width: 760px; }
 .origin-line { font-size: var(--text-voice); line-height: 1.4; letter-spacing: -.03em; font-weight: 600; text-wrap: pretty; }
-.js-enabled .origin:not(.is-still) .origin-scroll { height: 400vh; height: 400svh; }
+.origin-field { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-1); height: clamp(120px, 24svh, 220px); margin: 0 var(--inline) var(--space-6); }
+.origin-layer { position: relative; overflow: hidden; }
+.origin-layer--empty { display: none; }
+.origin-layer--split { background: linear-gradient(var(--paper) 0 50%, var(--ink) 50% 100%); outline: 1px solid var(--line); }
+.origin-layer--shapes { display: flex; align-items: center; justify-content: space-evenly; outline: 1px solid var(--line); }
+.origin-shape { display: block; width: 24%; aspect-ratio: 1; background: var(--ink); }
+.origin-shape--circle { border-radius: 50%; }
+.origin-shape--square { width: 20%; }
+.origin-shape--triangle { clip-path: polygon(50% 4%, 100% 92%, 0 92%); }
+.origin-shape[hidden] { display: block !important; visibility: hidden; }
+.origin-layer--many { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Ccircle cx='14' cy='14' r='7' fill='%23191a17'/%3E%3Crect x='44' y='8' width='12' height='12' fill='%23a8af99'/%3E%3Cpath d='M14 44l8 14H6z' fill='%23c0c2b6'/%3E%3Ccircle cx='50' cy='52' r='4' fill='%23a8af99'/%3E%3C/svg%3E") center / 72px 72px; }
+.origin-layer--dots { background: radial-gradient(circle, var(--dot) 0 2.5px, transparent 3px) center / 20px 20px; }
+.js-enabled .origin:not(.is-still) .origin-scroll { height: 500vh; height: 500svh; }
 .js-enabled .origin:not(.is-still) .origin-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
-.js-enabled .origin:not(.is-still) .origin-field { position: absolute; inset: auto 0 0; display: block; height: 52vh; height: 52svh; margin: 0; }
-.js-enabled .origin:not(.is-still) .origin-layer { position: absolute; inset: 0; visibility: hidden; }
+.js-enabled .origin:not(.is-still) .origin-field { position: absolute; inset: 0; display: block; height: auto; margin: 0; }
+.js-enabled .origin:not(.is-still) .origin-layer { position: absolute; inset: 0; display: block; visibility: hidden; outline: 0; }
 .js-enabled .origin:not(.is-still) .origin-layer.is-current { visibility: visible; }
+/* Свет и тьма — на весь экран; текст стоит на светлой половине. */
+.js-enabled .origin:not(.is-still) .origin-layer--shapes { inset: 50% 0 0; display: flex; align-items: center; justify-content: center; gap: 6vw; }
+.js-enabled .origin:not(.is-still) .origin-shape { width: clamp(64px, 14vw, 200px); }
+.js-enabled .origin:not(.is-still) .origin-shape--square { width: clamp(54px, 12vw, 172px); }
+.js-enabled .origin:not(.is-still) .origin-layer--many { inset: 50% 0 0; }
 .js-enabled .origin:not(.is-still) .origin-copy { position: absolute; top: clamp(72px, 13svh, 150px); left: 0; right: 0; display: grid; gap: 0; padding-block: 0; }
 .js-enabled .origin:not(.is-still) .origin-text { grid-area: 1 / 1; opacity: 0; transition: opacity .45s var(--ease); }
 .js-enabled .origin:not(.is-still) .origin-text.is-current { opacity: 1; }
+/* Первая и последняя надписи — посередине экрана, как у заголовка. */
+.js-enabled .origin:not(.is-still) .origin-text:is(:first-child, :last-child) { align-self: start; padding-top: calc(50svh - clamp(72px, 13svh, 150px) - .6em); }
 
 /* 01 Точки и фигуры. Сцену проигрывает geometry-story.js; на время показа прокрутка заблокирована. */
 .attention-scene { --story-accent: var(--accent); --story-copy-1: 1; --story-copy-2: 1; --story-copy-3: 1; }
