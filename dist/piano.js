@@ -1,9 +1,9 @@
-import { computerKeys, describeChord, noteName } from './notes.js?v=field-14';
-import { LOOKAHEAD, advance, dueEvents, trackTarget } from './listening.js?v=field-14';
-import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=field-14';
-import { mountSpectrum } from './spectrum.js?v=field-14';
-import { mountBall } from './ball.js?v=field-14';
-import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=field-14';
+import { computerKeys, describeChord, noteName } from './notes.js?v=dance-15';
+import { LOOKAHEAD, advance, dueEvents } from './listening.js?v=dance-15';
+import { createMelody, finalNotes, keyboardRange, noteFrequency } from './melody.js?v=dance-15';
+import { mountSpectrum } from './spectrum.js?v=dance-15';
+import { mountBall } from './ball.js?v=dance-15';
+import { mountTritonFinale, tritonNotes, tritonTiming, createTritonSchedule } from './triton.js?v=dance-15';
 
 export function mountPianoExperience({ reducedMotion }) {
   const piano = document.querySelector('#piano');
@@ -87,12 +87,6 @@ export function mountPianoExperience({ reducedMotion }) {
     spectrum.setFocus(showAnnotations, Math.max(0, Math.min(1, progress)));
   }
 
-  // How far the reader has scrolled through a track, 0…1.
-  function trackFraction(track) {
-    const rect = track.getBoundingClientRect();
-    return Math.min(1, Math.max(0, -rect.top / Math.max(1, rect.height - innerHeight)));
-  }
-
   function audible() {
     return Boolean(context && context.state === 'running');
   }
@@ -159,15 +153,15 @@ export function mountPianoExperience({ reducedMotion }) {
     }
   }
 
-  // Each frame: the scroll sets how far to play, the playhead follows at real tempo.
+  // Each frame: the playhead moves on at real tempo and queues the next notes.
   function tick(now) {
     frame = undefined;
     const performance = active;
     if (!performance) return;
     const dt = Math.min(.1, (now - lastNow) / 1000);
     lastNow = now;
-    const track = tracks.find((element) => element.dataset.track === performance.version);
-    const target = trackTarget(trackFraction(track), performance.duration);
+    // One scroll into the track starts the melody; it plays to the end by itself.
+    const target = performance.duration;
     const step = advance(performance.playhead, target, dt);
     if (step.jumped) {
       // Back up the page: the music stops and the scene rewinds without sound.
@@ -398,7 +392,7 @@ export function mountPianoExperience({ reducedMotion }) {
         enter(inside.dataset.track);
         queueTick();
       } else if (active) {
-        // Past the end of a track the melody plays out; above it, it stops.
+        // Below the track the melody plays out; back above it, it stops.
         if (tracks.find((track) => track.dataset.track === active.version).getBoundingClientRect().top > 0) leave();
         else if (lab.getBoundingClientRect().bottom <= 0) leave();
         else queueTick();

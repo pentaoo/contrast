@@ -245,9 +245,8 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .sound-section { background: var(--ink); color: var(--paper); padding-bottom: var(--space-5); }
 .sound-lab { --sound-deck-height: clamp(400px, 52svh, 560px); position: relative; display: grid; overflow-anchor: none; }
 .sound-story, .sound-instrument { grid-area: 1 / 1; }
-/* Мелодия звучит, пока читатель крутит дорожку: текст над ней закреплён, а длина дорожки — это длина мелодии. */
-.js-enabled .sound-track { height: 400vh; height: 400svh; }
-.js-enabled .sound-track[data-track="correct"] { height: 480vh; height: 480svh; }
+/* Дорожка: когда текст над ней доходит до верха окна, мелодия начинается и доигрывает сама. */
+.js-enabled .sound-track { height: 200vh; height: 200svh; }
 .js-enabled .sound-track>.sound-step { position: sticky; top: 0; }
 .sound-step { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding-top: clamp(20px, 4svh, 48px); padding-bottom: calc(var(--sound-deck-height) + clamp(20px, 4svh, 48px)); }
 /* Абзац целиком помещается над графиком: размер зависит и от ширины, и от высоты окна. */
