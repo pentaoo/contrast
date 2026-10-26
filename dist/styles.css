@@ -167,16 +167,14 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 /* Обложка */
 .hero { min-height: 100vh; min-height: 100svh; padding-block: var(--space-5); padding-inline: max(var(--gutter), calc((100% - 1470px) / 2)); display: flex; flex-direction: column; justify-content: center; }
 .hero-title { font: 600 clamp(64px, 19.6vw, 340px)/1.12 var(--display); letter-spacing: -.05em; white-space: nowrap; }
-/* У «К» в Oswald пустое поле слева ≈ .06 кегля: сдвигаем, чтобы штрих стоял на одной грани с фразой под ним. */
+/* У «К» в Oswald пустое поле слева ≈ .06 кегля: сдвигаем, чтобы левой гранью был штрих буквы, а не пустое поле. */
 .hero-title h1 { display: inline; margin-left: -.055em; font: inherit; letter-spacing: inherit; }
 /* Точка заголовка — кнопка «читать». Пропорции из макета: высота ≈ 0,2 кегля, нижний край на базовой линии. */
 .read-button { display: inline-block; overflow: hidden; vertical-align: baseline; margin-left: .3em; font-size: max(14px, .058em); line-height: 2.45; letter-spacing: 0; padding: .33em .33em .58em; background: var(--accent); color: #fff; transition: background .2s; }
 .read-button:hover { background: var(--accent-hover); }
 .read-button:focus-visible { outline-offset: 4px; }
-.hero-subline { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); margin-top: var(--space-3); }
-.js-enabled .hero-title, .js-enabled .hero-statement { opacity: 0; transform: translateY(22px); transition: opacity .85s var(--ease), transform .85s var(--ease); }
-.js-enabled.intro-ready .hero-title, .js-enabled.intro-ready .hero-statement { opacity: 1; transform: none; }
-.intro-ready .hero-statement { transition-delay: .25s; }
+.js-enabled .hero-title { opacity: 0; transform: translateY(22px); transition: opacity .85s var(--ease), transform .85s var(--ease); }
+.js-enabled.intro-ready .hero-title { opacity: 1; transform: none; }
 /* Обложка гаснет вместе с прокруткой (--hero-leave от 0 до 1) или по «читать» (.is-leaving). */
 .js-enabled .hero { opacity: calc(1 - var(--hero-leave, 0)); }
 .js-enabled .hero.is-leaving { opacity: 0; transition: opacity 1.2s ease-in-out; }
@@ -387,7 +385,6 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
 }
 @media (max-width: 600px) {
   .stranger { --tw: 64vw; --tr: 0px; --fig: 44px; }
-  .hero-subline { align-items: flex-start; gap: var(--space-3); }
   .circle-link { width: 44px; height: 44px; font-size: 22px; }
   .attention-stage { gap: var(--space-4); }
   .story-copy .body-copy { margin-top: var(--space-2); }
@@ -408,7 +405,7 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .js-enabled .scroll-scene { height: auto; }
   .scene-sticky { position: relative; }
   .js-enabled .scene>.scene-heading, .js-enabled .scene>.sound-lab,
-  .js-enabled .conclusion>h2, .js-enabled .hero-title, .js-enabled .hero-statement { opacity: 1; transform: none; visibility: visible; }
+  .js-enabled .conclusion>h2, .js-enabled .hero-title { opacity: 1; transform: none; visibility: visible; }
   .js-enabled .attention-stage { position: relative; height: auto; padding: var(--space-5) var(--gutter); }
   .js-enabled .story-canvas { display: none; }
   .js-enabled .story-frames { position: static; width: 100%; height: auto; margin: 0 auto; overflow: visible; clip: auto; }
