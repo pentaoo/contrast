@@ -268,9 +268,9 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 /* Третий акт: тритон выглядывает из воды и трубит в раковину, на зов поднимается
    его море и накрывает экран. Под водой чужие — точка и квадрат.
    Контекст влияет на контраст. */
-.stranger { --sea: 0; --lift: 0; --sink: 0; --text-a: 1; --text-b: 0; --text-c: 0; --tw: clamp(240px, 36vw, 540px); --floor: clamp(56px, 11svh, 120px); --tr: max(var(--gutter), calc(50% - 620px)); --fig: clamp(64px, 8.5vw, 136px); --bed: 0; --open: 0; --slip-x: 0; --slip-y: 0; --stuck-x: 0; --stuck-y: 0; --hole: calc(var(--fig) * 1.3); --hx: calc(var(--tr) + var(--tw) * .98 + var(--fig) * 1.6 + 7px); }
+.stranger { --sea: 0; --lift: 0; --sink: 0; --text-a: 1; --text-b: 0; --text-c: 0; --dive: 0; --dark: 0; --tw: clamp(240px, 36vw, 540px); --floor: clamp(56px, 11svh, 120px); --tr: max(var(--gutter), calc(50% - 620px)); --fig: clamp(64px, 8.5vw, 136px); }
 .stranger-scroll { height: 100vh; height: 100svh; }
-.js-enabled .stranger-scroll { height: 660vh; height: 660svh; }
+.js-enabled .stranger-scroll { height: 600vh; height: 600svh; }
 .stranger-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--paper); }
 .sea { position: absolute; inset: 44% 0 0; transform: translateY(calc((1 - var(--sea)) * 100%)); will-change: transform; }
 /* Толща воды: нижний край ближних гребней тает, и вода плавно темнеет от цвета волн
@@ -310,10 +310,10 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .is-calling .triton-call i:nth-child(2) { animation-delay: .3s; }
 .is-calling .triton-call i:nth-child(3) { animation-delay: .6s; }
 @keyframes call-ring { from { scale: .3; opacity: .8; } to { scale: 4.2; opacity: 0; } }
-.cast-circle, .cast-square { position: absolute; bottom: 0; display: block; background: var(--accent); }
-/* Under water the figures float up; then the dot rolls to the drain and falls through, the square turns on its corner and wedges. */
-.cast-circle { transform: translate(calc(var(--slip-x) * (var(--fig) / 2 + 7px)), calc(var(--sink) * -16svh + var(--slip-y) * (16svh + var(--floor) + var(--fig) * 1.3))) rotate(calc(var(--sink) * 28deg)); }
-.cast-square { transform: translate(calc(var(--stuck-x) * -1 * (var(--fig) * .8 + 7px)), calc(var(--sink) * -16svh + var(--stuck-y) * (16svh + var(--fig) * .52))) rotate(calc(var(--sink) * 28deg + var(--stuck-y) * 25deg)); }
+.cast-circle, .cast-square { position: absolute; bottom: 0; display: block; background: var(--accent); transform: translateY(calc(var(--sink) * -16svh + var(--dive) * 4svh)) rotate(calc(var(--sink) * 28deg + var(--dive) * 17deg)); }
+/* On the way down the water turns black over everything but the figures: they keep their colour. */
+.stranger-dark { position: absolute; inset: 0; background: #000; opacity: var(--dark); pointer-events: none; }
+.stranger.is-still .stranger-dark { display: none; }
 /* Под водой фигуры всплывают в толщу, от них поднимаются пузыри. */
 .cast-circle::before, .cast-square::before, .cast-square::after { content: ""; position: absolute; left: 30%; top: -14px; width: 9px; aspect-ratio: 1; border: 1.5px solid var(--paper); border-radius: 50%; opacity: 0; }
 .cast-square::after { left: 70%; width: 6px; }
@@ -321,22 +321,8 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .is-sea .cast-square::before { animation-delay: -1.1s; }
 .is-sea .cast-square::after { animation-delay: -2s; }
 @keyframes bubble { from { translate: 0 0; opacity: calc(var(--sink) * .9); } to { translate: 6px -16svh; opacity: 0; } }
-.cast-square { right: calc(var(--tr) + var(--tw) * .98); width: calc(var(--fig) * 1.6); aspect-ratio: 1; rotate: -8deg; }
+.cast-square { right: calc(var(--tr) + var(--tw) * .98); width: calc(var(--fig) * 1.6); aspect-ratio: 1; rotate: -8deg; transform-origin: 0 100%; }
 .cast-circle { right: calc(var(--tr) + var(--tw) * .98 + var(--fig) * 1.6 + 14px); width: var(--fig); aspect-ratio: 1; border-radius: 50%; }
-/* The drain: the floor, the black hole under it, the plug, the whirl. The halves of the floor cover the figures, so the square sticks in the gap. */
-.sea-bed, .drain-hole { position: absolute; bottom: calc(-1 * var(--floor)); height: var(--floor); opacity: var(--bed); }
-.sea-bed { left: 0; right: 0; }
-.sea-bed i { position: absolute; top: 0; bottom: 0; background: #123a33; border-top: 2px solid color-mix(in srgb, var(--paper) 35%, transparent); }
-.sea-bed i:first-child { left: 0; right: calc(var(--hx) + var(--hole) * var(--open) / 2); }
-.sea-bed i:last-child { right: 0; width: calc(var(--hx) - var(--hole) * var(--open) / 2); }
-.drain-hole { right: calc(var(--hx) - var(--hole) / 2); width: var(--hole); background: #000; }
-.drain-plug { position: absolute; bottom: calc(var(--fig) * -.2); right: calc(var(--hx) - var(--fig) * .75); width: calc(var(--fig) * 1.5); height: calc(var(--fig) * .4); border-radius: 6px 6px 2px 2px; background: var(--paper); opacity: calc(var(--bed) * (1 - var(--open) * var(--open))); transform: translateY(calc(var(--open) * -34svh)) rotate(calc(var(--open) * 200deg)); }
-.drain-plug::before { content: ""; position: absolute; left: 50%; bottom: 100%; width: calc(var(--fig) * .36); aspect-ratio: 1; translate: -50% 30%; border: 3px solid var(--paper); border-radius: 50%; }
-.drain-swirl { position: absolute; bottom: calc(var(--fig) * -1); right: calc(var(--hx) - var(--fig)); width: calc(var(--fig) * 2); aspect-ratio: 1; transform: scaleY(.28); opacity: calc(var(--open) * (1 - var(--stuck-y)) * .7); }
-.drain-swirl::before, .drain-swirl::after { content: ""; position: absolute; inset: 0; border: 2px solid var(--paper); border-color: var(--paper) transparent var(--paper) transparent; border-radius: 50%; animation: swirl 1.6s linear infinite; }
-.drain-swirl::after { inset: 24%; animation-duration: 1.1s; }
-@keyframes swirl { to { rotate: 1turn; } }
-.stranger.is-still :is(.sea-bed, .drain-hole, .drain-plug, .drain-swirl) { display: none; }
 .is-sea .cast-circle { animation: cast-bob 3.4s ease-in-out infinite; }
 .is-sea .cast-square { animation: cast-bob 4.1s -1.2s ease-in-out infinite; }
 @keyframes cast-bob { 50% { translate: 0 -7px; } }

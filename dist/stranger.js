@@ -3,22 +3,20 @@
 // его интервал. На зов поднимается море и накрывает экран: под водой остаются
 // точка и квадрат, теперь чужие они.
 // Контекст влияет на контраст.
-// Потом на дне выбивает пробку: точка успевает проскользнуть в слив,
-// а квадрат застревает в дырке углом.
+// Дальше фигуры уходят на дно: вода темнеет до полной черноты,
+// и видны остаются только они — яркие, как были.
 
 // `shore` — how much of the sea shows at the start; `deep` — the sea has risen over the whole screen.
 // `call` — where the Triton blows his conch: the scroll starts the call, the call plays out by itself.
-// The drain: `bed` — the sea floor shows; `open` — the plug flies off and the hole widens;
-// `slip` — the dot rolls to the hole, then falls through; `stuck` — the square follows, turns on its corner and wedges.
+// `dive` — the figures go down to the bottom; `dark` — the water around them turns black, the text goes with it.
 export const seaTiming = {
-  shore: .71, deep: 2.86, call: .25,
-  textA: [.06, .13], textB: [.13, .2], lift: [.145, .23],
-  flood: [.3, .58], textBOut: [.32, .39], textC: [.54, .62], sink: [.36, .72],
-  bed: [.6, .67], open: [.68, .76], slipX: [.74, .81], slipY: [.79, .88], stuckX: [.8, .88], stuckY: [.85, .95]
+  shore: .71, deep: 2.86, call: .27,
+  textA: [.064, .144], textB: [.144, .224], lift: [.16, .256],
+  flood: [.336, .64], textBOut: [.352, .432], textC: [.592, .688], sink: [.4, .8],
+  dive: [.74, 1], dark: [.74, .96], textCOut: [.74, .84]
 };
 
 const ramp = (value, [from, to]) => Math.min(1, Math.max(0, (value - from) / (to - from)));
-const ease = (value) => value * value * (3 - 2 * value);
 
 export function seaAt(progress) {
   return {
@@ -27,14 +25,9 @@ export function seaAt(progress) {
     sink: ramp(progress, seaTiming.sink),
     first: 1 - ramp(progress, seaTiming.textA),
     second: ramp(progress, seaTiming.textB) * (1 - ramp(progress, seaTiming.textBOut)),
-    third: ramp(progress, seaTiming.textC),
-    bed: ramp(progress, seaTiming.bed),
-    open: ease(ramp(progress, seaTiming.open)),
-    slipX: ease(ramp(progress, seaTiming.slipX)),
-    // The drain pulls harder the closer the dot gets.
-    slipY: ramp(progress, seaTiming.slipY) ** 2,
-    stuckX: ease(ramp(progress, seaTiming.stuckX)),
-    stuckY: ease(ramp(progress, seaTiming.stuckY))
+    third: ramp(progress, seaTiming.textC) * (1 - ramp(progress, seaTiming.textCOut)),
+    dive: ramp(progress, seaTiming.dive),
+    dark: ramp(progress, seaTiming.dark)
   };
 }
 
@@ -90,9 +83,7 @@ export function mountStranger(section, { reducedMotion, isStatic, onCall = () =>
     const still = reducedMotion.matches || isStatic();
     const progress = Math.min(1, Math.max(0, -rect.top / Math.max(1, rect.height - innerHeight)));
     // Without motion the three texts stand in a column and the sea stays at the bottom of the scene.
-    const state = still
-      ? { level: 1, lift: 1, sink: 0, first: 1, second: 1, third: 1, bed: 0, open: 0, slipX: 0, slipY: 0, stuckX: 0, stuckY: 0 }
-      : seaAt(progress);
+    const state = still ? { level: 1, lift: 1, sink: 0, first: 1, second: 1, third: 1, dive: 0, dark: 0 } : seaAt(progress);
     section.classList.toggle('is-still', still);
     section.style.setProperty('--sea', state.level.toFixed(4));
     section.style.setProperty('--text-a', state.first.toFixed(3));
@@ -100,9 +91,8 @@ export function mountStranger(section, { reducedMotion, isStatic, onCall = () =>
     section.style.setProperty('--text-c', state.third.toFixed(3));
     section.style.setProperty('--lift', state.lift.toFixed(4));
     section.style.setProperty('--sink', state.sink.toFixed(4));
-    ['bed', 'open', 'slipX', 'slipY', 'stuckX', 'stuckY'].forEach((key) => {
-      section.style.setProperty(`--${key.replace(/[XY]/, (axis) => `-${axis.toLowerCase()}`)}`, state[key].toFixed(4));
-    });
+    section.style.setProperty('--dive', state.dive.toFixed(4));
+    section.style.setProperty('--dark', state.dark.toFixed(4));
     section.classList.toggle('is-sea', !still && state.level > .5);
     // Landing far below the call (a reload, a jump to the sources) does not blow the conch.
     if (!still && progress >= seaTiming.call) {
