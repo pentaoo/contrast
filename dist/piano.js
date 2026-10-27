@@ -143,6 +143,7 @@ export function mountPianoExperience({ reducedMotion }) {
 
   function complete(performance) {
     performance.done = true;
+    performance.playing = false;
     heard[performance.version] = true;
     if (performance.version === 'mistake') {
       spectrum.finish(performance.snapshot, 'mistake');
@@ -191,7 +192,8 @@ export function mountPianoExperience({ reducedMotion }) {
   }
 
   function queueTick() {
-    if (!frame && active) {
+    // Keep the final frame without remeasuring the spectrum on every repaint.
+    if (!frame && active && !active.done) {
       lastNow ||= performance.now();
       frame = requestAnimationFrame(tick);
     }
@@ -375,8 +377,12 @@ export function mountPianoExperience({ reducedMotion }) {
     if (event.button !== 0) return;
     const note = noteAt(event.clientX, event.clientY);
     if (note === null) return;
-    event.preventDefault();
-    piano.setPointerCapture?.(event.pointerId);
+    // Touch keeps native vertical scrolling; pointercancel releases the note
+    // as soon as the browser recognises a swipe. Mouse glissando stays captured.
+    if (event.pointerType === 'mouse') {
+      event.preventDefault();
+      piano.setPointerCapture?.(event.pointerId);
+    }
     press(`pointer-${event.pointerId}`, note);
   });
   piano.addEventListener('pointermove', (event) => {

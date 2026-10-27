@@ -142,7 +142,7 @@ h2, .title { font-family: var(--sans); font-size: var(--text-title); font-weight
 /* Пианино */
 /* Клавиши и график частот — во всю ширину экрана, с одинаковыми полями: пик стоит над своей клавишей. */
 .piano-stage { flex: none; margin-inline: calc(50% - 50vw); padding: var(--space-1) var(--space-1) 10px; background: var(--ink-deep); }
-.piano { position: relative; height: clamp(96px, 18svh, 190px); isolation: isolate; touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; }
+.piano { position: relative; height: clamp(96px, 18svh, 190px); isolation: isolate; touch-action: pan-y pinch-zoom; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; cursor: pointer; }
 .piano-key { position: absolute; top: 0; border-radius: 0 0 3px 3px; transition: background 80ms, transform 80ms; }
 .piano-key.is-white { height: 100%; background: var(--paper); border-right: 1px solid #62655a; border-bottom: 6px solid #b9bbaf; }
 .piano-key.is-black { z-index: 1; height: 62%; background: #242620; border: 1px solid var(--ink-deep); border-bottom: 6px solid #090a07; box-shadow: 0 3px 3px #0005; }
@@ -389,6 +389,16 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
   .section-pad { padding-block: var(--space-5); }
 }
 @media (max-width: 600px) {
+  .hero { padding-inline: 0; }
+  .hero-title { font-size: min(48vw, calc((100vw - 60px) / 1.84)); line-height: 1; white-space: normal; }
+  .hero-byline { right: var(--gutter); }
+  .sound-lab { --sound-deck-height: clamp(230px, 34svh, 320px); }
+  /* Вступление уходит при первом свайпе, без лишнего закреплённого экрана. */
+  .js-enabled .sound-track[data-track="mistake"] { height: 100svh; }
+  .sound-instrument { gap: var(--space-1); padding-top: var(--space-1); padding-bottom: max(var(--space-1), env(safe-area-inset-bottom, 0px)); }
+  .sound-instrument .piano-hint, .sound-instrument #spectrum-caption { display: none; }
+  .sound-instrument .listening-actions:not(:has(button:not([hidden]))) { display: none; }
+  .spectrum-stage { grid-template-rows: minmax(0, 1fr); gap: 0; }
   .stranger { --tw: 64vw; --tr: 0px; --fig: 44px; }
   .circle-link { width: 44px; height: 44px; font-size: 22px; }
   .attention-stage { gap: var(--space-4); }

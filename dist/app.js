@@ -1,4 +1,4 @@
-import { mountPianoExperience } from './piano.js?v=paper-text-1';
+import { mountPianoExperience } from './piano.js?v=mobile-1';
 import { mountGeometryStory } from './geometry-story.js?v=narrative-1';
 import { mountStranger } from './stranger.js?v=dive-2';
 import { mountOrigin } from './origin.js?v=dive-2';
