@@ -468,3 +468,5 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 }
 
 .sound-lab:is([data-finale="playing"], [data-finale="done"]) .piano-hint { visibility: hidden; }
+.webring-zone .webring-why { max-width: 34em; margin: 4px 0 0 auto; color: var(--muted-on-ink); text-align: right; text-wrap: pretty; }
+@media (max-width: 720px) { .webring-zone .webring-why { margin-left: 0; text-align: left; } }
