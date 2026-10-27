@@ -1,7 +1,8 @@
-import { mountPianoExperience } from './piano.js?v=text-10';
-import { mountGeometryStory } from './geometry-story.js?v=text-10';
-import { mountSoundScreen } from './sound-screen.js?v=text-10';
-import { mountStranger } from './stranger.js?v=text-10';
+import { mountPianoExperience } from './piano.js?v=dive-2';
+import { mountGeometryStory } from './geometry-story.js?v=narrative-1';
+import { mountStranger } from './stranger.js?v=dive-2';
+import { mountOrigin } from './origin.js?v=dive-2';
+import { mountSources } from './sources.js?v=sources-3';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -26,44 +27,43 @@ if ('IntersectionObserver' in window) {
 }
 
 const soundExperience = mountPianoExperience({ reducedMotion });
-const soundScreen = mountSoundScreen({
-  lab: $('#sound-lab'),
-  holdsPage: () => soundExperience.holdsPage(),
-  isStatic: () => reducedMotion.matches || matchMedia('(max-height: 600px)').matches,
-  onScroll: () => queueScrollUpdate(),
-});
 const lowWindow = matchMedia('(max-height: 600px)');
 // Dots fill the whole screen; one of them becomes the orange circle of the story.
-const geometryStory = mountGeometryStory($('#principle'), { isStatic: () => reducedMotion.matches || lowWindow.matches });
-// The Triton lies on a white screen until his sea floods it.
-const stranger = mountStranger($('#stranger'), { reducedMotion, isStatic: () => lowWindow.matches });
+// Before the story: one grey field splits into ever finer parts.
+const origin = mountOrigin($('#origin'), { reducedMotion, isStatic: () => lowWindow.matches });
+// The prologue ends on the same field the story starts with.
+const geometryStory = mountGeometryStory($('#principle'), { isStatic: () => reducedMotion.matches || lowWindow.matches, onField: origin.setField });
+// The Triton peeks out of the water, blows his conch, and his sea floods the screen.
+const stranger = mountStranger($('#stranger'), { reducedMotion, isStatic: () => lowWindow.matches, onCall: soundExperience.conch });
+const sourceExperience = mountSources($('#sources'), { reducedMotion, isStatic: () => lowWindow.matches });
 
-const ending = $('#disappearance');
+// Тяжёлые рисунки грузятся в фоне с начала статьи, когда первый экран уже готов:
+// сначала тритон над пианино, потом тритон в море и его волны.
+function preloadArt() {
+  soundExperience.preload()
+    .then(() => stranger.preload())
+    .then(() => { new Image().src = new URL('./assets/sea/sea-waves.webp', import.meta.url).href; });
+}
+const whenIdle = window.requestIdleCallback || ((callback) => setTimeout(callback, 600));
+if (document.readyState === 'complete') whenIdle(preloadArt);
+else window.addEventListener('load', () => whenIdle(preloadArt), { once: true });
+
 const veil = $('.restart-veil');
 let scrollTicking = false;
 let restarting = false;
 
-function localProgress(element) {
-  return clamp(-element.getBoundingClientRect().top / Math.max(1, element.offsetHeight - innerHeight));
-}
 function updateScroll() {
   scrollTicking = false;
-  soundScreen.check();
   soundExperience.updateScroll();
   const reduced = reducedMotion.matches;
+  origin.update();
   geometryStory.check();
   stranger.update();
+  sourceExperience.update();
+  const hero = $('#top');
+  hero.style.setProperty('--hero-leave', reduced ? '0' : clamp(scrollY / Math.max(1, hero.offsetHeight * .7)).toFixed(4));
   const total = root.scrollHeight - innerHeight;
   $('.reading-progress span').style.transform = `scaleX(${clamp(scrollY / Math.max(1, total))})`;
-  const progress = localProgress(ending);
-  ending.style.setProperty('--end-p', clamp(progress / .48).toFixed(4));
-  ending.style.setProperty('--end-w', clamp((progress - .57) / .36).toFixed(4));
-  ending.style.setProperty('--end-opacity', (1 - clamp((progress - .17) / .3)).toFixed(4));
-  $('.reading-progress').style.opacity = String(1 - clamp((progress - .35) / .15));
-  root.classList.toggle('ending-blank', progress > .48 && !reduced);
-  // The white ending waits for the reader. Keep the exit in the tab order only
-  // once it is visible, and remove it again when scrolling back into the essay.
-  $('.ending-last').hidden = !reduced && progress < .93;
 }
 function queueScrollUpdate() {
   if (scrollTicking) return;
@@ -73,8 +73,6 @@ function queueScrollUpdate() {
 function resetExperiments() {
   geometryStory.reset();
   soundExperience.reset();
-  soundScreen.reset();
-  $('#sources').open = false;
 }
 function restartEssay() {
   if (restarting) return;
@@ -100,21 +98,38 @@ function restartEssay() {
   }, reducedMotion.matches ? 0 : 300);
 }
 $('#restart').addEventListener('click', restartEssay);
-// «Читать»: надписи обложки уезжают влево, и сразу начинается пролёт над полем точек.
+// «Читать»: обложка медленно гаснет, секунду-другую стоит пустой светлый экран,
+// потом страница сама доезжает до «Родилась она», и надпись поднимается снизу.
+// Это нажатие заодно разрешает звук для бала.
+function glideTo(target, duration) {
+  const start = scrollY;
+  const began = performance.now();
+  const previous = root.style.scrollBehavior;
+  root.style.scrollBehavior = 'auto';
+  const step = (now) => {
+    const t = clamp((now - began) / duration);
+    const eased = t < .5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
+    scrollTo({ top: start + (target - start) * eased, behavior: 'instant' });
+    if (t < 1) requestAnimationFrame(step);
+    else root.style.scrollBehavior = previous;
+  };
+  requestAnimationFrame(step);
+}
 $('.read-button').addEventListener('click', (event) => {
+  soundExperience.unlockAudio();
   const hero = $('#top');
-  if (reducedMotion.matches || lowWindow.matches || hero.classList.contains('is-leaving')) return;
+  if (lowWindow.matches || hero.classList.contains('is-leaving')) return;
   event.preventDefault();
+  if (reducedMotion.matches) { scrollTo({ top: origin.titleScroll(), behavior: 'instant' }); return; }
   hero.classList.add('is-leaving');
   setTimeout(() => {
     const previous = root.style.scrollBehavior;
     root.style.scrollBehavior = 'auto';
-    scrollTo({ top: $('#principle').getBoundingClientRect().top + scrollY, behavior: 'instant' });
+    scrollTo({ top: $('#origin').getBoundingClientRect().top + scrollY, behavior: 'instant' });
     root.style.scrollBehavior = previous;
-    updateScroll();
-    // Обложка снова на месте, если читатель вернётся наверх.
-    setTimeout(() => hero.classList.remove('is-leaving'), 200);
-  }, 650);
+    hero.classList.remove('is-leaving');
+    setTimeout(() => glideTo(origin.titleScroll(), 1800), 500);
+  }, 1200);
 });
 addEventListener('scroll', queueScrollUpdate, { passive: true });
 function relayout() {
