@@ -54,7 +54,7 @@ export function mountTritonFinale({ lab, stage, piano, reducedMotion }) {
         image.hidden = true;
         image.style.width = `${scale * 100}%`;
         image.style.transform = `translate(${-x * 100}%, ${-y * 100}%)`;
-        image.src = new URL(`./assets/triton/triton-${key}.png`, import.meta.url).href;
+        image.src = new URL(`./assets/triton/triton-${key}.webp`, import.meta.url).href;
         sprite.append(image);
         frames.set(key, image);
       }
