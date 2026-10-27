@@ -1,7 +1,8 @@
 import { mountPianoExperience } from './piano.js?v=dive-2';
-import { mountGeometryStory } from './geometry-story.js?v=dive-2';
+import { mountGeometryStory } from './geometry-story.js?v=narrative-1';
 import { mountStranger } from './stranger.js?v=dive-2';
 import { mountOrigin } from './origin.js?v=dive-2';
+import { mountSources } from './sources.js?v=sources-3';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -34,6 +35,7 @@ const origin = mountOrigin($('#origin'), { reducedMotion, isStatic: () => lowWin
 const geometryStory = mountGeometryStory($('#principle'), { isStatic: () => reducedMotion.matches || lowWindow.matches, onField: origin.setField });
 // The Triton peeks out of the water, blows his conch, and his sea floods the screen.
 const stranger = mountStranger($('#stranger'), { reducedMotion, isStatic: () => lowWindow.matches, onCall: soundExperience.conch });
+const sourceExperience = mountSources($('#sources'), { reducedMotion, isStatic: () => lowWindow.matches });
 
 // Тяжёлые рисунки грузятся в фоне с начала статьи, когда первый экран уже готов:
 // сначала тритон над пианино, потом тритон в море и его волны.
@@ -46,14 +48,10 @@ const whenIdle = window.requestIdleCallback || ((callback) => setTimeout(callbac
 if (document.readyState === 'complete') whenIdle(preloadArt);
 else window.addEventListener('load', () => whenIdle(preloadArt), { once: true });
 
-const ending = $('#disappearance');
 const veil = $('.restart-veil');
 let scrollTicking = false;
 let restarting = false;
 
-function localProgress(element) {
-  return clamp(-element.getBoundingClientRect().top / Math.max(1, element.offsetHeight - innerHeight));
-}
 function updateScroll() {
   scrollTicking = false;
   soundExperience.updateScroll();
@@ -61,19 +59,11 @@ function updateScroll() {
   origin.update();
   geometryStory.check();
   stranger.update();
+  sourceExperience.update();
   const hero = $('#top');
   hero.style.setProperty('--hero-leave', reduced ? '0' : clamp(scrollY / Math.max(1, hero.offsetHeight * .7)).toFixed(4));
   const total = root.scrollHeight - innerHeight;
   $('.reading-progress span').style.transform = `scaleX(${clamp(scrollY / Math.max(1, total))})`;
-  const progress = localProgress(ending);
-  ending.style.setProperty('--end-p', clamp(progress / .48).toFixed(4));
-  ending.style.setProperty('--end-w', clamp((progress - .57) / .36).toFixed(4));
-  ending.style.setProperty('--end-opacity', (1 - clamp((progress - .17) / .3)).toFixed(4));
-  $('.reading-progress').style.opacity = String(1 - clamp((progress - .35) / .15));
-  root.classList.toggle('ending-blank', progress > .48 && !reduced);
-  // The white ending waits for the reader. Keep the exit in the tab order only
-  // once it is visible, and remove it again when scrolling back into the essay.
-  $('.ending-last').hidden = !reduced && progress < .93;
 }
 function queueScrollUpdate() {
   if (scrollTicking) return;
@@ -83,7 +73,6 @@ function queueScrollUpdate() {
 function resetExperiments() {
   geometryStory.reset();
   soundExperience.reset();
-  $('#sources').open = false;
 }
 function restartEssay() {
   if (restarting) return;

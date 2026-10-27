@@ -196,9 +196,9 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 /* Первая и последняя надписи — посередине экрана, как у заголовка. */
 .js-enabled .origin:not(.is-still) .origin-text:is(:first-child, :last-child) { align-self: start; padding-top: calc(50svh - clamp(72px, 13svh, 150px) - .6em); }
 
-/* 01 Точки и фигуры. Сцену проигрывает geometry-story.js; на время показа прокрутка заблокирована. */
+/* 01 Точки и фигуры. Кадр задаёт прокрутка; перед ростом квадрата есть пауза для чтения. */
 .attention-scene { --story-accent: var(--accent); --story-copy-1: 1; --story-copy-2: 1; --story-copy-3: 1; }
-.js-enabled .attention-scene { height: 1150vh; height: 1150svh; }
+.js-enabled .attention-scene { height: 1250vh; height: 1250svh; }
 /* Усилие: пока точка рвётся из сетки, по краям экрана нарастает оранжевое свечение. */
 .js-enabled .attention-stage::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(90deg, rgb(238 73 44 / .42), rgb(238 73 44 / 0) 16%, rgb(238 73 44 / 0) 84%, rgb(238 73 44 / .42)); opacity: var(--strain, 0); }
 .attention-stage { position: relative; height: auto; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: var(--space-5); padding: var(--space-5) var(--gutter); }
@@ -227,7 +227,6 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .js-enabled .scene.is-entered>.scene-heading, .js-enabled .scene.is-entered>.sound-lab, .js-enabled .conclusion.is-entered>h2 { opacity: 1; transform: none; }
 .scene.is-entered>.sound-lab { transition-delay: .12s; }
 
-/* 02 Плакат */
 
 /* 03 Звук */
 .sound-section { background: var(--ink); color: var(--paper); padding-bottom: var(--space-5); }
@@ -342,30 +341,30 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .stranger.is-still { --wave: 40vh; --wave: 40svh; }
 .stranger.is-still .stranger-cast { position: relative; bottom: auto; height: 62svh; }
 .stranger.is-still .cast-circle, .stranger.is-still .cast-square { bottom: 14svh; }
-.stranger-after { padding-block: var(--space-6) var(--space-5); }
-.ending-link { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-5); transition: color .2s; }
-.ending-link:hover { color: var(--accent); }
-.ending-link>span { font-family: var(--sans); font-style: normal; }
-
-/* Исчезновение */
-.disappearance { height: 240vh; height: 240svh; position: relative; --end-p: 0; --end-w: 0; --end-opacity: 1; }
-.ending-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: rgb(calc(133 + var(--end-w)*122),calc(133 + var(--end-w)*122),calc(128 + var(--end-w)*127)); }
-.ending-pattern { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; opacity: calc(1 - var(--end-p)); }
-.ending-pattern>div { display: grid; place-items: center; background: #e0dfd6; }
-.ending-pattern>div+div { background: #20211e; }
-.ending-pattern>div:before { content: ''; display: block; width: min(35vw, 56vh); aspect-ratio: 1; border-radius: 50%; background: #858580; }
-.ending-content { position: absolute; inset: 0; display: grid; place-items: center; color: white; mix-blend-mode: difference; opacity: var(--end-opacity); }
-.ending-last { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); color: var(--muted); text-align: center; padding: var(--space-3); }
-.ending-last:not([hidden]) { display: flex; }
+/* Ссылки падают и вращаются в глубине; итоговый текст продолжает чёрный фон. */
+.sources-chapter { --source-count: 7; color: var(--paper); background: #000; }
+.source-items { list-style: none; padding-block: var(--space-5); }
+.source-item { max-width: 760px; margin: 0 auto var(--space-4); text-align: center; }
+.source-link { display: inline-flex; align-items: center; gap: .6em; min-height: var(--source-hit, 44px); max-width: 100%; padding-block: 12px; color: inherit; font-size: var(--text-lead); line-height: 1.35; }
+.source-link>span { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .2em; }
+.source-link>svg { flex: none; width: .7em; height: .7em; }
+.source-link:hover { color: var(--accent); }
+.source-link:focus-visible { outline-offset: 6px; }
+.sources-chapter.is-floating .sources-scroll { height: calc((var(--source-count) + 1) * 120vh); height: calc((var(--source-count) + 1) * 120svh); }
+.is-floating .sources-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: clip; }
+.is-floating .source-items { position: absolute; inset: 0; max-width: none; width: 100%; padding: 0; }
+.is-floating .source-item { position: absolute; top: 50%; left: 50%; width: min(760px, calc(100% - var(--gutter) * 2)); margin: 0; opacity: var(--fall-opacity, 0); transform: translate(-50%, -50%) translate(calc(var(--fall-x, 0) * clamp(24px, 14vw, 240px)), var(--fall-y, -70svh)) rotate(var(--fall-angle, 0deg)) scale(var(--fall-scale, 1)); pointer-events: none; will-change: transform, opacity; }
+.is-floating .source-item.is-readable { pointer-events: auto; }
+.conclusion-copy { padding-block: var(--space-5) var(--space-6); }
+.conclusion-copy .lead { margin-top: var(--space-3); }
+.conclusion-copy .button { display: flex; width: 100%; justify-content: space-between; min-height: 56px; margin-top: var(--space-4); }
 .restart-veil { position: fixed; inset: 0; z-index: 90; background: white; opacity: 0; pointer-events: none; transition: opacity .8s; }
 .restart-veil.active { opacity: 1; transition: opacity .25s; }
-/* Подвал с веб-рингом продолжает белый финал. */
-.webring-zone { display: flow-root; background: #fff; color: var(--ink); padding-bottom: var(--space-5); }
+/* Подвал с веб-рингом. */
+.webring-zone { display: flow-root; background: #000; color: var(--paper); padding-bottom: var(--space-5); }
 .webring-zone .course-webring { max-width: var(--measure); margin-inline: auto; }
 .webring-zone .course-webring h2 { letter-spacing: 0; text-wrap: wrap; }
-.webring-zone .course-webring__nav a:hover { color: var(--muted); }
-html.ending-blank { scrollbar-width: none; }
-html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
+.webring-zone .course-webring__nav a:hover { color: var(--muted-on-ink); }
 
 /* 7. Адаптивность и доступность ----------------------------- */
 @media (min-width: 1600px) {
@@ -414,9 +413,6 @@ html.ending-blank::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .js-enabled .story-frames { position: static; width: 100%; height: auto; margin: 0 auto; overflow: visible; clip: auto; }
   .js-enabled .story-copy { position: static; width: 100%; pointer-events: auto; }
   .js-enabled .story-copy>* { opacity: 1; }
-  .disappearance { height: 100vh; height: 100svh; }
-  .ending-pattern, .ending-content { display: none; }
-  .ending-last { display: flex; background: var(--paper); }
 }
 @media (max-height: 600px) {
   .js-enabled .sound-lab { height: auto; overflow: visible; }
