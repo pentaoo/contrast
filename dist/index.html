@@ -10,7 +10,7 @@
   <link rel="preload" href="./assets/oswald-600.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/manrope-400.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="./assets/fonts.css">
-  <link rel="stylesheet" href="./styles.css?v=ending-5">
+  <link rel="stylesheet" href="./styles.css?v=credits-3">
   <script type="module" src="./app.js?v=ending-5"></script>
 </head>
 <body>
@@ -19,6 +19,7 @@
   <main>
     <section class="hero" id="top" aria-labelledby="hero-title">
       <div class="hero-title"><h1 id="hero-title">КОНТРАСТ</h1><a href="#origin" class="read-button">читать</a></div>
+      <p class="label hero-byline">Андрей Гудков · куратор Олег Пащенко</p>
     </section>
 
     <section class="origin" id="origin" aria-labelledby="origin-title">
@@ -91,7 +92,7 @@
       <div class="stranger-scroll">
         <div class="stranger-stage">
           <div class="sea" aria-hidden="true"></div><div class="stranger-dark" aria-hidden="true"></div>
-          <div class="stranger-cast" aria-hidden="true">
+          <div class="stranger-cast" role="img" aria-label="Рисованный тритон с раковиной в волнах рядом с оранжевым кругом и тёмным квадратом.">
             <i class="cast-circle"></i><i class="cast-square"></i>
             <span class="triton-call"><i></i><i></i><i></i></span><div class="stranger-triton"><span class="triton-pose triton-pose--rest"><img src="assets/triton/triton-rest-a.webp" alt="" width="1254" height="1254" loading="lazy" decoding="async"><img src="assets/triton/triton-rest-b.webp" alt="" width="1254" height="1254" loading="lazy" decoding="async" hidden></span><span class="triton-pose triton-pose--call"><img src="assets/triton/triton-call-a.webp" alt="" width="1254" height="1254" loading="lazy" decoding="async"><img src="assets/triton/triton-call-b.webp" alt="" width="1254" height="1254" loading="lazy" decoding="async" hidden></span></div>
           </div>
@@ -131,6 +132,11 @@
           <h2 id="conclusion-title">Контраст и <span class="serif">контекст.</span></h2>
           <p class="lead">Контраст выделяет одно на фоне другого. Контекст меняет то, как мы воспринимаем это различие. Движение превратило фигуры в персонажей. Сочетание нот изменило впечатление от мелодии. Море сделало тритона своим, а точку и квадрат — чужими. Сами герои не изменились — изменился мир вокруг них. Поэтому важна и сама разница, и то, в каком окружении она возникает.</p>
           <button id="restart" class="button button--outline">Прочитать заново <span aria-hidden="true">↗</span></button>
+          <div class="credits">
+            <p class="label">Автор — Андрей Гудков. Куратор — Олег Пащенко. Группа «Соевые кодеры», 2026.</p>
+            <p class="label">Код написан вместе с ИИ-ассистентами для программирования; автор ставил задачи и принимал каждую правку. Рисунки тритона и моря сгенерированы в ChatGPT по промптам автора.</p>
+            <p class="label">Шрифты Manrope, Oswald и IBM Plex Mono — SIL Open Font License. <a href="https://github.com/pentaoo/contrast" target="_blank" rel="noopener noreferrer">Исходный код и история версий</a>.</p>
+          </div>
       </div>
     </section>
   </main>

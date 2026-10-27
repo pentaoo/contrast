@@ -165,9 +165,10 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 /* 6. Сцены -------------------------------------------------- */
 
 /* Обложка */
-.hero { min-height: 100vh; min-height: 100svh; padding-block: var(--space-5); padding-inline: max(var(--gutter), calc((100% - 1470px) / 2)); display: flex; flex-direction: column; justify-content: center; }
+.hero { position: relative; min-height: 100vh; min-height: 100svh; padding-block: var(--space-5); padding-inline: max(var(--gutter), calc((100% - 1470px) / 2)); display: flex; flex-direction: column; justify-content: center; }
 .hero-title { font: 600 clamp(64px, 19.6vw, 340px)/1.12 var(--display); letter-spacing: -.05em; white-space: nowrap; }
 /* У «К» в Oswald пустое поле слева ≈ .06 кегля: сдвигаем, чтобы левой гранью был штрих буквы, а не пустое поле. */
+.hero-byline { position: absolute; left: max(var(--gutter), calc((100% - 1470px) / 2)); bottom: var(--space-4); }
 .hero-title h1 { display: inline; margin-left: -.055em; font: inherit; letter-spacing: inherit; }
 /* Точка заголовка — кнопка «читать». Пропорции из макета: высота ≈ 0,2 кегля, нижний край на базовой линии. */
 .read-button { display: inline-block; overflow: hidden; vertical-align: baseline; margin-left: .3em; font-size: max(14px, .058em); line-height: 2.45; letter-spacing: 0; padding: .33em .33em .58em; background: var(--accent); color: #fff; transition: background .2s; }
@@ -358,6 +359,8 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .conclusion-copy { padding-block: var(--space-5) var(--space-6); }
 .conclusion-copy .lead { margin-top: var(--space-3); }
 .conclusion-copy .button { display: flex; width: 100%; justify-content: space-between; min-height: 56px; margin-top: var(--space-4); }
+.credits { display: grid; gap: var(--space-1); max-width: var(--measure-text); margin-top: var(--space-4); }
+.credits a { text-decoration: underline; }
 .restart-veil { position: fixed; inset: 0; z-index: 90; background: white; opacity: 0; pointer-events: none; transition: opacity .8s; }
 .restart-veil.active { opacity: 1; transition: opacity .25s; }
 /* Подвал с веб-рингом. */
