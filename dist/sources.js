@@ -19,7 +19,7 @@ export function sourceReadingProgress(index, count) {
   return (index * spacing + centreTime) / totalTime(count);
 }
 
-// Scroll sends the links tumbling downward: each has its own drift and spin.
+// As the reader descends, the links pass from below and drift out above.
 export function sourceFrame(progress, index, count) {
   const p = clamp(Number.isFinite(progress) ? progress : 0);
   const time = p * totalTime(count) - index * spacing;
@@ -27,7 +27,7 @@ export function sourceFrame(progress, index, count) {
   const path = paths[index % paths.length];
   return {
     x: path.x + path.drift * fall,
-    y: -70 + 160 * fall,
+    y: 70 - 160 * fall,
     rotation: path.angle + path.spin * fall,
     scale: 1.08 - .56 * fall,
     opacity: ease(clamp(time / .2)) * (1 - ease(clamp((time - 1.05) / .35))),

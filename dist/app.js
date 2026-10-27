@@ -2,7 +2,7 @@ import { mountPianoExperience } from './piano.js?v=dive-2';
 import { mountGeometryStory } from './geometry-story.js?v=narrative-1';
 import { mountStranger } from './stranger.js?v=dive-2';
 import { mountOrigin } from './origin.js?v=dive-2';
-import { mountSources } from './sources.js?v=sources-3';
+import { mountSources } from './sources.js?v=sources-4';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];

@@ -342,7 +342,7 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .stranger.is-still { --wave: 40vh; --wave: 40svh; }
 .stranger.is-still .stranger-cast { position: relative; bottom: auto; height: 62svh; }
 .stranger.is-still .cast-circle, .stranger.is-still .cast-square { bottom: 14svh; }
-/* Ссылки падают и вращаются в глубине; итоговый текст продолжает чёрный фон. */
+/* При погружении ссылки проходят снизу вверх; итог продолжает чёрный фон. */
 .sources-chapter { --source-count: 7; color: var(--paper); background: #000; }
 .source-items { list-style: none; padding-block: var(--space-5); }
 .source-item { max-width: 760px; margin: 0 auto var(--space-4); text-align: center; }
@@ -354,7 +354,7 @@ kbd { font: inherit; padding: 0 5px; border: 1px solid currentColor; border-radi
 .sources-chapter.is-floating .sources-scroll { height: calc((var(--source-count) + 1) * 120vh); height: calc((var(--source-count) + 1) * 120svh); }
 .is-floating .sources-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: clip; }
 .is-floating .source-items { position: absolute; inset: 0; max-width: none; width: 100%; padding: 0; }
-.is-floating .source-item { position: absolute; top: 50%; left: 50%; width: min(760px, calc(100% - var(--gutter) * 2)); margin: 0; opacity: var(--fall-opacity, 0); transform: translate(-50%, -50%) translate(calc(var(--fall-x, 0) * clamp(24px, 14vw, 240px)), var(--fall-y, -70svh)) rotate(var(--fall-angle, 0deg)) scale(var(--fall-scale, 1)); pointer-events: none; will-change: transform, opacity; }
+.is-floating .source-item { position: absolute; top: 50%; left: 50%; width: min(760px, calc(100% - var(--gutter) * 2)); margin: 0; opacity: var(--fall-opacity, 0); transform: translate(-50%, -50%) translate(calc(var(--fall-x, 0) * clamp(24px, 14vw, 240px)), var(--fall-y, 70svh)) rotate(var(--fall-angle, 0deg)) scale(var(--fall-scale, 1)); pointer-events: none; will-change: transform, opacity; }
 .is-floating .source-item.is-readable { pointer-events: auto; }
 .conclusion-copy { padding-block: var(--space-5) var(--space-6); }
 .conclusion-copy .lead { margin-top: var(--space-3); }
