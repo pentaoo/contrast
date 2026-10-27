@@ -160,7 +160,15 @@ export function mountOrigin(section, { reducedMotion, isStatic }) {
   function update() {
     const still = reducedMotion.matches || isStatic();
     section.classList.toggle('is-still', still);
-    if (still) { lastKey = ''; return; }
+    if (still) {
+      lastKey = '';
+      texts.forEach((text) => {
+        text.style.removeProperty('transform');
+        text.style.removeProperty('opacity');
+        text.style.removeProperty('visibility');
+      });
+      return;
+    }
     const rect = scroll.getBoundingClientRect();
     const frame = originFrame(-rect.top / Math.max(1, rect.height - innerHeight));
     const key = `${frame.progress.toFixed(4)}:${svg.clientWidth}x${svg.clientHeight}`;

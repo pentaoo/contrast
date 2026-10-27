@@ -1,8 +1,9 @@
 import { mountPianoExperience } from './piano.js?v=mobile-1';
 import { mountGeometryStory } from './geometry-story.js?v=narrative-1';
 import { mountStranger } from './stranger.js?v=dive-2';
-import { mountOrigin } from './origin.js?v=dive-2';
+import { mountOrigin } from './origin.js?v=reading-position-1';
 import { mountSources } from './sources.js?v=sources-4';
+import { mountReadingPosition } from './reading-position.js?v=1';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -36,6 +37,7 @@ const geometryStory = mountGeometryStory($('#principle'), { isStatic: () => redu
 // The Triton peeks out of the water, blows his conch, and his sea floods the screen.
 const stranger = mountStranger($('#stranger'), { reducedMotion, isStatic: () => lowWindow.matches, onCall: soundExperience.conch });
 const sourceExperience = mountSources($('#sources'), { reducedMotion, isStatic: () => lowWindow.matches });
+const readingPosition = mountReadingPosition();
 
 // Тяжёлые рисунки грузятся в фоне с начала статьи, когда первый экран уже готов:
 // сначала тритон над пианино, потом тритон в море и его волны.
@@ -54,6 +56,7 @@ let restarting = false;
 
 function updateScroll() {
   scrollTicking = false;
+  if (readingPosition.viewportChanged()) { relayout(); return; }
   soundExperience.updateScroll();
   const reduced = reducedMotion.matches;
   origin.update();
@@ -64,6 +67,7 @@ function updateScroll() {
   hero.style.setProperty('--hero-leave', reduced ? '0' : clamp(scrollY / Math.max(1, hero.offsetHeight * .7)).toFixed(4));
   const total = root.scrollHeight - innerHeight;
   $('.reading-progress span').style.transform = `scaleX(${clamp(scrollY / Math.max(1, total))})`;
+  readingPosition.capture();
 }
 function queueScrollUpdate() {
   if (scrollTicking) return;
@@ -131,9 +135,18 @@ $('.read-button').addEventListener('click', (event) => {
     setTimeout(() => glideTo(origin.titleScroll(), 1800), 500);
   }, 1200);
 });
-addEventListener('scroll', queueScrollUpdate, { passive: true });
+addEventListener('scroll', () => {
+  readingPosition.capture();
+  queueScrollUpdate();
+}, { passive: true });
 function relayout() {
+  // Apply every height-changing scene mode before restoring the reader's region.
+  origin.update();
   geometryStory.layout();
+  geometryStory.check();
+  stranger.update();
+  sourceExperience.update();
+  readingPosition.restore();
   queueScrollUpdate();
 }
 addEventListener('resize', relayout, { passive: true });
