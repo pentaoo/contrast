@@ -83,7 +83,7 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
     ctx.moveTo(0, baseline + .5);
     ctx.lineTo(width, baseline + .5);
     ctx.stroke();
-    ctx.fillStyle = '#c8cdbf';
+    ctx.fillStyle = '#f1f0eb';
     ctx.font = '14px Manrope, sans-serif';
     ctx.textBaseline = 'bottom';
     ctx.textAlign = 'left';
@@ -130,7 +130,7 @@ export function mountSpectrum(canvas, caption, reducedMotion) {
         ctx.globalAlpha = opacity;
         ctx.fillStyle = '#191a17';
         ctx.fillRect(center - textWidth / 2 - 4, 0, textWidth + 8, 23);
-        ctx.fillStyle = '#c8cdbf';
+        ctx.fillStyle = '#f1f0eb';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         ctx.fillText(text, center, 3);

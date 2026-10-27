@@ -13,7 +13,7 @@
   --ink: #191a17;
   --ink-deep: #0e0f0c;
   --muted: #5d6055;
-  --muted-on-ink: #c8cdbf;
+  --muted-on-ink: var(--paper);
   --line: #d1d1c8;
   --line-on-ink: #3a3c35;
   --accent: #ee492c;
